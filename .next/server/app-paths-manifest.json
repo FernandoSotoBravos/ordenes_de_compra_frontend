@@ -1,5 +1,0 @@
-{
-  "/(dashboard)/orders/create/page": "app/(dashboard)/orders/create/page.js",
-  "/(dashboard)/catalogs/departments/page": "app/(dashboard)/catalogs/departments/page.js",
-  "/auth/signin/page": "app/auth/signin/page.js"
-}
