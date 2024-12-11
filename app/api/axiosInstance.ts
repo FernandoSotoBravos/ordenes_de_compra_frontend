@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseUrl = "http://localhost:8000/api/v1";
+const baseUrl = "https://bend.bravos-fcjuarez.com/api/v1";
 
 const client = axios.create({ baseURL: baseUrl });
 

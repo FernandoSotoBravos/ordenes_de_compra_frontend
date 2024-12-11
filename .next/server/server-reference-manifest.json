@@ -1,5 +1,17 @@
 {
-  "node": {},
+  "node": {
+    "7f0daa2ac2dc84a27272fce618d7676dc8939afa72": {
+      "workers": {
+        "app/auth/signin/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Ffcjuarez%2FDocuments%2Fdatalori%2Fbravos_erp_frontend%2Fapp%2Fauth%2Fsignin%2Factions.ts%22%2C%5B%5B%227f0daa2ac2dc84a27272fce618d7676dc8939afa72%22%2C%22default%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/auth/signin/page": "action-browser"
+      }
+    }
+  },
   "edge": {},
   "encryptionKey": "6uJXNeRpcOjHOxT9MsPj/dhfVpzklGr0jeVjiz5N72g="
 }

@@ -27,7 +27,10 @@ import {
 } from "@tanstack/react-query";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Department } from "@/app/interfaces/Departments.interface";
+import {
+  Department,
+  CreateDepto,
+} from "@/app/interfaces/Departments.interface";
 import { departmentService } from "@/app/api/departmentService";
 
 const CRUDDepartments = () => {
@@ -207,10 +210,18 @@ const CRUDDepartments = () => {
 function useCreateDepartment() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Department: Department) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (department: Department) => {
+      const newDepartment: CreateDepto = {
+        name: department.name,
+      };
+      return await departmentService
+        .create(newDepartment)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newDepartmentInfo: Department) => {
@@ -221,7 +232,6 @@ function useCreateDepartment() {
             ...prevDepartments,
             {
               ...newDepartmentInfo,
-              id: (Math.random() + 1).toString(36).substring(7),
             },
           ] as Department[]
       );

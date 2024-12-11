@@ -15,9 +15,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
   Tooltip,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import {
   QueryClient,
   QueryClientProvider,
@@ -101,72 +107,137 @@ const CRUDSuppliers = () => {
       },
       {
         accessorKey: "address",
-        header: "Nombre",
+        header: "Dirección",
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.name,
-          helperText: validationErrors?.name,
+          error: !!validationErrors?.address,
+          helperText: validationErrors?.address,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              name: undefined,
+              address: undefined,
             }),
         },
       },
       {
-        accessorKey: "name",
-        header: "Nombre",
+        accessorKey: "city",
+        header: "Ciudad",
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.name,
-          helperText: validationErrors?.name,
+          error: !!validationErrors?.city,
+          helperText: validationErrors?.city,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              name: undefined,
+              city: undefined,
             }),
         },
       },
       {
-        accessorKey: "name",
-        header: "Nombre",
+        accessorKey: "state",
+        header: "Estado",
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.name,
-          helperText: validationErrors?.name,
+          error: !!validationErrors?.state,
+          helperText: validationErrors?.state,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              name: undefined,
+              state: undefined,
             }),
         },
       },
       {
-        accessorKey: "name",
-        header: "Nombre",
+        accessorKey: "country",
+        header: "Pais",
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.name,
-          helperText: validationErrors?.name,
+          error: !!validationErrors?.country,
+          helperText: validationErrors?.country,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              name: undefined,
+              country: undefined,
             }),
         },
       },
       {
-        accessorKey: "name",
-        header: "Nombre",
+        accessorKey: "postal_code",
+        header: "Código Postal",
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.name,
-          helperText: validationErrors?.name,
+          error: !!validationErrors?.postal_code,
+          helperText: validationErrors?.postal_code,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              name: undefined,
+              postal_code: undefined,
             }),
+        },
+      },
+      {
+        accessorKey: "tax",
+        header: "Impuesto",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.tax,
+          helperText: validationErrors?.tax,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              tax: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "account_manager",
+        header: "Gerente de Cuenta",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.account_manager,
+          helperText: validationErrors?.account_manager,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              account_manager: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "bank_name",
+        header: "Nombre del Banco",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.bank_name,
+          helperText: validationErrors?.bank_name,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              bank_name: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "clabe",
+        header: "CLABE",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.clabe,
+          helperText: validationErrors?.clabe,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              clabe: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "website",
+        header: "Sitio Web",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.website,
+          helperText: validationErrors?.website,
         },
       },
     ],
@@ -249,10 +320,91 @@ const CRUDSuppliers = () => {
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h3">Create New Supplier</DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-        >
-          {internalEditComponents} {/* or render custom edit components here */}
+        <DialogContent>
+          <Grid container spacing={2} mt={2} size={{ xs: 12, sm: 6 }}>
+            <TextField fullWidth label="Nombre" id="name" name="name" />
+            <TextField
+              fullWidth
+              label="Nombre de Contacto"
+              id="contact_name"
+              name="contact_name"
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              id="email"
+              name="email"
+            />
+            <TextField
+              fullWidth
+              label="Dirección"
+              id="address"
+              name="address"
+            />
+            <TextField
+              label="Numero de Telefono"
+              id="phone_number"
+              name="phone_number"
+              type="number"
+            />
+
+            <TextField label="Ciudad" id="city" name="city" />
+            <TextField
+              label="Estado"
+              id="state"
+              name="phone_number"
+              type="number"
+            />
+            <TextField label="Pais" id="country" name="country" />
+            <TextField
+              label="Codigo Postal"
+              id="postal_code"
+              name="postal_code"
+              type="number"
+            />
+            <FormControl sx={{ width: "45%" }}>
+              <InputLabel id="tax_id-label">Tipo de impuesto</InputLabel>
+              <Select
+                labelId="tax_id-label"
+                id="tax_id"
+                name="tax_id"
+                onChange={(e) => console.log(e)}
+              >
+                {[
+                  { id: 1, name: "FRONTERA" },
+                  { id: 2, name: "NACIONAL" },
+                  { id: 3, name: "OBJETO" },
+                ].map((tax) => (
+                  <MenuItem key={tax.id} value={tax.id}>
+                    {tax.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              label="Gerente de Cuenta"
+              id="account_manager"
+              name="account_manager"
+            />
+            <TextField
+              fullWidth
+              label="Nombre del Banco"
+              id="bank_name"
+              name="bank_name"
+            />
+            <TextField fullWidth label="CLABE" id="clabe" name="clabe" />
+            <TextField
+              fullWidth
+              label="Sitio Web"
+              id="website"
+              name="website"
+            />
+          </Grid>
+
+          {/* {...internalEditComponents}{" "}
+          or render custom edit components here */}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -305,8 +457,7 @@ const CRUDSuppliers = () => {
     ),
     state: {
       isLoading: isLoadingSuppliers,
-      isSaving:
-        isCreatingSupplier || isUpdatingSupplier || isDeletingSupplier,
+      isSaving: isCreatingSupplier || isUpdatingSupplier || isDeletingSupplier,
       showAlertBanner: isLoadingSuppliersError,
       showProgressBars: isFetchingSuppliers,
     },
