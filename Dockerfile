@@ -63,7 +63,7 @@ ENV PORT=3013
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 # ENV HOSTNAME="0.0.0.0"
-ENV HOSTNAME="https://ordenes.bravos-fcjuarez.com"
+ENV HOSTNAME="0.0.0.0"
 ENV AUTH_SECRET=secret
 ENV NEXT_APP_API_URL=https://bend.bravos-fcjuarez.com/api/v1
 ENV NEXTAUTH_URL=https://ordenes.bravos-fcjuarez.com
