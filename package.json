@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "next dev",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build": "next build"
   },
   "dependencies": {
     "@emotion/cache": "^11",

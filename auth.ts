@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers";
-import { NextApiRequest, NextApiResponse } from "next";
 import { fetchWrapper } from "./app/api/axiosInstance";
 
 const providers: Provider[] = [
@@ -56,6 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/auth/signin",
   },
+  trustHost: true,
   callbacks: {
     authorized({ auth: session, request: { nextUrl } }) {
       const isLoggedIn = !!session?.user;
