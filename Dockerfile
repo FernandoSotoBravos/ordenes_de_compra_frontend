@@ -57,6 +57,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 ENV AUTH_SECRET=secret
+ENV NEXT_APP_API_URL=https://bend.bravos-fcjuarez.com/api/v1
+ENV NEXTAUTH_URL=https://bend.bravos-fcjuarez.com
+ENV NEXTAUTH_URL_INTERNAL=https://bend.bravos-fcjuarez.com
 
 EXPOSE 3013
 

@@ -15,7 +15,7 @@ declare module "next-auth" {
   }
 
   interface Session {
-    user: User; // Actualiza el tipo de `user` en la sesión
+    user: User; 
     access_token: string;
     refresh_token: string;
   }

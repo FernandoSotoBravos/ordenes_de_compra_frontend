@@ -8,7 +8,6 @@ import type { Navigation } from "@toolpad/core/AppProvider";
 import { SessionProvider, signIn, signOut } from "next-auth/react";
 import theme from "../theme";
 import { auth } from "../auth";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 const NAVIGATION: Navigation = [
   {
@@ -64,7 +63,6 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = await auth();
-  const queryClient = new QueryClient();
 
   return (
     <html lang="en" data-toolpad-color-scheme="light">
