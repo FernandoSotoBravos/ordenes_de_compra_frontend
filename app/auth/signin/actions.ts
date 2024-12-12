@@ -7,7 +7,9 @@ async function signIn(provider: AuthProvider, formData: FormData, callbackUrl?: 
   try {
     return await signInAction(provider.id, {
       ...(formData && { email: formData.get('email'), password: formData.get('password') }),
-      redirectTo: callbackUrl ?? '/',
+      // redirectTo: callbackUrl ?? '/',
+      redirectTo: '/'
+      
     });
   } catch (error) {
     // The desired flow for successful sign in in all cases
