@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseUrl = process.env.NEXT_APP_API_URL;
+const baseUrl = process.env.REACT_APP_API_URL;
 
 const client = axios.create({ baseURL: baseUrl });
 
@@ -10,7 +10,9 @@ client.interceptors.response.use(
       (error.response && error.response.status === 403) ||
       error.response.status === 401
     ) {
-      window.location.href = "/login";
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
