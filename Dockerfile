@@ -66,7 +66,7 @@ ENV PORT=3013
 ENV HOSTNAME="0.0.0.0"
 ENV AUTH_SECRET=secret
 ENV NEXT_APP_API_URL=https://bend.bravos-fcjuarez.com/api/v1
-ENV NEXTAUTH_URL=https://ordenes.bravos-fcjuarez.com/
-ENV NEXTAUTH_URL_INTERNAL=https://ordenes.bravos-fcjuarez.com/
+# ENV NEXTAUTH_URL=https://ordenes.bravos-fcjuarez.com/
+# ENV NEXTAUTH_URL_INTERNAL=https://ordenes.bravos-fcjuarez.com/
 ENV AUTH_TRUSTED_HOST=true
 CMD ["node", "server.js"]
