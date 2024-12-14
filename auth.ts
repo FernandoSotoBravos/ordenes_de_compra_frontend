@@ -18,20 +18,32 @@ const providers: Provider[] = [
           },
         })
         .then((res) => {
-          if (res.status === 200) {
-            return {
-              id: res.data.user_data.id,
-              name: res.data.user_data.name,
-              email: res.data.user_data.email,
-              area: res.data.user_data.area,
-              role: res.data.user_data.role,
-              department: res.data.user_data.department,
-              leader: res.data.user_data.leader,
-              access_token: res.data.access_token,
-              refresh_token: res.data.refresh_token,
-            };
+          console.log(res);
+          return {
+            id: "1",
+            name: "User",
+            email: "user@gmail.com",
+            area: "area",
+            role: "role",
+            department: "department",
+            leader: 0,
+            access_token: "access_token",
+            refresh_token: "refresh_token",
           }
-          return null;
+          // if (res.status === 200) {
+          //   return {
+          //     id: res.data.user_data.id,
+          //     name: res.data.user_data.name,
+          //     email: res.data.user_data.email,
+          //     area: res.data.user_data.area,
+          //     role: res.data.user_data.role,
+          //     department: res.data.user_data.department,
+          //     leader: res.data.user_data.leader,
+          //     access_token: res.data.access_token,
+          //     refresh_token: res.data.refresh_token,
+          //   };
+          // }
+          // return null;
         })
         .catch((err) => {
           console.error(err);
