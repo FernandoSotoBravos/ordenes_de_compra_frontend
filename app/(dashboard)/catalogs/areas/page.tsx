@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
@@ -16,6 +16,8 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  MenuItem,
+  TextField,
   Tooltip,
 } from "@mui/material";
 import {
@@ -27,13 +29,23 @@ import {
 } from "@tanstack/react-query";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Area } from "@/app/interfaces/Areas.interface";
+import { Area, createArea, updateArea } from "@/app/interfaces/Areas.interface";
 import { areaService } from "@/app/api/areaService";
+import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
+import { departmentService } from "@/app/api/departmentService";
 
 const CRUDAreas = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+
+  const [departments, setDepartments] = useState<SelectBase[]>([]);
+
+  useEffect(() => {
+    departmentService.getAll().then((data) => {
+      setDepartments(data);
+    });
+  }, []);
 
   const columns = useMemo<MRT_ColumnDef<Area>[]>(
     () => [
@@ -62,6 +74,12 @@ const CRUDAreas = () => {
         header: "Departamento",
         muiEditTextFieldProps: {
           required: true,
+          children: departments.map((department) => (
+            <MenuItem key={department.id} value={department.id}>
+              {department.name}
+            </MenuItem>
+          )),
+          select: true,
           error: !!validationErrors?.department,
           helperText: validationErrors?.department,
           //remove any previous validation errors when Area focuses on the input
@@ -136,7 +154,7 @@ const CRUDAreas = () => {
     createDisplayMode: "modal", //default ('row', and 'custom' are also available)
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
-    getRowId: (row) => row.id ? row.id.toString() : "",
+    getRowId: (row) => (row.id ? row.id.toString() : ""),
     muiToolbarAlertBannerProps: isLoadingAreasError
       ? {
           color: "error",
@@ -221,14 +239,24 @@ const CRUDAreas = () => {
   return <MaterialReactTable table={table} />;
 };
 
-//CREATE hook (post new Area to api)
 function useCreateArea() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Area: Area) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (area: Area) => {
+      console.log("area", area);
+      const createArea: createArea = {
+        name: area.name,
+        department_id: parseInt(area.department),
+      };
+
+      return await areaService
+        .create(createArea)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newAreaInfo: Area) => {
@@ -239,12 +267,11 @@ function useCreateArea() {
             ...prevAreas,
             {
               ...newAreaInfo,
-              id: (Math.random() + 1).toString(36).substring(7),
             },
           ] as Area[]
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Areas'] }), //refetch Areas after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Areas"] }), //refetch Areas after mutation, disabled for demo
   });
 }
 
@@ -263,21 +290,30 @@ function useGetAreas() {
           return error;
         });
 
-    //   await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-    //   return Promise.resolve([]);
+      //   await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+      //   return Promise.resolve([]);
     },
     refetchOnWindowFocus: false,
   });
 }
 
-//UPDATE hook (put Area in api)
 function useUpdateArea() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Area: Area) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (area: Area) => {
+      const updateArea: updateArea = {
+        name: area.name,
+        department_id: parseInt(area.department),
+      };
+
+      return await areaService
+        .update(area.id, updateArea)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newAreaInfo: Area) => {
@@ -287,18 +323,22 @@ function useUpdateArea() {
         )
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Areas'] }), //refetch Areas after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Areas"] }), //refetch Areas after mutation, disabled for demo
   });
 }
 
-//DELETE hook (delete Area in api)
 function useDeleteArea() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (AreaId: number) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (areaId: number) => {
+      return await areaService
+        .remove(areaId)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (AreaId: number) => {
@@ -306,7 +346,7 @@ function useDeleteArea() {
         prevAreas?.filter((Area: Area) => Area.id !== AreaId)
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Areas'] }), //refetch Areas after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Areas"] }), //refetch Areas after mutation, disabled for demo
   });
 }
 
@@ -325,7 +365,7 @@ const validateRequired = (value: string) => !!value.length;
 function validateArea(Area: Area) {
   return {
     name: !validateRequired(Area.name) ? "El Nombre es Requerido" : "",
-    department_id: !validateRequired(Area.department_id.toString())
+    department_id: !validateRequired(String(Area.department_id))
       ? "El departamento es requerido"
       : "",
   };

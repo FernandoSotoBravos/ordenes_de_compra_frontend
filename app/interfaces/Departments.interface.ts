@@ -11,3 +11,5 @@ export interface Department {
 export interface CreateDepto {
   name: string;
 }
+
+export interface UpdateDepto extends CreateDepto {}

@@ -9,5 +9,13 @@ export interface Concept {
   name: string;
   area: string;
   area_id: number;
-  segment_business: string
+  segment_business: string;
 }
+
+export interface createConcept {
+  name: string;
+  area_id: number;
+  segment_business: string;
+}
+
+export interface updateConcept extends createConcept {}

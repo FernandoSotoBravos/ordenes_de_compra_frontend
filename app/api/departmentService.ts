@@ -1,4 +1,4 @@
-import { CreateDepto } from "../interfaces/Departments.interface";
+import { CreateDepto, UpdateDepto } from "../interfaces/Departments.interface";
 import { fetchWrapper } from "./axiosInstance";
 
 const getAll = async (limit: number = 10, page: number = 1) => {
@@ -22,6 +22,30 @@ const create = async (department: CreateDepto) => {
     .post("/departments/", {
       data: department,
     })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+
+const update = async (id: number, department: UpdateDepto) => {
+  return fetchWrapper
+    .put(`/departments/${id}`, {
+      data: department,
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+
+const remove = async (id: number) => {
+  return fetchWrapper
+    .delete(`/departments/${id}`, {})
     .then((response) => {
       return response.data;
     })
@@ -56,5 +80,7 @@ export const departmentService = {
   getAll,
   getById,
   getByDepartment,
-  create
+  create,
+  update,
+  remove,
 };

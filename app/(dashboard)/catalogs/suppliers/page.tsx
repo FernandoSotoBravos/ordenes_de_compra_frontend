@@ -33,7 +33,11 @@ import {
 } from "@tanstack/react-query";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Supplier } from "@/app/interfaces/Suppliers.interface";
+import {
+  createSupplier,
+  Supplier,
+  updateSupplier,
+} from "@/app/interfaces/Suppliers.interface";
 import { suppliersService } from "@/app/api/suppliersService";
 
 const CRUDSuppliers = () => {
@@ -51,7 +55,7 @@ const CRUDSuppliers = () => {
       },
       {
         accessorKey: "name",
-        header: "Nombre",
+        header: "Nombre Completo",
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.name,
@@ -166,6 +170,7 @@ const CRUDSuppliers = () => {
         header: "Código Postal",
         muiEditTextFieldProps: {
           required: true,
+          type: "number",
           error: !!validationErrors?.postal_code,
           helperText: validationErrors?.postal_code,
           onFocus: () =>
@@ -180,6 +185,16 @@ const CRUDSuppliers = () => {
         header: "Impuesto",
         muiEditTextFieldProps: {
           required: true,
+          children: [
+            { id: 1, name: "FRONTERA" },
+            { id: 2, name: "NACIONAL" },
+            { id: 3, name: "OBJETO" },
+          ].map((tax) => (
+            <MenuItem key={tax.id} value={tax.id}>
+              {tax.name}
+            </MenuItem>
+          )),
+          select: true,
           error: !!validationErrors?.tax,
           helperText: validationErrors?.tax,
           onFocus: () =>
@@ -214,6 +229,20 @@ const CRUDSuppliers = () => {
             setValidationErrors({
               ...validationErrors,
               bank_name: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "account_number",
+        header: "Número de Cuenta",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.account_number,
+          helperText: validationErrors?.account_number,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              account_number: undefined,
             }),
         },
       },
@@ -264,11 +293,11 @@ const CRUDSuppliers = () => {
   //CREATE action
   const handleCreateSupplier: MRT_TableOptions<Supplier>["onCreatingRowSave"] =
     async ({ values, table }) => {
-      const newValidationErrors = validateSupplier(values);
-      if (Object.values(newValidationErrors).some((error) => error)) {
-        setValidationErrors(newValidationErrors);
-        return;
-      }
+      // const newValidationErrors = validateSupplier(values);
+      // if (Object.values(newValidationErrors).some((error) => error)) {
+      //   setValidationErrors(newValidationErrors);
+      //   return;
+      // }
       setValidationErrors({});
       await createSupplier(values);
       table.setCreatingRow(null); //exit creating mode
@@ -277,11 +306,11 @@ const CRUDSuppliers = () => {
   //UPDATE action
   const handleSaveSupplier: MRT_TableOptions<Supplier>["onEditingRowSave"] =
     async ({ values, table }) => {
-      const newValidationErrors = validateSupplier(values);
-      if (Object.values(newValidationErrors).some((error) => error)) {
-        setValidationErrors(newValidationErrors);
-        return;
-      }
+      // const newValidationErrors = validateSupplier(values);
+      // if (Object.values(newValidationErrors).some((error) => error)) {
+      //   setValidationErrors(newValidationErrors);
+      //   return;.
+      // }
       setValidationErrors({});
       await updateSupplier(values);
       table.setEditingRow(null); //exit editing mode
@@ -318,98 +347,17 @@ const CRUDSuppliers = () => {
     onEditingRowSave: handleSaveSupplier,
     //optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
-      <>
+      <Box>
         <DialogTitle variant="h3">Create New Supplier</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} mt={2} size={{ xs: 12, sm: 6 }}>
-            <TextField fullWidth label="Nombre" id="name" name="name" />
-            <TextField
-              fullWidth
-              label="Nombre de Contacto"
-              id="contact_name"
-              name="contact_name"
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              id="email"
-              name="email"
-            />
-            <TextField
-              fullWidth
-              label="Dirección"
-              id="address"
-              name="address"
-            />
-            <TextField
-              label="Numero de Telefono"
-              id="phone_number"
-              name="phone_number"
-              type="number"
-            />
-
-            <TextField label="Ciudad" id="city" name="city" />
-            <TextField
-              label="Estado"
-              id="state"
-              name="phone_number"
-              type="number"
-            />
-            <TextField label="Pais" id="country" name="country" />
-            <TextField
-              label="Codigo Postal"
-              id="postal_code"
-              name="postal_code"
-              type="number"
-            />
-            <FormControl sx={{ width: "45%" }}>
-              <InputLabel id="tax_id-label">Tipo de impuesto</InputLabel>
-              <Select
-                labelId="tax_id-label"
-                id="tax_id"
-                name="tax_id"
-                onChange={(e) => console.log(e)}
-              >
-                {[
-                  { id: 1, name: "FRONTERA" },
-                  { id: 2, name: "NACIONAL" },
-                  { id: 3, name: "OBJETO" },
-                ].map((tax) => (
-                  <MenuItem key={tax.id} value={tax.id}>
-                    {tax.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth
-              label="Gerente de Cuenta"
-              id="account_manager"
-              name="account_manager"
-            />
-            <TextField
-              fullWidth
-              label="Nombre del Banco"
-              id="bank_name"
-              name="bank_name"
-            />
-            <TextField fullWidth label="CLABE" id="clabe" name="clabe" />
-            <TextField
-              fullWidth
-              label="Sitio Web"
-              id="website"
-              name="website"
-            />
-          </Grid>
-
-          {/* {...internalEditComponents}{" "}
-          or render custom edit components here */}
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        >
+          {internalEditComponents} {/* or render custom edit components here */}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
         </DialogActions>
-      </>
+      </Box>
     ),
     //optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
@@ -470,10 +418,33 @@ const CRUDSuppliers = () => {
 function useCreateSupplier() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Supplier: Supplier) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (supplier: Supplier) => {
+      const newSupplier: createSupplier = {
+        name: supplier.name,
+        contact_name: supplier.contact_name,
+        email: supplier.email,
+        phone_number: supplier.phone_number,
+        address: supplier.address,
+        city: supplier.city,
+        state: supplier.state,
+        country: supplier.country,
+        postal_code: supplier.postal_code,
+        tax_id: parseInt(supplier.tax),
+        account_manager: supplier.account_manager,
+        account_number: supplier.account_number,
+        bank_name: supplier.bank_name,
+        clabe: supplier.clabe,
+        website: supplier.website,
+      };
+
+      return await suppliersService
+        .create(newSupplier)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newSupplierInfo: Supplier) => {
@@ -484,12 +455,11 @@ function useCreateSupplier() {
             ...prevSuppliers,
             {
               ...newSupplierInfo,
-              id: (Math.random() + 1).toString(36).substring(7),
             },
           ] as Supplier[]
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Suppliers'] }), //refetch Suppliers after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Suppliers"] }), //refetch Suppliers after mutation, disabled for demo
   });
 }
 
@@ -519,10 +489,33 @@ function useGetSuppliers() {
 function useUpdateSupplier() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Supplier: Supplier) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (supplier: Supplier) => {
+      const updatedSupplier: updateSupplier = {
+        name: supplier.name,
+        contact_name: supplier.contact_name,
+        email: supplier.email,
+        phone_number: supplier.phone_number,
+        address: supplier.address,
+        city: supplier.city,
+        state: supplier.state,
+        country: supplier.country,
+        postal_code: supplier.postal_code,
+        tax_id: parseInt(supplier.tax),
+        account_manager: supplier.account_manager,
+        account_number: supplier.account_number,
+        bank_name: supplier.bank_name,
+        clabe: supplier.clabe,
+        website: supplier.website,
+      };
+
+      return await suppliersService
+        .update(supplier.id, updatedSupplier)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newSupplierInfo: Supplier) => {
@@ -534,7 +527,7 @@ function useUpdateSupplier() {
         )
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Suppliers'] }), //refetch Suppliers after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Suppliers"] }), //refetch Suppliers after mutation, disabled for demo
   });
 }
 
@@ -542,10 +535,15 @@ function useUpdateSupplier() {
 function useDeleteSupplier() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (SupplierId: number) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (supplierId: number) => {
+      return await suppliersService
+        .remove(supplierId)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (SupplierId: number) => {
@@ -555,7 +553,7 @@ function useDeleteSupplier() {
         )
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Suppliers'] }), //refetch Suppliers after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Suppliers"] }), //refetch Suppliers after mutation, disabled for demo
   });
 }
 
@@ -569,10 +567,10 @@ const SuppliersProviders = () => (
 
 export default SuppliersProviders;
 
-const validateRequired = (value: string) => !!value.length;
+// const validateRequired = (value: string) => !!value.length;
 
-function validateSupplier(Supplier: Supplier) {
-  return {
-    name: !validateRequired(Supplier.name) ? "El Nombre es Requerido" : "",
-  };
-}
+// function validateSupplier(Supplier: Supplier) {
+//   return {
+//     name: !validateRequired(Supplier.name) ? "El Nombre es Requerido" : "",
+//   };
+// }

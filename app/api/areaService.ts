@@ -1,3 +1,8 @@
+import {
+  Area,
+  createArea as CreateArea,
+  updateArea,
+} from "../interfaces/Areas.interface";
 import { fetchWrapper } from "./axiosInstance";
 
 const getAll = async (limit: number = 10, page: number = 1) => {
@@ -8,6 +13,43 @@ const getAll = async (limit: number = 10, page: number = 1) => {
         page: page,
       },
     })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
+const create = async (area: CreateArea) => {
+  return await fetchWrapper
+    .post("/areas/", {
+      data: area,
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
+const update = async (id: number, area: updateArea) => {
+  return fetchWrapper
+    .put(`/areas/${id}`, {
+      data: area,
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
+const remove = async (id: number) => {
+  return fetchWrapper
+    .delete(`/areas/${id}`, {})
     .then((response) => {
       return response.data;
     })
@@ -42,4 +84,7 @@ export const areaService = {
   getAll,
   getById,
   getByDepartment,
+  create,
+  update,
+  remove,
 };

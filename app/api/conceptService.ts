@@ -1,3 +1,8 @@
+import {
+  Concept,
+  updateConcept,
+  createConcept,
+} from "../interfaces/Concepts.interface";
 import { fetchWrapper } from "./axiosInstance";
 
 const getAll = async (limit: number = 10, page: number = 1) => {
@@ -8,6 +13,43 @@ const getAll = async (limit: number = 10, page: number = 1) => {
         page: page,
       },
     })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
+const create = async (concept: createConcept) => {
+  return fetchWrapper
+    .post("/concepts/", {
+      data: concept,
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
+const update = async (id: number, concept: updateConcept) => {
+  return fetchWrapper
+    .put(`/concepts/${id}`, {
+      data: concept,
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
+const remove = async (id: number) => {
+  return fetchWrapper
+    .delete(`/concepts/${id}`, {})
     .then((response) => {
       return response.data;
     })
@@ -42,4 +84,7 @@ export const conceptService = {
   getAll,
   getById,
   getByArea,
+  create,
+  update,
+  remove,
 };

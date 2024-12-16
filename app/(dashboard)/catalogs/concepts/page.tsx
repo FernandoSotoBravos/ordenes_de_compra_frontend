@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  MenuItem,
   Tooltip,
 } from "@mui/material";
 import {
@@ -27,13 +28,31 @@ import {
 } from "@tanstack/react-query";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Concept } from "@/app/interfaces/Concepts.interface";
+import {
+  Concept,
+  createConcept,
+  updateConcept,
+} from "@/app/interfaces/Concepts.interface";
 import { conceptService } from "@/app/api/conceptService";
+import { areaService } from "@/app/api/areaService";
+import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 
 const CRUDConcepts = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+
+  const [areas, setAreas] = useState<SelectBase[]>([]);
+
+  useEffect(() => {
+    areaService.getAll().then((data) => {
+      setAreas(data);
+    });
+    // DESCOMENTAR CUANDO SE TOMA LOS VALORES DE LOS USUARIOS
+    // areaService.getByDepartment(parseInt(event.target.value)).then((data) => {
+    //   setAreas(data);
+    // });
+  }, []);
 
   const columns = useMemo<MRT_ColumnDef<Concept>[]>(
     () => [
@@ -61,6 +80,12 @@ const CRUDConcepts = () => {
         accessorKey: "area",
         header: "Area",
         muiEditTextFieldProps: {
+          children: areas.map((area) => (
+            <MenuItem key={area.id} value={area.id}>
+              {area.name}
+            </MenuItem>
+          )),
+          select: true,
           required: true,
           error: !!validationErrors?.area,
           helperText: validationErrors?.area,
@@ -111,11 +136,11 @@ const CRUDConcepts = () => {
   //CREATE action
   const handleCreateConcept: MRT_TableOptions<Concept>["onCreatingRowSave"] =
     async ({ values, table }) => {
-      const newValidationErrors = validateConcept(values);
-      if (Object.values(newValidationErrors).some((error) => error)) {
-        setValidationErrors(newValidationErrors);
-        return;
-      }
+      // const newValidationErrors = validateConcept(values);
+      // if (Object.values(newValidationErrors).some((error) => error)) {
+      //   setValidationErrors(newValidationErrors);
+      //   return;
+      // }
       setValidationErrors({});
       await createConcept(values);
       table.setCreatingRow(null); //exit creating mode
@@ -124,11 +149,11 @@ const CRUDConcepts = () => {
   //UPDATE action
   const handleSaveConcept: MRT_TableOptions<Concept>["onEditingRowSave"] =
     async ({ values, table }) => {
-      const newValidationErrors = validateConcept(values);
-      if (Object.values(newValidationErrors).some((error) => error)) {
-        setValidationErrors(newValidationErrors);
-        return;
-      }
+      // const newValidationErrors = validateConcept(values);
+      // if (Object.values(newValidationErrors).some((error) => error)) {
+      //   setValidationErrors(newValidationErrors);
+      //   return;
+      // }
       setValidationErrors({});
       await updateConcept(values);
       table.setEditingRow(null); //exit editing mode
@@ -236,10 +261,21 @@ const CRUDConcepts = () => {
 function useCreateConcept() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Concept: Concept) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (concept: Concept) => {
+      const newConcept: createConcept = {
+        name: concept.name,
+        area_id: parseInt(concept.area),
+        segment_business: concept.segment_business,
+      };
+
+      return await conceptService
+        .create(newConcept)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newConceptInfo: Concept) => {
@@ -250,12 +286,11 @@ function useCreateConcept() {
             ...prevConcepts,
             {
               ...newConceptInfo,
-              id: (Math.random() + 1).toString(36).substring(7),
             },
           ] as Concept[]
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Concepts'] }), //refetch Concepts after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Concepts"] }), //refetch Concepts after mutation, disabled for demo
   });
 }
 
@@ -273,9 +308,6 @@ function useGetConcepts() {
         .catch((error) => {
           return error;
         });
-
-      //   await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      //   return Promise.resolve([]);
     },
     refetchOnWindowFocus: false,
   });
@@ -285,10 +317,21 @@ function useGetConcepts() {
 function useUpdateConcept() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Concept: Concept) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (concept: Concept) => {
+      const updateConcept: updateConcept = {
+        name: concept.name,
+        area_id: parseInt(concept.area),
+        segment_business: concept.segment_business,
+      };
+
+      return await conceptService
+        .update(concept.id, updateConcept)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newConceptInfo: Concept) => {
@@ -298,7 +341,7 @@ function useUpdateConcept() {
         )
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Concepts'] }), //refetch Concepts after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Concepts"] }), //refetch Concepts after mutation, disabled for demo
   });
 }
 
@@ -306,10 +349,15 @@ function useUpdateConcept() {
 function useDeleteConcept() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (ConceptId: number) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (conceptId: number) => {
+      return await conceptService
+        .remove(conceptId)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (ConceptId: number) => {
@@ -317,7 +365,7 @@ function useDeleteConcept() {
         prevConcepts?.filter((Concept: Concept) => Concept.id !== ConceptId)
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Concepts'] }), //refetch Concepts after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Concepts"] }), //refetch Concepts after mutation, disabled for demo
   });
 }
 
@@ -331,16 +379,16 @@ const ConceptsProviders = () => (
 
 export default ConceptsProviders;
 
-const validateRequired = (value: string) => !!value.length;
+// const validateRequired = (value: string) => !!value.length;
 
-function validateConcept(Concept: Concept) {
-  return {
-    name: !validateRequired(Concept.name) ? "El Nombre es Requerido" : "",
-    area_id: !validateRequired(Concept.area_id.toString())
-      ? "El departamento es requerido"
-      : "",
-    segment_business: !validateRequired(Concept.segment_business)
-      ? "El Segmento de Negocio es requerido"
-      : "",
-  };
-}
+// function validateConcept(Concept: Concept) {
+//   return {
+//     name: !validateRequired(Concept.name) ? "El Nombre es Requerido" : "",
+//     area_id: !validateRequired(Concept.area_id.toString())
+//       ? "El departamento es requerido"
+//       : "",
+//     segment_business: !validateRequired(Concept.segment_business)
+//       ? "El Segmento de Negocio es requerido"
+//       : "",
+//   };
+// }

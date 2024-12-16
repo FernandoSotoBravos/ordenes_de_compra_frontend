@@ -15,7 +15,6 @@ export interface createArea {
 }
 
 export interface updateArea {
-  id: number;
   name: string;
   department_id: number;
 }

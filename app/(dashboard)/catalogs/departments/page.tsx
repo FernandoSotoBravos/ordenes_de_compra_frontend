@@ -30,6 +30,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Department,
   CreateDepto,
+  UpdateDepto,
 } from "@/app/interfaces/Departments.interface";
 import { departmentService } from "@/app/api/departmentService";
 
@@ -236,7 +237,8 @@ function useCreateDepartment() {
           ] as Department[]
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Departments'] }), //refetch Departments after mutation, disabled for demo
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["Departments"] }), //refetch Departments after mutation, disabled for demo
   });
 }
 
@@ -266,10 +268,20 @@ function useGetDepartments() {
 function useUpdateDepartment() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (Department: Department) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (department: Department) => {
+      const updatedDepartment: UpdateDepto = {
+        name: department.name,
+      };
+      return await departmentService
+        .update(department.id, updatedDepartment)
+        .then((response) => {
+          alert("Department updated successfully");
+          return response;
+        })
+        .catch((error) => {
+          alert("Error updating Department");
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (newDepartmentInfo: Department) => {
@@ -281,7 +293,8 @@ function useUpdateDepartment() {
         )
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Departments'] }), //refetch Departments after mutation, disabled for demo
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["Departments"] }), //refetch Departments after mutation, disabled for demo
   });
 }
 
@@ -289,10 +302,17 @@ function useUpdateDepartment() {
 function useDeleteDepartment() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (DepartmentId: number) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+    mutationFn: async (departmentId: number) => {
+      return await departmentService
+        .remove(departmentId)
+        .then((response) => {
+          alert("Department deleted successfully");
+          return response;
+        })
+        .catch((error) => {
+          alert("Error deleting Department");
+          return error;
+        });
     },
     //client side optimistic update
     onMutate: (DepartmentId: number) => {
@@ -302,7 +322,8 @@ function useDeleteDepartment() {
         )
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['Departments'] }), //refetch Departments after mutation, disabled for demo
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["Departments"] }), //refetch Departments after mutation, disabled for demo
   });
 }
 
