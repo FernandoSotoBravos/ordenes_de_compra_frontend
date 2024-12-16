@@ -3,7 +3,7 @@ import { fetchWrapper } from "./axiosInstance";
 
 const create = async (order: OrderCreateProps) => {
   return fetchWrapper
-    .post("/orders", {
+    .post("/orders/", {
         data: order,
     })
     .then((response) => {

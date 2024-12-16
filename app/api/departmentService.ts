@@ -3,7 +3,7 @@ import { fetchWrapper } from "./axiosInstance";
 
 const getAll = async (limit: number = 10, page: number = 1) => {
   return fetchWrapper
-    .get("/departments", {
+    .get("/departments/", {
       params: {
         limit: limit,
         page: page,
@@ -19,7 +19,7 @@ const getAll = async (limit: number = 10, page: number = 1) => {
 
 const create = async (department: CreateDepto) => {
   return fetchWrapper
-    .post("/departments", {
+    .post("/departments/", {
       data: department,
     })
     .then((response) => {

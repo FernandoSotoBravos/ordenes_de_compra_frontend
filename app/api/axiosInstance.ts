@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseUrl = process.env.REACT_APP_API_URL;
+// const baseUrl = process.env.REACT_APP_API_URL;
 
 const client = axios.create({ baseURL: "https://bend.bravos-fcjuarez.com/api/v1" });
 

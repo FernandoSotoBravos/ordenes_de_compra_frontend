@@ -2,7 +2,7 @@ import { fetchWrapper } from "./axiosInstance";
 
 const getAll = async (limit: number = 10, page: number = 1) => {
   return fetchWrapper
-    .get("/areas", {
+    .get("/areas/", {
       params: {
         limit: limit,
         page: page,
