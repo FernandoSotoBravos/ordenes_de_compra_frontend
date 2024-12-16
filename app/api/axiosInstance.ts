@@ -1,7 +1,7 @@
 import axios from "axios";
 const baseUrl = process.env.REACT_APP_API_URL;
 
-const client = axios.create({ baseURL: baseUrl });
+const client = axios.create({ baseURL: "https://bend.bravos-fcjuarez.com/api/v1" });
 
 client.interceptors.response.use(
   (response) => response,
