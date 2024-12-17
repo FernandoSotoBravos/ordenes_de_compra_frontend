@@ -7,61 +7,35 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextArea from "../TextArea";
 import Grid from "@mui/material/Grid2";
-import { OrderCreate } from "@/app/interfaces/Order.interface";
+import { Order, OrderCreate } from "@/app/interfaces/Order.interface";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { OrderCreateProps } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
 import { orderService } from "@/app/api/orderService";
 import { useDialogs } from "@toolpad/core/useDialogs";
 
-export default function DialogCreateOrder({
+export default function DialogStatusOrder({
   payload,
   open,
   onClose,
-}: DialogProps<OrderCreate, number | null>) {
+}: DialogProps<Record<string, number | string>, number | null>) {
   const [comentaries, setComentaries] = useState<string>("");
-  const [observations, setObservations] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState<number | null>(null);
   const dialogs = useDialogs();
-  const session = useSession();
 
-  const handleCreateProduct = () => {
+  const handleAcceptOrder = () => {
     setLoading(true);
 
-
-    const data: OrderCreateProps = {
-      concept_id: parseInt(payload.segment),
-      supplier_id: parseInt(payload.beneficiary),
-      comments: comentaries,
-      description: payload.descriptionPayment,
-      status: "pendiente",
-      created_by: session?.user?.name || "",
-      details: payload.products.map((product) => ({
-        product_id: 1,
-        description: product.description,
-        quantity: product.quantity,
-        unit_price: product.unit_price,
-        total: product.total,
-      })),
-    };
-
     orderService
-      .create(data)
+      .changeStatus(parseInt(payload.id.toString()), payload.status.toString())
       .then((response) => {
-        dialogs.alert(
-          `La orden de compra ha sido creada con el ID: ${response.order}`,
-          {
-            title: "Success",
-          }
-        );
         setLoading(false);
 
-        onClose(response.order);
+        onClose(response);
       })
       .catch((error) => {
         console.error(error);
-        dialogs.alert(`Erro al generar la orden de compra: ${error}`, {
+        dialogs.alert(`Erro al rechazar la orden de compra: ${error}`, {
           title: "Error",
         });
         setLoading(false);
@@ -71,7 +45,7 @@ export default function DialogCreateOrder({
 
   return (
     <Dialog fullWidth open={open} onClose={() => onClose(null)}>
-      <DialogTitle>Crear Orden de Compra</DialogTitle>
+      <DialogTitle>Aceptar Orden de Compra</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
           <TextArea
@@ -80,14 +54,6 @@ export default function DialogCreateOrder({
             onChange={(e) => setComentaries(e.target.value)}
             maxRows={10}
             placeholder="Comentarios"
-            minRows={3}
-          />
-          <TextArea
-            name="observations"
-            value={observations}
-            onChange={(e) => setObservations(e.target.value)}
-            maxRows={10}
-            placeholder="Observaciones"
             minRows={3}
           />
         </Grid>
@@ -99,7 +65,7 @@ export default function DialogCreateOrder({
         <LoadingButton
           loading={loading}
           color="primary"
-          onClick={handleCreateProduct}
+          onClick={handleAcceptOrder}
         >
           Guardar
         </LoadingButton>

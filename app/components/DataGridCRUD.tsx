@@ -21,7 +21,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {
   ProductsOrder,
   CRUDTableProps,
-} from "../interfaces/OrderCreate.interface";
+} from "../interfaces/Order.interface";
 
 const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
   const [validationErrors, setValidationErrors] = useState<

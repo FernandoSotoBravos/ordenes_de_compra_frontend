@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export interface ProductsOrder {
   id: string;
   quantity: number;
@@ -42,4 +44,36 @@ export interface OrderCreateProps {
   status: string;
   created_by: string;
   details: ProductsOrderProps[];
+}
+
+export interface OrderDetail {
+  product: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+}
+
+export interface Order {
+  id: number;
+  concept: string;
+  supplier: string;
+  created_by: string;
+  created_at: dayjs.Dayjs;
+  total: number;
+  subtotal: number;
+  iva: number;
+  comments: string;
+  description: string;
+  other: string;
+  other_2: string;
+  status: string;
+  details: OrderDetail[];
+}
+
+export interface OrderHistory {
+  action: string;
+  comments: string;
+  changed_by: string;
+  created_at: dayjs.Dayjs;
 }

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import TextArea from "../../../components/TextArea";
 import { useDialogs } from "@toolpad/core/useDialogs";
-import { OrderCreate } from "@/app/interfaces/OrderCreate.interface";
+import { OrderCreate } from "@/app/interfaces/Order.interface";
 
 import Grid from "@mui/material/Grid2";
 import DialogCreateOrder from "@/app/components/dialogs/CreateOrder";
@@ -24,7 +24,7 @@ import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { suppliersService } from "@/app/api/suppliersService";
 import { conceptService } from "@/app/api/conceptService";
 import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
-import { ProductsOrder } from "@/app/interfaces/OrderCreate.interface";
+import { ProductsOrder } from "@/app/interfaces/Order.interface";
 
 function CreateOrderPage() {
   const dialogs = useDialogs();
@@ -144,7 +144,6 @@ function CreateOrderPage() {
     }
 
     const result = await dialogs.open(DialogCreateOrder, formValues);
-    alert(result);
     if (result) {
       handleCleanForm();
     }

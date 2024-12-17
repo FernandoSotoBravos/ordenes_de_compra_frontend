@@ -27,6 +27,10 @@ const NAVIGATION: Navigation = [
         segment: "create",
         title: "Crear nueva orden",
       },
+      {
+        segment: "list",
+        title: "Listado de ordenes",
+      }
     ],
   },
   {
