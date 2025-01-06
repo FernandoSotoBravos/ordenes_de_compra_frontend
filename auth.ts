@@ -20,15 +20,12 @@ const providers: Provider[] = [
         .then((res) => {
           if (res.status === 200) {
             return {
-              id: res.data.user_data.id,
-              name: res.data.user_data.name,
-              email: res.data.user_data.email,
-              area: res.data.user_data.area,
-              role: res.data.user_data.role,
-              department: res.data.user_data.department,
-              leader: res.data.user_data.leader,
+              id: res.data.data.id,
+              name: res.data.data.name,
+              email: res.data.data.email,
+              area: res.data.data.area,
+              department: res.data.data.department,
               access_token: res.data.access_token,
-              refresh_token: res.data.refresh_token,
             };
           }
           return null;
@@ -72,12 +69,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-        token.area = user.area;
-        token.role = user.role;
-        token.department = user.department;
-        token.leader = user.leader;
-        token.access_token = user.access_token;
-        token.refresh_token = user.refresh_token;
+        token.is_admin = user.is_admin;
+        token.is_leader_department = user.is_leader_department;
+        token.is_leader_area = user.is_leader_area;
       }
       return token;
     },
@@ -86,16 +80,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         id: token.id as string,
         name: token.name,
         email: token.email as string,
-        area: token.area as string | null,
-        role: token.role as string,
-        department: token.department as string | null,
-        leader: token.leader as number,
-        emailVerified: null,
-        access_token: token.access_token as string,
-        refresh_token: token.refresh_token as string,
+        is_admin: token.is_admin as boolean | null | undefined,
+        is_leader_department: token.is_leader_department as boolean | null | undefined,
+        is_leader_area: token.is_leader_area as boolean | null | undefined,
+        emailVerified: new Date(),
       };
       session.access_token = token.access_token as string;
-      session.refresh_token = token.refresh_token as string;
       return session;
     },
   },

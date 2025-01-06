@@ -9,32 +9,32 @@ const stategyStatus: Record<
   string,
   { Icon: any; color: string; text: string }
 > = {
-  pendiente: {
+  1: {
     Icon: PendingIcon,
     color: "#FFC107",
     text: "Pendiente",
   },
-  "en revisión": {
+  2: {
     Icon: PreviewIcon,
     color: "#2196F3",
     text: "En revisión",
   },
-  aprobada: {
+  3: {
     Icon: CheckCircleIcon,
     color: "#4CAF50",
     text: "Aprobada",
   },
-  rechazada: {
+  4: {
     Icon: ErrorIcon,
     color: "#F44336",
     text: "Rechazada",
   },
-  pagada: {
+  5: {
     Icon: CreditScoreIcon,
     color: "#4CAF50",
     text: "Pagada",
   },
-  cancelada: {
+  6: {
     Icon: ErrorIcon,
     color: "#F44336",
     text: "Cancelada",

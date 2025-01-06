@@ -6,18 +6,14 @@ declare module "next-auth" {
     id: string;
     name: string;
     email: string;
-    area: string | null;
-    role: string;
-    department: string | null;
-    leader: number;
-    access_token: string;
-    refresh_token: string;
+    is_admin?: boolean | null | undefined;
+    is_leader_department?: boolean | null | undefined;
+    is_leader_area?: boolean | null | undefined;
   }
 
   interface Session {
-    user: User; 
+    user: User;
     access_token: string;
-    refresh_token: string;
   }
 
   interface JWT {
@@ -25,10 +21,6 @@ declare module "next-auth" {
     name: string;
     email: string;
     area: string;
-    role: string;
-    department: string | null;
-    leader: number;
-    access_token: string;
-    refresh_token: string;
+    department: string;
   }
 }

@@ -25,9 +25,11 @@ import { suppliersService } from "@/app/api/suppliersService";
 import { conceptService } from "@/app/api/conceptService";
 import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
 import { ProductsOrder } from "@/app/interfaces/Order.interface";
+import { useSession } from "@toolpad/core";
 
 function CreateOrderPage() {
   const dialogs = useDialogs();
+  const session = useSession();
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
   const [providers, setProviders] = useState<SelectBase[]>([]);

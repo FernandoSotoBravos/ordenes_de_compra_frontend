@@ -50,13 +50,13 @@ const getById = async (id: string) => {
 };
 
 const getAll = async (
-  limit: number = 50,
+  limit: number = 10,
   page: number = 1,
   status: string = ""
 ) => {
   let params: { limit: number; page: number; status?: string } = {
     limit: limit,
-    page: 2,
+    page: page,
   };
 
   if (status) {

@@ -41,8 +41,9 @@ export interface OrderCreateProps {
   description?: string;
   other?: string;
   other_2?: string;
-  status: string;
   created_by: string;
+  area_id: number;
+  department_id: number;
   details: ProductsOrderProps[];
 }
 

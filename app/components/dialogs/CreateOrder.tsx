@@ -35,8 +35,9 @@ export default function DialogCreateOrder({
       supplier_id: parseInt(payload.beneficiary),
       comments: comentaries,
       description: payload.descriptionPayment,
-      status: "pendiente",
-      created_by: session?.user?.name || "",
+      created_by: session?.user?.id as string,
+      area_id: 1,
+      department_id: 1,
       details: payload.products.map((product) => ({
         product_id: 1,
         description: product.description,

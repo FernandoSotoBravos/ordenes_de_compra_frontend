@@ -67,7 +67,7 @@ const RUDOrders = () => {
         size: 80,
       },
       {
-        accessorKey: "status",
+        accessorKey: "status_id",
         header: "Estado",
         Cell: ({ cell }) => {
           // Obtener el valor de status
@@ -105,17 +105,17 @@ const RUDOrders = () => {
         },
       },
       {
-        accessorKey: "created_by",
+        accessorKey: "created_user",
         header: "Creado por",
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.created_by,
-          helperText: validationErrors?.created_by,
+          error: !!validationErrors?.created_user,
+          helperText: validationErrors?.created_user,
           //remove any previous validation errors when Order focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              created_by: undefined,
+              created_user: undefined,
             }),
         },
       },
@@ -290,6 +290,7 @@ const RUDOrders = () => {
     muiTableContainerProps: {
       sx: {
         minHeight: "500px",
+        minWidth: "100%",
       },
     },
     muiDetailPanelProps: () => ({
@@ -392,18 +393,16 @@ function useGetOrders() {
   return useQuery<Order[]>({
     queryKey: ["Orders"],
     queryFn: async () => {
-      //send api request here
       return await orderService
         .getAll()
         .then((response) => {
           return response;
         })
         .catch((error) => {
+          console.log(error);
           return error;
         });
 
-      //   await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      //   return Promise.resolve([]);
     },
     refetchOnWindowFocus: false,
   });
