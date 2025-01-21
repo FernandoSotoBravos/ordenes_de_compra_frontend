@@ -76,7 +76,7 @@ const getByArea = async (area_id: number) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 

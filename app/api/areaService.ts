@@ -76,7 +76,8 @@ const getByDepartment = async (department_id: number) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      console.log(error);
+      throw error;
     });
 };
 

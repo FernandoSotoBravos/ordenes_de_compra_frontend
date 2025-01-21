@@ -7,26 +7,17 @@ import {
   type MRT_TableOptions,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton, Tooltip } from "@mui/material";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-// import { type User, fakeData, usStates } from './makeData';
+import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  ProductsOrder,
-  CRUDTableProps,
-} from "../interfaces/Order.interface";
+import { ProductsOrder, CRUDTableProps } from "../interfaces/Order.interface";
+import { useDialogs } from "@toolpad/core";
 
 const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const dialogs = useDialogs();
 
   const columns = useMemo<MRT_ColumnDef<ProductsOrder>[]>(
     () => [
@@ -35,6 +26,21 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
         header: "Id",
         enableEditing: false,
         size: 80,
+      },
+      {
+        accessorKey: "description",
+        header: "Descripción",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.description,
+          helperText: validationErrors?.description,
+          //remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              description: undefined,
+            }),
+        },
       },
       {
         accessorKey: "quantity",
@@ -51,21 +57,6 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
               quantity: undefined,
             }),
           //optionally add validation checking for onBlur or onChange
-        },
-      },
-      {
-        accessorKey: "description",
-        header: "Descripción",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.description,
-          helperText: validationErrors?.description,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              description: undefined,
-            }),
         },
       },
       {
@@ -87,9 +78,10 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
       {
         accessorKey: "total",
         header: "Total",
+        enableEditing: false,
         muiEditTextFieldProps: {
           type: "number",
-          required: true,
+          // required: true,
           error: !!validationErrors?.total,
           helperText: validationErrors?.total,
           //remove any previous validation errors when user focuses on the input
@@ -107,22 +99,31 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
   const handleCreateProduct: MRT_TableOptions<ProductsOrder>["onCreatingRowSave"] =
     async ({ values, table }) => {
       // Validar y agregar el nuevo producto
-      const newProduct = { ...values, id: crypto.randomUUID() };
+      const total = values.quantity * values.unit_price;
+      const newProduct = { ...values, id: crypto.randomUUID(), total: total };
       const updatedTableData = [...tableData, newProduct];
       setTableData(updatedTableData);
+      table.setCreatingRow(null);
     };
 
   const handleSaveProduct: MRT_TableOptions<ProductsOrder>["onEditingRowSave"] =
     async ({ values, table }) => {
       // Actualizar el producto editado
+      const total = values.quantity * values.unit_price;
+
       const updatedTableData = tableData.map((product) =>
-        product.id === values.id ? values : product
+        product.id === values.id ? { ...values, total } : product
       );
       setTableData(updatedTableData);
+      table.setCreatingRow(null);
     };
 
-  const openDeleteConfirmModal = (row: MRT_Row<ProductsOrder>) => {
-    if (window.confirm("¿Seguro que deseas eliminar este producto?")) {
+  const openDeleteConfirmModal = async (row: MRT_Row<ProductsOrder>) => {
+    const result = await dialogs.confirm(
+      "Deseas eliminar el elemento de la lista?",
+      { title: "Eliminar item" }
+    );
+    if (result) {
       const updatedTableData = tableData.filter(
         (product) => product.id !== row.original.id
       );
@@ -133,8 +134,8 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
   const table = useMaterialReactTable({
     columns,
     data: tableData,
-    createDisplayMode: "row", // ('modal', and 'custom' are also available)
-    editDisplayMode: "row", // ('modal', 'cell', 'table', and 'custom' are also available)
+    createDisplayMode: "modal", // ('modal', and 'custom' are also available)
+    editDisplayMode: "modal", // ('modal', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
     getRowId: (row) => row.id,
     muiTableContainerProps: {
@@ -164,8 +165,7 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
       <Button
         variant="contained"
         onClick={() => {
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
+          table.setCreatingRow(true);
           // table.setCreatingRow(
           //   createRow(table, {
           //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios

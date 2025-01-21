@@ -13,6 +13,7 @@ import { OrderCreateProps } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
 import { orderService } from "@/app/api/orderService";
 import { useDialogs } from "@toolpad/core/useDialogs";
+import FileUpload from "@/app/components/fileUpload";
 
 export default function DialogCreateOrder({
   payload,
@@ -28,7 +29,6 @@ export default function DialogCreateOrder({
 
   const handleCreateProduct = () => {
     setLoading(true);
-
 
     const data: OrderCreateProps = {
       concept_id: parseInt(payload.segment),
@@ -91,6 +91,7 @@ export default function DialogCreateOrder({
             placeholder="Observaciones"
             minRows={3}
           />
+          <FileUpload onUpload={() => console.log("error")} />
         </Grid>
       </DialogContent>
       <DialogActions>

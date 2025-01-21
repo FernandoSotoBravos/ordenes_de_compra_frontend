@@ -58,9 +58,18 @@ function CreateOrderPage() {
   }, []);
 
   const handleSelectedArea = (event: SelectChangeEvent<string>) => {
-    conceptService.getByArea(parseInt(event.target.value)).then((data) => {
-      setConcepts(data);
-    });
+    conceptService
+      .getByArea(parseInt(event.target.value))
+      .then((data) => {
+        setConcepts(data);
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer los conceptos del area, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
     setFormValues({
       ...formValues,
       concept: event.target.value,
@@ -68,9 +77,18 @@ function CreateOrderPage() {
   };
 
   const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
-    areaService.getByDepartment(parseInt(event.target.value)).then((data) => {
-      setAreas(data);
-    });
+    areaService
+      .getByDepartment(parseInt(event.target.value))
+      .then((data) => {
+        setAreas(data);
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer las areas del departamento, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
     setFormValues({
       ...formValues,
       department: event.target.value,
@@ -149,7 +167,6 @@ function CreateOrderPage() {
     if (result) {
       handleCleanForm();
     }
-    
   };
 
   return (
@@ -256,7 +273,11 @@ function CreateOrderPage() {
         </Grid>
       </Grid>
       <Box mt={1}>
-        <CRUDTable tableData={tableData} setTableData={handleProductsChange} isSaving={false} />
+        <CRUDTable
+          tableData={tableData}
+          setTableData={handleProductsChange}
+          isSaving={false}
+        />
       </Box>
       <Box mt={2} textAlign={"end"}>
         <Button
