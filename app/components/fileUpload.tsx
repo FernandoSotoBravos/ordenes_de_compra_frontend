@@ -1,13 +1,23 @@
 import React, { useState } from "react";
-import { Box, Button, Typography, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  List,
+  ListItem,
+  ListItemButton,
+  IconButton,
+} from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import { Delete } from "@mui/icons-material";
 
 interface FileUploadProps {
-  onUpload: (files: File[]) => void;
+  setFiles: (files: File[]) => void;
+  files: File[];
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onUpload }) => {
-  const [files, setFiles] = useState<File[]>([]);
+const FileUpload: React.FC<FileUploadProps> = ({ setFiles, files }) => {
   const [dragging, setDragging] = useState(false);
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -16,8 +26,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload }) => {
     setDragging(false);
 
     const uploadedFiles = Array.from(event.dataTransfer.files);
-    setFiles(uploadedFiles);
-    onUpload(uploadedFiles);
+    setFiles([...files, ...uploadedFiles]);
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -34,15 +43,18 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload }) => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
-    setFiles(uploadedFiles);
-    onUpload(uploadedFiles);
+    setFiles([...files, ...uploadedFiles]);
+  };
+
+  const handleDeleteFile = (index: number) => {
+    const newFiles = files.filter((_, i) => i !== index);
+    setFiles(newFiles);
   };
 
   return (
     <Box
       sx={{
         width: "100%",
-        maxWidth: 400,
         margin: "0 auto",
         textAlign: "center",
       }}
@@ -52,7 +64,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload }) => {
         sx={{
           p: 3,
           border: dragging ? "2px dashed #4caf50" : "2px dashed #ccc",
-          bgcolor: dragging ? "#e8f5e9" : "#fafafa",
           transition: "all 0.3s ease",
         }}
         onDrop={handleDrop}
@@ -75,11 +86,20 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload }) => {
       {files.length > 0 && (
         <Box mt={2}>
           <Typography variant="subtitle1">Archivos seleccionados:</Typography>
-          <ul>
+          <List>
             {files.map((file, index) => (
-              <li key={index}>{file.name}</li>
+              <ListItem key={index} sx={{ display: "flex", gap: "1rem" }}>
+                <Typography variant="body2">{file.name}</Typography>
+
+                <IconButton
+                  onClick={() => handleDeleteFile(index)}
+                  size="small"
+                >
+                  <Delete />
+                </IconButton>
+              </ListItem>
             ))}
-          </ul>
+          </List>
         </Box>
       )}
     </Box>

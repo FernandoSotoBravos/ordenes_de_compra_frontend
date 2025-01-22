@@ -45,6 +45,7 @@ export interface OrderCreateProps {
   area_id: number;
   department_id: number;
   details: ProductsOrderProps[];
+  documents: any[];
 }
 
 export interface OrderDetail {

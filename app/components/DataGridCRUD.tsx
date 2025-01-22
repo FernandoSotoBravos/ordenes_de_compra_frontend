@@ -108,7 +108,6 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
 
   const handleSaveProduct: MRT_TableOptions<ProductsOrder>["onEditingRowSave"] =
     async ({ values, table }) => {
-      // Actualizar el producto editado
       const total = values.quantity * values.unit_price;
 
       const updatedTableData = tableData.map((product) =>

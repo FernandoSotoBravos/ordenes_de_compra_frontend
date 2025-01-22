@@ -22,52 +22,83 @@ export default function DialogCreateOrder({
 }: DialogProps<OrderCreate, number | null>) {
   const [comentaries, setComentaries] = useState<string>("");
   const [observations, setObservations] = useState<string>("");
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<number | null>(null);
   const dialogs = useDialogs();
   const session = useSession();
 
-  const handleCreateProduct = () => {
+  const handleCreateProduct = async () => {
     setLoading(true);
 
-    const data: OrderCreateProps = {
-      concept_id: parseInt(payload.segment),
-      supplier_id: parseInt(payload.beneficiary),
-      comments: comentaries,
-      description: payload.descriptionPayment,
-      created_by: session?.user?.id as string,
-      area_id: 1,
-      department_id: 1,
-      details: payload.products.map((product) => ({
-        product_id: 1,
-        description: product.description,
-        quantity: product.quantity,
-        unit_price: product.unit_price,
-        total: product.total,
-      })),
-    };
+    try {
+      // Convertir archivos a Base64
+      const base64Files = await Promise.all(
+        files.map((file) => {
+          return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file); // Convierte el archivo a Base64
+          });
+        })
+      );
 
-    orderService
-      .create(data)
-      .then((response) => {
-        dialogs.alert(
-          `La orden de compra ha sido creada con el ID: ${response.order}`,
-          {
-            title: "Success",
-          }
-        );
-        setLoading(false);
+      // Crear el payload con archivos en formato Base64
+      const data: OrderCreateProps = {
+        concept_id: parseInt(payload.segment),
+        supplier_id: parseInt(payload.beneficiary),
+        comments: comentaries,
+        description: payload.descriptionPayment,
+        created_by: session?.user?.id as string,
+        area_id: 1,
+        department_id: 1,
+        details: payload.products.map((product) => ({
+          product_id: 1,
+          description: product.description,
+          quantity: product.quantity,
+          unit_price: product.unit_price,
+          total: product.total,
+        })),
+        documents: base64Files.map((base64File, index) => ({
+          filename: files[index].name,
+          content_type: files[index].type,
+          content: base64File.split(",")[1],
+        })),
+      };
 
-        onClose(response.order);
-      })
-      .catch((error) => {
-        console.error(error);
-        dialogs.alert(`Erro al generar la orden de compra: ${error}`, {
-          title: "Error",
+      orderService
+        .create(data)
+        .then((response) => {
+          dialogs.alert(
+            `La orden de compra ha sido creada con el ID: ${response.order}`,
+            {
+              title: "Success",
+            }
+          );
+          setLoading(false);
+
+          onClose(response.order);
+        })
+        .catch((error) => {
+          console.error(error);
+          dialogs.alert(
+            `Error al generar la orden de compra hacia el servidor: ${error}`,
+            {
+              title: "Error",
+            }
+          );
+          setLoading(false);
+          onClose(null);
         });
-        setLoading(false);
-        onClose(null);
+    } catch (error) {
+      console.error(error);
+      dialogs.alert(`Erro al generar la orden de compra: ${error}`, {
+        title: "Error",
       });
+      setLoading(false);
+      onClose(null);
+    }
   };
 
   return (
@@ -91,7 +122,7 @@ export default function DialogCreateOrder({
             placeholder="Observaciones"
             minRows={3}
           />
-          <FileUpload onUpload={() => console.log("error")} />
+          <FileUpload setFiles={setFiles} files={files} />
         </Grid>
       </DialogContent>
       <DialogActions>
