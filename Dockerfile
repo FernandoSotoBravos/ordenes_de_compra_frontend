@@ -44,6 +44,7 @@ ENV NEXT_SHARP_PATH=/app/node_modules/sharp
 ENV AUTH_SECRET=secret
 # ENV NEXT_APP_API_URL=http://localhost:8013/api/v1
 ENV NEXT_APP_API_URL=https://bend.bravos-fcjuarez.com/api/v1
+ENV NEXTAUTH_URL=https://ordenes.bravos-fcjuarez.com/
 ENV AUTH_TRUSTED_HOST=true
 # ENV NEXTAUTH_URL_INTERNAL=https://ordenes.bravos-fcjuarez.com/
 # Uncomment the following line in case you want to disable telemetry during runtime.
