@@ -13,7 +13,7 @@ const getAll = async (limit: number = 10, page: number = 1) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 
@@ -26,7 +26,7 @@ const create = async (department: CreateDepto) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 
@@ -39,7 +39,7 @@ const update = async (id: number, department: UpdateDepto) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 
@@ -50,7 +50,7 @@ const remove = async (id: number) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 
@@ -61,7 +61,7 @@ const getById = async (id: string) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 
@@ -72,7 +72,7 @@ const getByDepartment = async (department: string) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 

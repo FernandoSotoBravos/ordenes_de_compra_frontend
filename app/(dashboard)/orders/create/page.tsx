@@ -26,6 +26,7 @@ import { conceptService } from "@/app/api/conceptService";
 import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
 import { ProductsOrder } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
+import { error } from "console";
 
 function CreateOrderPage() {
   const dialogs = useDialogs();
@@ -48,13 +49,31 @@ function CreateOrderPage() {
   });
 
   useEffect(() => {
-    departmentService.getAll().then((data) => {
-      setDepartments(data);
-    });
+    departmentService
+      .getAll()
+      .then((data) => {
+        setDepartments(data);
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer los departamentos, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
 
-    suppliersService.getAll().then((data) => {
-      setProviders(data);
-    });
+    suppliersService
+      .getAll()
+      .then((data) => {
+        setProviders(data);
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer los proveedores, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
   }, []);
 
   const handleSelectedArea = (event: SelectChangeEvent<string>) => {
