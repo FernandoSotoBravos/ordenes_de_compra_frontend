@@ -8,6 +8,15 @@ export interface ProductsOrder {
   total: number;
 }
 
+export type OrderHistoryProps = {
+  id: number;
+};
+
+export type OrderDocumentsProps = {
+  id: number;
+  documents: string[];
+};
+
 export interface OrderCreate {
   department: string;
   concept: string;
@@ -71,6 +80,7 @@ export interface Order {
   other_2: string;
   status: string;
   details: OrderDetail[];
+  documents?: any;
 }
 
 export interface OrderHistory {

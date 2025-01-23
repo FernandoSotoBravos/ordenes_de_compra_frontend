@@ -8,6 +8,7 @@ import {
   type MRT_Row,
   type MRT_TableOptions,
   useMaterialReactTable,
+  MRT_PaginationState,
 } from "material-react-table";
 import {
   Box,
@@ -30,9 +31,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import TimelineIcon from "@mui/icons-material/Timeline";
 import Typography from "@mui/material/Typography";
 import {
   Order,
@@ -45,18 +47,19 @@ import dayjs from "dayjs";
 import { useDialogs } from "@toolpad/core";
 import DialogDeleteOrder from "@/app/components/dialogs/DeleteOrder";
 import DialogStatusOrder from "@/app/components/dialogs/AcceptOrder";
+import DialogHistoryOrder from "@/app/components/dialogs/HistoryOrder";
+import DialogDocumentsOrder from "@/app/components/dialogs/DocumentsOrder";
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
   const dialogs = useDialogs();
-
-  useEffect(() => {
-    // departmentService.getAll().then((data) => {
-    //   setDepartments(data);
-    // });
-  }, []);
+  // const [pagination, setPagination] = useState<MRT_PaginationState>({
+  //   pageIndex: 1,
+  //   pageSize: 10,
+  // });
+  const [totalItems, setTotalItems] = useState(10);
 
   const columns = useMemo<MRT_ColumnDef<Order>[]>(
     () => [
@@ -254,9 +257,6 @@ const RUDOrders = () => {
     }
 
     deleteOrder(row.original.id);
-    // if (window.confirm("Are you sure you want to delete this Order?")) {
-    //   deleteOrder(row.original.id);
-    // }
   };
 
   const openAcceptConfirmModal = async (row: MRT_Row<Order>) => {
@@ -269,9 +269,25 @@ const RUDOrders = () => {
     }
 
     deleteOrder(row.original.id);
-    // if (window.confirm("Are you sure you want to delete this Order?")) {
-    //   deleteOrder(row.original.id);
-    // }
+  };
+
+  const openHistoryOrder = async (row: MRT_Row<Order>) => {
+    const result = await dialogs.open(DialogHistoryOrder, {
+      id: row.original.id,
+    });
+    if (result === null) {
+      return;
+    }
+  };
+
+  const openDocumentsOrder = async (row: MRT_Row<Order>) => {
+    const result = await dialogs.open(DialogDocumentsOrder, {
+      id: row.original.id,
+      documents: row.original.documents,
+    });
+    if (result === null) {
+      return;
+    }
   };
 
   const table = useMaterialReactTable({
@@ -309,9 +325,8 @@ const RUDOrders = () => {
         transition: "transform 0.2s",
       },
     }),
-    //conditionally render detail panel
     renderDetailPanel: ({ row }) =>
-      row.original.details ? (
+      row.original.details && row.original.details.length ? (
         <Box
           key={row.id}
           sx={{
@@ -328,11 +343,15 @@ const RUDOrders = () => {
               <Typography>Cantidad: {detail.quantity}</Typography>
               <Typography>Precio Unitario: {detail.unit_price}</Typography>
               <Typography>Total: {detail.total}</Typography>
-              <Divider sx={{ borderBottomWidth: 5 }}/>
+              <Divider sx={{ borderBottomWidth: 5 }} />
             </Stack>
           ))}
         </Box>
-      ) : null,
+      ) : (
+        <Typography variant="body2" color="textSecondary">
+          No hay detalles disponibles para esta orden.
+        </Typography>
+      ),
 
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveOrder,
@@ -354,6 +373,7 @@ const RUDOrders = () => {
         <Tooltip title="Editar">
           <IconButton
             sx={{ color: "#2196F3" }}
+            size="small"
             onClick={() => table.setEditingRow(row)}
           >
             <EditIcon />
@@ -362,19 +382,41 @@ const RUDOrders = () => {
         <Tooltip title="Aprobar">
           <IconButton
             sx={{ color: "#4caf50" }}
+            size="small"
             onClick={() => openAcceptConfirmModal(row)}
           >
-            <CheckCircleIcon />
+            <ThumbUpIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title="Rechazar">
           <IconButton
             sx={{ color: "#f44336" }}
+            size="small"
             onClick={() => openRejectConfirmModal(row)}
           >
-            <DeleteIcon />
+            <ThumbDownIcon />
           </IconButton>
         </Tooltip>
+        <Tooltip title="Historial">
+          <IconButton
+            sx={{ color: "primary" }}
+            size="small"
+            onClick={() => openHistoryOrder(row)}
+          >
+            <TimelineIcon />
+          </IconButton>
+        </Tooltip>
+        {row.original.documents && (
+          <Tooltip title="Documentos">
+            <IconButton
+              sx={{ color: "primary" }}
+              size="small"
+              onClick={() => openDocumentsOrder(row)}
+            >
+              <PictureAsPdfIcon />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
     ),
     state: {
@@ -388,7 +430,6 @@ const RUDOrders = () => {
   return <MaterialReactTable table={table} />;
 };
 
-//READ hook (get Orders from api)
 function useGetOrders() {
   return useQuery<Order[]>({
     queryKey: ["Orders"],
@@ -399,10 +440,9 @@ function useGetOrders() {
           return response;
         })
         .catch((error) => {
-          console.log(error);
-          return error;
+          alert("Error loading Orders " + error);
+          return [];
         });
-
     },
     refetchOnWindowFocus: false,
   });
@@ -461,14 +501,3 @@ const OrdersProviders = () => (
 );
 
 export default OrdersProviders;
-
-// const validateRequired = (value: string) => !!value.length;
-
-// function validateOrder(Order: Order) {
-//   return {
-//     name: !validateRequired(Order.name) ? "El Nombre es Requerido" : "",
-//     department_id: !validateRequired(String(Order.department_id))
-//       ? "El departamento es requerido"
-//       : "",
-//   };
-// }

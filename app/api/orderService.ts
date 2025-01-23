@@ -70,7 +70,7 @@ const getAll = async (
       return response.data;
     })
     .catch((error) => {
-      return error;
+      throw error;
     });
 };
 
@@ -85,6 +85,41 @@ const changeStatus = async (id: number, status: string) => {
     });
 };
 
+const getOrderHistory = async (id: number) => {
+  return fetchWrapper
+    .get(`/orders/${id}/history`, {})
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const getDocuments = async (id: number) => {
+  return fetchWrapper
+    .get(`/orders/${id}/documents`, {})
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const downloadDocument = async (id: number, document: string) => {
+  return fetchWrapper
+    .get(`/orders/${id}/document/${document}`, {
+      responseType: "blob",
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
 export const orderService = {
   create,
   getAll,
@@ -92,4 +127,7 @@ export const orderService = {
   update,
   remove,
   changeStatus,
+  getOrderHistory,
+  getDocuments,
+  downloadDocument,
 };
