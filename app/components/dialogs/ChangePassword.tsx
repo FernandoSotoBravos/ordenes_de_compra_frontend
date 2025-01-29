@@ -18,7 +18,6 @@ import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { SelectRole } from "@/app/interfaces/Roles.interface";
 import { areaService } from "@/app/api/areaService";
 import { departmentService } from "@/app/api/departmentService";
-import { roleservice } from "@/app/api/roleService";
 import { useDialogs, useSession } from "@toolpad/core";
 import { userService } from "@/app/api/userService";
 

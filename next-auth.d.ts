@@ -6,9 +6,12 @@ declare module "next-auth" {
     id: string;
     name: string;
     email: string;
+    role: number;
     is_admin?: boolean | null | undefined;
     is_leader_department?: boolean | null | undefined;
     is_leader_area?: boolean | null | undefined;
+    isPower?: boolean | null
+    access_token: string
   }
 
   interface Session {
@@ -20,6 +23,7 @@ declare module "next-auth" {
     id: string;
     name: string;
     email: string;
+    role: number;
     area: string;
     department: string;
   }

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Container,
   FormControl,
@@ -26,11 +26,12 @@ import { conceptService } from "@/app/api/conceptService";
 import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
 import { ProductsOrder } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
-import { error } from "console";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 function CreateOrderPage() {
   const dialogs = useDialogs();
-  const session = useSession();
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
   const [providers, setProviders] = useState<SelectBase[]>([]);
@@ -48,9 +49,9 @@ function CreateOrderPage() {
     products: [],
   });
 
-  useEffect(() => {
-    departmentService
-      .getAll()
+  const handleGetDepartments = async () => {
+    await departmentService
+      .getAll(token as string)
       .then((data) => {
         setDepartments(data);
       })
@@ -61,20 +62,26 @@ function CreateOrderPage() {
         );
         handleCleanForm();
       });
+  };
 
-    suppliersService
-      .getAll()
-      .then((data) => {
-        setProviders(data);
-      })
-      .catch((error) => {
-        dialogs.alert(
-          "Ha ocurrido un error al traer los proveedores, " +
-            error.response.data.detail
-        );
-        handleCleanForm();
-      });
-  }, []);
+  useMemo(() => {
+    if (token) {
+      handleGetDepartments();
+
+      suppliersService
+        .getAll()
+        .then((data) => {
+          setProviders(data);
+        })
+        .catch((error) => {
+          dialogs.alert(
+            "Ha ocurrido un error al traer los proveedores, " +
+              error.response.data.detail
+          );
+          handleCleanForm();
+        });
+    }
+  }, [token]);
 
   const handleSelectedArea = (event: SelectChangeEvent<string>) => {
     conceptService
@@ -97,7 +104,7 @@ function CreateOrderPage() {
 
   const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
     areaService
-      .getByDepartment(parseInt(event.target.value))
+      .getByDepartment(token as string, parseInt(event.target.value))
       .then((data) => {
         setAreas(data);
       })
@@ -201,11 +208,12 @@ function CreateOrderPage() {
               value={formValues.department}
               onChange={handleSelectedDepartment}
             >
-              {departments.map((department) => (
-                <MenuItem key={department.id} value={department.id}>
-                  {department.name}
-                </MenuItem>
-              ))}
+              {departments.length > 0 &&
+                departments.map((department) => (
+                  <MenuItem key={department.id} value={department.id}>
+                    {department.name}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
         </Grid>

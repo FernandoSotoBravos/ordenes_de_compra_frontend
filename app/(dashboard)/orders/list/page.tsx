@@ -12,14 +12,11 @@ import {
 } from "material-react-table";
 import {
   Box,
-  Button,
-  Chip,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   IconButton,
-  MenuItem,
   Stack,
   Tooltip,
 } from "@mui/material";
@@ -45,21 +42,25 @@ import { orderService } from "@/app/api/orderService";
 import { StatusOrderComponent } from "./status";
 import dayjs from "dayjs";
 import { useDialogs } from "@toolpad/core";
-import DialogDeleteOrder from "@/app/components/dialogs/DeleteOrder";
 import DialogStatusOrder from "@/app/components/dialogs/AcceptOrder";
 import DialogHistoryOrder from "@/app/components/dialogs/HistoryOrder";
 import DialogDocumentsOrder from "@/app/components/dialogs/DocumentsOrder";
+import { useSession } from "@toolpad/core";
+import { CustomSession } from "@/app/interfaces/Session.interface";
+import { StatusRole } from "@/app/mocks/statusRole";
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
   const dialogs = useDialogs();
-  // const [pagination, setPagination] = useState<MRT_PaginationState>({
-  //   pageIndex: 1,
-  //   pageSize: 10,
-  // });
-  const [totalItems, setTotalItems] = useState(10);
+  const session = useSession<CustomSession>();
+
+  const isPower =
+    session?.user?.is_admin ||
+    session?.user?.is_leader_area ||
+    session?.user?.is_leader_department ||
+    [6, 7].includes(session?.user?.role as number);
 
   const columns = useMemo<MRT_ColumnDef<Order>[]>(
     () => [
@@ -73,7 +74,6 @@ const RUDOrders = () => {
         accessorKey: "status_id",
         header: "Estado",
         Cell: ({ cell }) => {
-          // Obtener el valor de status
           const status = cell.getValue() as string;
           return <StatusOrderComponent status={status} />;
         },
@@ -226,7 +226,7 @@ const RUDOrders = () => {
     isError: isLoadingOrdersError,
     isFetching: isFetchingOrders,
     isLoading: isLoadingOrders,
-  } = useGetOrders();
+  } = useGetOrders(session?.user?.access_token as string);
   //call UPDATE hook
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
     useUpdateOrder();
@@ -251,7 +251,11 @@ const RUDOrders = () => {
 
   //DELETE action
   const openRejectConfirmModal = async (row: MRT_Row<Order>) => {
-    const result = await dialogs.open(DialogDeleteOrder, row.original);
+    const result = await dialogs.open(DialogStatusOrder, {
+      id: row.original.id,
+      status: "REJECTED",
+      title: "Rechazar Orden de Compra",
+    });
     if (result === null) {
       return;
     }
@@ -260,9 +264,17 @@ const RUDOrders = () => {
   };
 
   const openAcceptConfirmModal = async (row: MRT_Row<Order>) => {
+    const status = StatusRole[session?.user?.role as number];
+
+    if (!status) {
+      dialogs.alert("Rol no se encuentra por favor vuelve a iniciar sesion");
+      return;
+    }
+
     const result = await dialogs.open(DialogStatusOrder, {
       id: row.original.id,
-      status: "aprobada",
+      status: status,
+      title: "Aceptar Orden de Compra",
     });
     if (result === null) {
       return;
@@ -370,33 +382,39 @@ const RUDOrders = () => {
     ),
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
-        <Tooltip title="Editar">
-          <IconButton
-            sx={{ color: "#2196F3" }}
-            size="small"
-            onClick={() => table.setEditingRow(row)}
-          >
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Aprobar">
-          <IconButton
-            sx={{ color: "#4caf50" }}
-            size="small"
-            onClick={() => openAcceptConfirmModal(row)}
-          >
-            <ThumbUpIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Rechazar">
-          <IconButton
-            sx={{ color: "#f44336" }}
-            size="small"
-            onClick={() => openRejectConfirmModal(row)}
-          >
-            <ThumbDownIcon />
-          </IconButton>
-        </Tooltip>
+        {!isPower && (
+          <Tooltip title="Editar">
+            <IconButton
+              sx={{ color: "#2196F3" }}
+              size="small"
+              onClick={() => table.setEditingRow(row)}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+        {isPower && (
+          <Box sx={{ display: "flex", gap: "1rem" }}>
+            <Tooltip title="Aprobar">
+              <IconButton
+                sx={{ color: "#4caf50" }}
+                size="small"
+                onClick={() => openAcceptConfirmModal(row)}
+              >
+                <ThumbUpIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Rechazar">
+              <IconButton
+                sx={{ color: "#f44336" }}
+                size="small"
+                onClick={() => openRejectConfirmModal(row)}
+              >
+                <ThumbDownIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
         <Tooltip title="Historial">
           <IconButton
             sx={{ color: "primary" }}
@@ -430,12 +448,12 @@ const RUDOrders = () => {
   return <MaterialReactTable table={table} />;
 };
 
-function useGetOrders() {
+function useGetOrders(token: string) {
   return useQuery<Order[]>({
     queryKey: ["Orders"],
     queryFn: async () => {
       return await orderService
-        .getAll()
+        .getAll(token)
         .then((response) => {
           return response;
         })

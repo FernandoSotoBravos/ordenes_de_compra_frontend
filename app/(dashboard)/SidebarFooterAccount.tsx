@@ -17,6 +17,8 @@ import {
 import { SidebarFooterProps } from "@toolpad/core/DashboardLayout";
 import SignUp from "../components/dialogs/SingUp";
 import ChangePassword from "../components/dialogs/ChangePassword";
+import { useSession } from "@toolpad/core";
+import { CustomSession } from "../interfaces/Session.interface";
 
 function AccountSidebarPreview(props: AccountPreviewProps & { mini: boolean }) {
   const { handleClick, open, mini } = props;
@@ -42,6 +44,10 @@ function SidebarFooterAccountPopover({
   setOpenModal: (value: boolean) => void;
   setChangePassword: (value: boolean) => void;
 }) {
+  const session = useSession<CustomSession>();
+
+  const isPower = session?.user?.isPower;
+
   return (
     <Stack direction="column">
       {mini ? <AccountPreview variant="expanded" /> : null}
@@ -57,17 +63,19 @@ function SidebarFooterAccountPopover({
         >
           Cambiar contraseña
         </Button>
-        <Button
-          variant="text"
-          sx={{ textTransform: "capitalize", display: "flex", mx: "auto" }}
-          size="small"
-          fullWidth
-          startIcon={<AddIcon />}
-          disableElevation
-          onClick={() => setOpenModal(true)}
-        >
-          Agregar usuario
-        </Button>
+        {isPower && (
+          <Button
+            variant="text"
+            sx={{ textTransform: "capitalize", display: "flex", mx: "auto" }}
+            size="small"
+            fullWidth
+            startIcon={<AddIcon />}
+            disableElevation
+            onClick={() => setOpenModal(true)}
+          >
+            Agregar usuario
+          </Button>
+        )}
       </MenuList>
       <Divider />
       <AccountPopoverFooter>
@@ -91,7 +99,11 @@ const createPopoverComponent = (
 ) => {
   function PopoverComponent() {
     return (
-      <SidebarFooterAccountPopover setOpenModal={setOpenSingUp} mini={mini} setChangePassword={setChangePassword} />
+      <SidebarFooterAccountPopover
+        setOpenModal={setOpenSingUp}
+        mini={mini}
+        setChangePassword={setChangePassword}
+      />
     );
   }
   return PopoverComponent;
@@ -101,7 +113,8 @@ export default function SidebarFooterAccount({ mini }: SidebarFooterProps) {
   const [openSingUp, setOpenSingUp] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const handleClick = (value: boolean) => setOpenSingUp(value);
-  const handleClickChangePassword = (value: boolean) => setOpenChangePassword(value);
+  const handleClickChangePassword = (value: boolean) =>
+    setOpenChangePassword(value);
   const PreviewComponent = React.useMemo(
     () => createPreviewComponent(mini),
     [mini]
@@ -110,10 +123,17 @@ export default function SidebarFooterAccount({ mini }: SidebarFooterProps) {
     () => createPopoverComponent(mini, handleClick, handleClickChangePassword),
     [mini]
   );
+
+  const session = useSession<CustomSession>();
+  const isPower = session?.user?.isPower;
+
   return (
     <>
-      <SignUp open={openSingUp} onClose={handleClick} />
-      <ChangePassword open={openChangePassword} onClose={handleClickChangePassword} />
+      {isPower && <SignUp open={openSingUp} onClose={handleClick} />}
+      <ChangePassword
+        open={openChangePassword}
+        onClose={handleClickChangePassword}
+      />
       <Account
         slots={{
           preview: PreviewComponent,

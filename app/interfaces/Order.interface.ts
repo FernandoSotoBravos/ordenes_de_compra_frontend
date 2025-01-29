@@ -51,8 +51,8 @@ export interface OrderCreateProps {
   other?: string;
   other_2?: string;
   created_by: string;
-  area_id: number;
-  department_id: number;
+  area_id?: number;
+  department_id?: number;
   details: ProductsOrderProps[];
   documents: any[];
 }
@@ -87,5 +87,12 @@ export interface OrderHistory {
   action: string;
   comments: string;
   changed_by: string;
-  created_at: dayjs.Dayjs;
+  created_at: string;
+}
+
+
+export interface ChangeStatus {
+  orderId: number;
+  status: string;
+  comments: string;
 }

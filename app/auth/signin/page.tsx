@@ -3,7 +3,6 @@ import * as React from "react";
 import { Box, Typography } from "@mui/material";
 import { SignInPage } from "@toolpad/core/SignInPage";
 import { providerMap } from "../../../auth";
-import LoadingButton from "@mui/lab/LoadingButton";
 import signIn from "./actions";
 import Image from "next/image";
 
@@ -26,12 +25,6 @@ function Subtitle() {
       FC Bravos de Juárez
     </Typography>
   );
-}
-
-function submitButton() {
-  return <LoadingButton>
-    Iniciar Session
-  </LoadingButton>;
 }
 
 export default function SignIn() {

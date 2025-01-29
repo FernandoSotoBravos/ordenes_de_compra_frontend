@@ -13,6 +13,7 @@ import { OrderCreateProps } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
 import { orderService } from "@/app/api/orderService";
 import { useDialogs } from "@toolpad/core/useDialogs";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 export default function DialogStatusOrder({
   payload,
@@ -22,19 +23,24 @@ export default function DialogStatusOrder({
   const [comentaries, setComentaries] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const dialogs = useDialogs();
+  const session = useSession<CustomSession>();
 
   const handleAcceptOrder = () => {
     setLoading(true);
+    const token = session?.user?.access_token;
 
     orderService
-      .changeStatus(parseInt(payload.id.toString()), payload.status.toString())
+      .changeStatus(token as string, {
+        orderId: parseInt(payload.id.toString()),
+        status: payload.status.toString(),
+        comments: comentaries,
+      })
       .then((response) => {
         setLoading(false);
 
         onClose(response);
       })
       .catch((error) => {
-        console.error(error);
         dialogs.alert(`Erro al rechazar la orden de compra: ${error}`, {
           title: "Error",
         });
@@ -45,7 +51,7 @@ export default function DialogStatusOrder({
 
   return (
     <Dialog fullWidth open={open} onClose={() => onClose(null)}>
-      <DialogTitle>Aceptar Orden de Compra</DialogTitle>
+      <DialogTitle>{payload.title}</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
           <TextArea

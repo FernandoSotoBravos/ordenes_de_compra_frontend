@@ -69,14 +69,17 @@ const getById = async (id: string) => {
     });
 };
 
-const getByDepartment = async (department_id: number) => {
+const getByDepartment = async (token: string, department_id: number) => {
   return fetchWrapper
-    .get(`/areas/by/${department_id}`, {})
+    .get(`/areas/by/${department_id}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })
     .catch((error) => {
-      console.log(error);
       throw error;
     });
 };

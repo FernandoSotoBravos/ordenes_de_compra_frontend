@@ -3,6 +3,7 @@ import axios from "axios";
 const baseUrl = "https://bend.bravos-fcjuarez.com/api/v1";
 // const baseUrl = "http://localhost:8013/api/v1";
 
+import { signOut } from "next-auth/react";
 const client = axios.create({ baseURL: baseUrl });
 
 client.interceptors.response.use(
@@ -16,9 +17,7 @@ client.interceptors.response.use(
       (error.response && error.response.status === 403) ||
       error.response.status === 401
     ) {
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
+      signOut();
     }
     return Promise.reject(error);
   }

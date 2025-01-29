@@ -12,32 +12,27 @@ const stategyStatus: Record<
   1: {
     Icon: PendingIcon,
     color: "#FFC107",
-    text: "Pendiente",
+    text: "Pendiente Aprobacion",
   },
   2: {
     Icon: PreviewIcon,
     color: "#2196F3",
-    text: "En revisión",
+    text: "Aprobado por Lider",
   },
   3: {
     Icon: CheckCircleIcon,
     color: "#4CAF50",
-    text: "Aprobada",
+    text: "Aprobado por Contralor",
   },
   4: {
+    Icon: CreditScoreIcon,
+    color: "#4CAF50",
+    text: "Aprobado por Gerencia",
+  },
+  7: {
     Icon: ErrorIcon,
     color: "#F44336",
     text: "Rechazada",
-  },
-  5: {
-    Icon: CreditScoreIcon,
-    color: "#4CAF50",
-    text: "Pagada",
-  },
-  6: {
-    Icon: ErrorIcon,
-    color: "#F44336",
-    text: "Cancelada",
   },
 };
 
@@ -50,7 +45,6 @@ export const StatusOrderComponent = ({ status }: StatusOrderProps) => {
   return (
     <Box display="flex" alignItems="center" justifyContent="center">
       <Chip
-        icon={<Icon style={{ color: "white" }} />}
         label={
           <Typography
             variant="body2"

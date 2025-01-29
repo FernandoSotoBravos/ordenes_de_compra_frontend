@@ -14,6 +14,7 @@ import { useSession } from "@toolpad/core";
 import { orderService } from "@/app/api/orderService";
 import { useDialogs } from "@toolpad/core/useDialogs";
 import FileUpload from "@/app/components/fileUpload";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 export default function DialogCreateOrder({
   payload,
@@ -26,7 +27,7 @@ export default function DialogCreateOrder({
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<number | null>(null);
   const dialogs = useDialogs();
-  const session = useSession();
+  const session = useSession<CustomSession>();
 
   const handleCreateProduct = async () => {
     setLoading(true);
@@ -51,8 +52,6 @@ export default function DialogCreateOrder({
         comments: comentaries,
         description: payload.descriptionPayment,
         created_by: session?.user?.id as string,
-        area_id: 1,
-        department_id: 1,
         details: payload.products.map((product) => ({
           product_id: 1,
           description: product.description,
@@ -68,7 +67,7 @@ export default function DialogCreateOrder({
       };
 
       orderService
-        .create(data)
+        .create(data, session?.user?.access_token as string)
         .then((response) => {
           dialogs.alert(
             `La orden de compra ha sido creada con el ID: ${response.order}`,

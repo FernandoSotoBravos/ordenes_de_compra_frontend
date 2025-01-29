@@ -33,16 +33,21 @@ import { Area, createArea, updateArea } from "@/app/interfaces/Areas.interface";
 import { areaService } from "@/app/api/areaService";
 import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { departmentService } from "@/app/api/departmentService";
+import { useSession } from "@toolpad/core";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 const CRUDAreas = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
+  const session = useSession<CustomSession>();
+
   const [departments, setDepartments] = useState<SelectBase[]>([]);
+  const token = session?.user?.access_token;
 
   useEffect(() => {
-    departmentService.getAll().then((data) => {
+    departmentService.getAll(token as string).then((data) => {
       setDepartments(data);
     });
   }, []);

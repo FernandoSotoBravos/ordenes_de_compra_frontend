@@ -1,12 +1,15 @@
 import { CreateDepto, UpdateDepto } from "../interfaces/Departments.interface";
 import { fetchWrapper } from "./axiosInstance";
 
-const getAll = async (limit: number = 10, page: number = 1) => {
-  return fetchWrapper
+const getAll = async (token: string, limit: number = 10, page: number = 1) => {
+  return await fetchWrapper
     .get("/departments/", {
       params: {
         limit: limit,
         page: page,
+      },
+      headers: {
+        Authorization: "Bearer " + token,
       },
     })
     .then((response) => {

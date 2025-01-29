@@ -1,23 +1,22 @@
-import {
-  Role,
-  RoleCreate,
-  RoleUpdate,
-} from "../interfaces/Roles.interface";
+import { Role, RoleCreate, RoleUpdate } from "../interfaces/Roles.interface";
 import { fetchWrapper } from "./axiosInstance";
 
-const getAll = async (limit: number = 10, page: number = 1) => {
+const getAll = async (token: string, limit: number = 10, page: number = 1) => {
   return fetchWrapper
     .get("/roles/", {
       params: {
         limit: limit,
         page: page,
       },
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
     })
     .catch((error) => {
-      return error;
+      throw error;
     });
 };
 
@@ -30,7 +29,7 @@ const create = async (concept: RoleCreate) => {
       return response.data;
     })
     .catch((error) => {
-      return error;
+      throw error;
     });
 };
 
@@ -43,7 +42,7 @@ const update = async (id: number, concept: RoleUpdate) => {
       return response.data;
     })
     .catch((error) => {
-      return error;
+      throw error;
     });
 };
 
@@ -54,7 +53,7 @@ const remove = async (id: number) => {
       return response.data;
     })
     .catch((error) => {
-      return error;
+      throw error;
     });
 };
 
@@ -65,7 +64,7 @@ const getById = async (id: string) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 
@@ -76,7 +75,7 @@ const getByArea = async (area_id: number) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 

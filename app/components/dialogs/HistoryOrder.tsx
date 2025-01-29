@@ -72,6 +72,7 @@ export default function DialogHistoryOrder({
                   <TableCell align="left">Accion Aplicada</TableCell>
                   <TableCell align="left">Comentarios</TableCell>
                   <TableCell align="left">Hecho por</TableCell>
+                  <TableCell align="left">Fecha Creacion</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -83,6 +84,7 @@ export default function DialogHistoryOrder({
                     <TableCell align="left">{row.action}</TableCell>
                     <TableCell align="left">{row.comments}</TableCell>
                     <TableCell align="left">{row.changed_by}</TableCell>
+                    <TableCell align="left">{row.created_at}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

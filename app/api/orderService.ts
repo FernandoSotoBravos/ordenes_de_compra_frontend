@@ -1,10 +1,13 @@
-import { OrderCreateProps } from "../interfaces/Order.interface";
+import { ChangeStatus, OrderCreateProps } from "../interfaces/Order.interface";
 import { fetchWrapper } from "./axiosInstance";
 
-const create = async (order: OrderCreateProps) => {
+const create = async (order: OrderCreateProps, token: string) => {
   return fetchWrapper
     .post("/orders/", {
       data: order,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -50,6 +53,7 @@ const getById = async (id: string) => {
 };
 
 const getAll = async (
+  token: string,
   limit: number = 10,
   page: number = 1,
   status: string = ""
@@ -65,6 +69,9 @@ const getAll = async (
   return fetchWrapper
     .get("/orders/", {
       params: params,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -74,9 +81,17 @@ const getAll = async (
     });
 };
 
-const changeStatus = async (id: number, status: string) => {
+const changeStatus = async (token: string, props: ChangeStatus) => {
   return fetchWrapper
-    .patch(`/orders/${id}/${status}`, {})
+    .post(`/orders/${props.orderId}/change_status`, {
+      data: {
+        status: props.status,
+        comments: props.comments,
+      },
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })

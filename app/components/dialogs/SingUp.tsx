@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
@@ -22,6 +22,8 @@ import { departmentService } from "@/app/api/departmentService";
 import { roleservice } from "@/app/api/roleService";
 import { useDialogs } from "@toolpad/core";
 import { userService } from "@/app/api/userService";
+import { useSession } from "@toolpad/core";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 export interface SignUpProps {
   open: boolean;
@@ -48,15 +50,22 @@ export default function SignUp({ open, onClose }: SignUpProps) {
   const [department, setDepartment] = useState("");
   const [role, setRole] = useState("");
   const dialog = useDialogs();
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
 
   useEffect(() => {
-    departmentService.getAll().then((response) => {
+    departmentService.getAll(token as string).then((response) => {
       setDepartments(response);
     });
 
-    roleservice.getAll().then((response) => {
-      setRoles(response);
-    });
+    roleservice
+      .getAll(token as string)
+      .then((response) => {
+        setRoles(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }, []);
 
   const validateInputs = () => {
@@ -166,9 +175,13 @@ export default function SignUp({ open, onClose }: SignUpProps) {
 
     setDepartment(event.target.value as string);
     areaService
-      .getByDepartment(parseInt(event.target.value))
+      .getByDepartment(token as string, parseInt(event.target.value))
       .then((response) => {
         setAreas(response);
+      })
+      .catch((error) => {
+        dialog.alert("Ha fallado al traer las areas del departamento " + error);
+        return;
       });
   };
 
