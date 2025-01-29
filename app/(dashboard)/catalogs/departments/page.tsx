@@ -33,11 +33,15 @@ import {
   UpdateDepto,
 } from "@/app/interfaces/Departments.interface";
 import { departmentService } from "@/app/api/departmentService";
+import { useSession } from "@toolpad/core";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 const CRUDDepartments = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
 
   const columns = useMemo<MRT_ColumnDef<Department>[]>(
     () => [
@@ -74,7 +78,7 @@ const CRUDDepartments = () => {
     isError: isLoadingDepartmentsError,
     isFetching: isFetchingDepartments,
     isLoading: isLoadingDepartments,
-  } = useGetDepartments();
+  } = useGetDepartments(token as string);
   //call UPDATE hook
   const { mutateAsync: updateDepartment, isPending: isUpdatingDepartment } =
     useUpdateDepartment();
@@ -243,13 +247,13 @@ function useCreateDepartment() {
 }
 
 //READ hook (get Departments from api)
-function useGetDepartments() {
+function useGetDepartments(token: string) {
   return useQuery<Department[]>({
     queryKey: ["Departments"],
     queryFn: async () => {
       //send api request here
       return await departmentService
-        .getAll()
+        .getAll(token)
         .then((response) => {
           return response;
         })
