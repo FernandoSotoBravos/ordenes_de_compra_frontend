@@ -135,6 +135,19 @@ const downloadDocument = async (id: number, document: string) => {
     });
 };
 
+const downloadPDFOrder = async (id: number) => {
+  return fetchWrapper
+    .get(`/orders/${id}/pdf`, {
+      responseType: "blob",
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
 export const orderService = {
   create,
   getAll,
@@ -145,4 +158,5 @@ export const orderService = {
   getOrderHistory,
   getDocuments,
   downloadDocument,
+  downloadPDFOrder,
 };

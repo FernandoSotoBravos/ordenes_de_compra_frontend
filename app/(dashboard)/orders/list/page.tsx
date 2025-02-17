@@ -32,6 +32,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import TimelineIcon from "@mui/icons-material/Timeline";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import Typography from "@mui/material/Typography";
 import {
   Order,
@@ -48,6 +49,7 @@ import DialogDocumentsOrder from "@/app/components/dialogs/DocumentsOrder";
 import { useSession } from "@toolpad/core";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { StatusRole } from "@/app/mocks/statusRole";
+import Viewer from "@/app/components/viewer";
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -283,6 +285,15 @@ const RUDOrders = () => {
     deleteOrder(row.original.id);
   };
 
+  const openPDFViewer = async (row: MRT_Row<Order>) => {
+    const result = await dialogs.open(Viewer, {
+      id: row.original.id,
+    });
+    if (result === null) {
+      return;
+    }
+  };
+
   const openHistoryOrder = async (row: MRT_Row<Order>) => {
     const result = await dialogs.open(DialogHistoryOrder, {
       id: row.original.id,
@@ -308,6 +319,8 @@ const RUDOrders = () => {
     editDisplayMode: "modal",
     positionActionsColumn: "last",
     enableEditing: true,
+    enableStickyHeader: true,
+    enableExpandAll: false,
     getRowId: (row) => (row.id ? row.id.toString() : ""),
     muiToolbarAlertBannerProps: isLoadingOrdersError
       ? {
@@ -329,42 +342,6 @@ const RUDOrders = () => {
             : "rgba(0,0,0,0.1)",
       }),
     }),
-    //custom expand button rotation
-    muiExpandButtonProps: ({ row, table }) => ({
-      onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }), //only 1 detail panel open at a time
-      sx: {
-        transform: row.getIsExpanded() ? "rotate(180deg)" : "rotate(-90deg)",
-        transition: "transform 0.2s",
-      },
-    }),
-    renderDetailPanel: ({ row }) =>
-      row.original.details && row.original.details.length ? (
-        <Box
-          key={row.id}
-          sx={{
-            display: "grid",
-            margin: "auto",
-            gridTemplateColumns: "1fr",
-            width: "100%",
-          }}
-        >
-          {row.original.details.map((detail: OrderDetail, index) => (
-            <Stack key={index} gap="0.5rem" minHeight="00px" mt={2}>
-              <Typography>Producto: {detail.product}</Typography>
-              <Typography>Descripcion: {detail.description}</Typography>
-              <Typography>Cantidad: {detail.quantity}</Typography>
-              <Typography>Precio Unitario: {detail.unit_price}</Typography>
-              <Typography>Total: {detail.total}</Typography>
-              <Divider sx={{ borderBottomWidth: 5 }} />
-            </Stack>
-          ))}
-        </Box>
-      ) : (
-        <Typography variant="body2" color="textSecondary">
-          No hay detalles disponibles para esta orden.
-        </Typography>
-      ),
-
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveOrder,
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
@@ -382,6 +359,11 @@ const RUDOrders = () => {
     ),
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
+        <Tooltip title="Mostrar">
+          <IconButton sx={{ color: "red" }} size="small" onClick={() => openPDFViewer(row)}>
+            <RemoveRedEyeIcon />
+          </IconButton>
+        </Tooltip>
         {!isPower && (
           <Tooltip title="Editar">
             <IconButton
