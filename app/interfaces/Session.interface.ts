@@ -1,6 +1,5 @@
 import { Session } from "@toolpad/core/AppProvider";
 
-
 export interface CustomSession extends Session {
   user?: {
     id?: string | null;
@@ -8,10 +7,12 @@ export interface CustomSession extends Session {
     image?: string | null;
     email?: string | null;
     role: number;
+    area: string | number;
+    department: string | number;
     isPower: boolean | null;
     is_admin?: boolean | null | undefined;
     is_leader_department?: boolean | null | undefined;
     is_leader_area?: boolean | null | undefined;
-    access_token: string
+    access_token: string;
   };
 }

@@ -2,7 +2,7 @@ import * as React from "react";
 import { AppProvider } from "@toolpad/core/nextjs";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import PostAddIcon from '@mui/icons-material/PostAdd';
+import PostAddIcon from "@mui/icons-material/PostAdd";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import type { Navigation } from "@toolpad/core/AppProvider";
 import { SessionProvider, signIn, signOut } from "next-auth/react";
@@ -30,32 +30,32 @@ const NAVIGATION: Navigation = [
       {
         segment: "list",
         title: "Listado de ordenes",
-      }
+      },
     ],
   },
   {
-    "segment": "catalogs",
-    "title": "Catalogos",
-    "icon": <PostAddIcon />,
-    "children": [
+    segment: "catalogs",
+    title: "Catalogos",
+    icon: <PostAddIcon />,
+    children: [
       {
-        "segment": "departments",
-        "title": "Departamentos",
+        segment: "departments",
+        title: "Departamentos",
       },
       {
-        "segment": "areas",
-        "title": "Areas",
+        segment: "areas",
+        title: "Areas",
       },
       {
-        "segment": "suppliers",
-        "title": "Proveedores",
+        segment: "suppliers",
+        title: "Proveedores",
       },
       {
-        "segment": "concepts",
-        "title": "Conceptos",
+        segment: "concepts",
+        title: "Conceptos",
       },
     ],
-  }
+  },
 ];
 
 const AUTHENTICATION = {

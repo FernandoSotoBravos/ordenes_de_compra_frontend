@@ -248,7 +248,6 @@ function useCreateArea() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (area: Area) => {
-      console.log("area", area);
       const createArea: createArea = {
         name: area.name,
         department_id: parseInt(area.department),

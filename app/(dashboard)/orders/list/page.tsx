@@ -364,7 +364,7 @@ const RUDOrders = () => {
             <RemoveRedEyeIcon />
           </IconButton>
         </Tooltip>
-        {!isPower && (
+        {row.original.status_id == 4 || !isPower && (
           <Tooltip title="Editar">
             <IconButton
               sx={{ color: "#2196F3" }}

@@ -64,7 +64,7 @@ export default function SignUp({ open, onClose }: SignUpProps) {
         setRoles(response);
       })
       .catch((error) => {
-        console.log(error);
+        dialog.alert(error);
       });
   }, []);
 

@@ -77,6 +77,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.is_admin = user.is_admin;
         token.is_leader_department = user.is_leader_department;
         token.is_leader_area = user.is_leader_area;
+        token.area = user.area;
+        token.department = user.department;
         token.access_token = user.access_token;
       }
       return token;
@@ -98,6 +100,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         is_leader_area: token.is_leader_area as boolean | null | undefined,
         emailVerified: new Date(),
         isPower: isPower as boolean,
+        area: token.area as string,
+        department: token.department as string,
         access_token: token.access_token as string,
       };
       session.access_token = token.access_token as string;

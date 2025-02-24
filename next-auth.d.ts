@@ -10,8 +10,10 @@ declare module "next-auth" {
     is_admin?: boolean | null | undefined;
     is_leader_department?: boolean | null | undefined;
     is_leader_area?: boolean | null | undefined;
-    isPower?: boolean | null
-    access_token: string
+    isPower?: boolean | null;
+    area: number | string;
+    department: number | string;
+    access_token: string;
   }
 
   interface Session {

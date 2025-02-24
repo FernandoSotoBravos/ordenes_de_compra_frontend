@@ -79,6 +79,7 @@ export interface Order {
   other: string;
   other_2: string;
   status: string;
+  status_id: number;
   details: OrderDetail[];
   documents?: any;
 }
