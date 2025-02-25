@@ -230,16 +230,12 @@ function useCreateDepartment() {
     },
     //client side optimistic update
     onMutate: (newDepartmentInfo: Department) => {
-      queryClient.setQueryData(
-        ["Departments"],
-        (prevDepartments: any) =>
-          [
-            ...prevDepartments,
-            {
-              ...newDepartmentInfo,
-            },
-          ] as Department[]
-      );
+      queryClient.setQueryData(["Departments"], (prevDepartments: any) => {
+        const departmArray = Array.isArray(prevDepartments)
+          ? prevDepartments
+          : [];
+        return [...departmArray, { ...newDepartmentInfo }] as Department[];
+      });
     },
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: ["Departments"] }), //refetch Departments after mutation, disabled for demo

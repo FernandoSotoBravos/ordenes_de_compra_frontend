@@ -279,16 +279,10 @@ function useCreateConcept() {
     },
     //client side optimistic update
     onMutate: (newConceptInfo: Concept) => {
-      queryClient.setQueryData(
-        ["Concepts"],
-        (prevConcepts: any) =>
-          [
-            ...prevConcepts,
-            {
-              ...newConceptInfo,
-            },
-          ] as Concept[]
-      );
+      queryClient.setQueryData(["Concepts"], (prevConcepts: any) => {
+        const conceptsArray = Array.isArray(prevConcepts) ? prevConcepts : [];
+        return [...conceptsArray, { ...newConceptInfo }] as Concept[];
+      });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["Concepts"] }), //refetch Concepts after mutation, disabled for demo
   });

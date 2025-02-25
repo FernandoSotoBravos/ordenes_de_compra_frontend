@@ -264,16 +264,10 @@ function useCreateArea() {
     },
     //client side optimistic update
     onMutate: (newAreaInfo: Area) => {
-      queryClient.setQueryData(
-        ["Areas"],
-        (prevAreas: any) =>
-          [
-            ...prevAreas,
-            {
-              ...newAreaInfo,
-            },
-          ] as Area[]
-      );
+      queryClient.setQueryData(["Areas"], (prevAreas: any) => {
+        const areasArray = Array.isArray(prevAreas) ? prevAreas : [];
+        return [...areasArray, { ...newAreaInfo }] as Area[];
+      });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["Areas"] }), //refetch Areas after mutation, disabled for demo
   });

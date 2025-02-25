@@ -448,16 +448,12 @@ function useCreateSupplier() {
     },
     //client side optimistic update
     onMutate: (newSupplierInfo: Supplier) => {
-      queryClient.setQueryData(
-        ["Suppliers"],
-        (prevSuppliers: any) =>
-          [
-            ...prevSuppliers,
-            {
-              ...newSupplierInfo,
-            },
-          ] as Supplier[]
-      );
+      queryClient.setQueryData(["Suppliers"], (prevSuppliers: any) => {
+        const suppliersArray = Array.isArray(prevSuppliers)
+          ? prevSuppliers
+          : [];
+        return [...suppliersArray, { ...newSupplierInfo }] as Supplier[];
+      });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["Suppliers"] }), //refetch Suppliers after mutation, disabled for demo
   });
