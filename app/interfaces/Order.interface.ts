@@ -22,6 +22,7 @@ export interface OrderCreate {
   concept: string;
   segment: string;
   beneficiary: string;
+  currency: string;
   descriptionPayment: string;
   comments?: string;
   observations?: string;
@@ -46,6 +47,7 @@ export interface ProductsOrderProps {
 export interface OrderCreateProps {
   concept_id: number;
   supplier_id: number;
+  currency_id: number;
   comments?: string;
   description?: string;
   other?: string;

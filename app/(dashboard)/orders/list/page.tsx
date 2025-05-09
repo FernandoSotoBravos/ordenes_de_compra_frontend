@@ -17,6 +17,8 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Menu,
+  MenuItem,
   Stack,
   Tooltip,
 } from "@mui/material";
@@ -34,6 +36,7 @@ import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import Typography from "@mui/material/Typography";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Order,
   OrderDetail,
@@ -57,6 +60,14 @@ const RUDOrders = () => {
   >({});
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const isPower =
     session?.user?.is_admin ||
@@ -128,9 +139,9 @@ const RUDOrders = () => {
         accessorKey: "created_at",
         header: "Fecha de Creación",
         Cell: ({ cell }) => {
-          return dayjs(cell.getValue() as string | number | Date).format(
-            "DD/MM/YYYY HH:mm"
-          );
+          return dayjs(cell.getValue() as string | number | Date)
+            .subtract(7, "hours")
+            .format("DD/MM/YYYY HH:mm");
         },
         muiEditTextFieldProps: {
           required: true,
@@ -141,36 +152,6 @@ const RUDOrders = () => {
             setValidationErrors({
               ...validationErrors,
               created_at: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "subtotal",
-        header: "Subtotal",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.subtotal,
-          helperText: validationErrors?.subtotal,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              subtotal: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "iva",
-        header: "Iva",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.iva,
-          helperText: validationErrors?.iva,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              iva: undefined,
             }),
         },
       },
@@ -286,6 +267,8 @@ const RUDOrders = () => {
   };
 
   const openPDFViewer = async (row: MRT_Row<Order>) => {
+    handleClose();
+
     const result = await dialogs.open(Viewer, {
       id: row.original.id,
     });
@@ -359,64 +342,87 @@ const RUDOrders = () => {
     ),
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
-        <Tooltip title="Mostrar">
-          <IconButton sx={{ color: "red" }} size="small" onClick={() => openPDFViewer(row)}>
-            <RemoveRedEyeIcon />
-          </IconButton>
-        </Tooltip>
-        {row.original.status_id == 4 || !isPower && (
-          <Tooltip title="Editar">
-            <IconButton
-              sx={{ color: "#2196F3" }}
-              size="small"
-              onClick={() => table.setEditingRow(row)}
+        <IconButton
+          aria-label="more"
+          id="long-button"
+          aria-controls={open ? "long-menu" : undefined}
+          aria-expanded={open ? "true" : undefined}
+          aria-haspopup="true"
+          onClick={handleClick}
+        >
+          <MoreVertIcon />
+        </IconButton>
+        <Menu
+          id="long-menu"
+          MenuListProps={{
+            "aria-labelledby": "long-button",
+          }}
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          slotProps={{
+            paper: {
+              style: {
+                maxHeight: 48 * 4.5,
+                width: "20ch",
+              },
+            },
+          }}
+        >
+          <Tooltip title="Mostrar">
+            <MenuItem
+              sx={{ display: "flex", gap: "1rem" }}
+              onClick={() => openPDFViewer(row)}
             >
-              <EditIcon />
-            </IconButton>
+              <RemoveRedEyeIcon sx={{ color: "red" }} />
+              Abrir PDF
+            </MenuItem>
           </Tooltip>
-        )}
-        {isPower && (
-          <Box sx={{ display: "flex", gap: "1rem" }}>
-            <Tooltip title="Aprobar">
-              <IconButton
-                sx={{ color: "#4caf50" }}
-                size="small"
-                onClick={() => openAcceptConfirmModal(row)}
+          {row.original.status_id == 4 ||
+            (!isPower && (
+              <MenuItem
+                sx={{ display: "flex", gap: "1rem" }}
+                onClick={() => table.setEditingRow(row)}
               >
-                <ThumbUpIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Rechazar">
-              <IconButton
-                sx={{ color: "#f44336" }}
-                size="small"
-                onClick={() => openRejectConfirmModal(row)}
-              >
-                <ThumbDownIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
-        <Tooltip title="Historial">
-          <IconButton
-            sx={{ color: "primary" }}
-            size="small"
+                <EditIcon sx={{ color: "#2196F3" }} />
+                Editar
+              </MenuItem>
+            ))}
+          {isPower && (
+            <MenuItem
+              sx={{ display: "flex", gap: "1rem" }}
+              onClick={() => openAcceptConfirmModal(row)}
+            >
+              <ThumbUpIcon sx={{ color: "#4caf50" }} />
+              Aprobar
+            </MenuItem>
+          )}
+          {isPower && (
+            <MenuItem
+              sx={{ display: "flex", gap: "1rem" }}
+              onClick={() => openRejectConfirmModal(row)}
+            >
+              <ThumbDownIcon sx={{ color: "#f44336" }} />
+              Rechazar
+            </MenuItem>
+          )}
+          <MenuItem
+            sx={{ display: "flex", gap: "1rem" }}
             onClick={() => openHistoryOrder(row)}
           >
-            <TimelineIcon />
-          </IconButton>
-        </Tooltip>
-        {row.original.documents && (
-          <Tooltip title="Documentos">
-            <IconButton
-              sx={{ color: "primary" }}
-              size="small"
+            <TimelineIcon sx={{ color: "primary" }} />
+            Historial
+          </MenuItem>
+          {row.original.documents && (
+            <MenuItem
+              sx={{ display: "flex", gap: "1rem" }}
               onClick={() => openDocumentsOrder(row)}
             >
-              <PictureAsPdfIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+              <PictureAsPdfIcon sx={{ color: "primary" }} />
+              Documentos
+            </MenuItem>
+          )}
+        </Menu>
       </Box>
     ),
     state: {

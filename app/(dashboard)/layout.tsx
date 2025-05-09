@@ -109,7 +109,9 @@ export default function Layout(props: { children: React.ReactNode }) {
           sidebarFooter: SidebarFooterAccount,
         }}
       >
-        <PageContainer>
+        {/* ignore error
+        @ts-ignore */}
+        <PageContainer maxWidth="fixed">
           {props.children}
           <Copyright sx={{ my: 4 }} />
         </PageContainer>

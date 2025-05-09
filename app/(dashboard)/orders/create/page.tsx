@@ -27,12 +27,15 @@ import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
 import { ProductsOrder } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
 import { CustomSession } from "@/app/interfaces/Session.interface";
+import { currencyService } from "@/app/api/currencyService";
+import { CurrencySelect } from "@/app/interfaces/Currency.interface";
 
 function CreateOrderPage() {
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
   const [departments, setDepartments] = useState<SelectBase[]>([]);
+  const [currencies, setCurrencies] = useState<CurrencySelect[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
   const [providers, setProviders] = useState<SelectBase[]>([]);
   const [concepts, setConcepts] = useState<ConceptSelect[]>([]);
@@ -43,6 +46,7 @@ function CreateOrderPage() {
     concept: "",
     segment: "",
     beneficiary: "",
+    currency: "",
     descriptionPayment: "",
     comments: "",
     observations: "",
@@ -64,22 +68,41 @@ function CreateOrderPage() {
       });
   };
 
+  const handleGetCurrencies = async () => {
+    await currencyService
+      .getAll(token as string)
+      .then((data) => {
+        setCurrencies(data);
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer los tipo de moneda, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
+  };
+
+  const handleGetProviders = async () => {
+    await suppliersService
+    .getAll()
+    .then((data) => {
+      setProviders(data);
+    })
+    .catch((error) => {
+      dialogs.alert(
+        "Ha ocurrido un error al traer los proveedores, " +
+          error.response.data.detail
+      );
+      handleCleanForm();
+    });
+  };
+
   useMemo(() => {
     if (token) {
       handleGetDepartments();
-
-      suppliersService
-        .getAll()
-        .then((data) => {
-          setProviders(data);
-        })
-        .catch((error) => {
-          dialogs.alert(
-            "Ha ocurrido un error al traer los proveedores, " +
-              error.response.data.detail
-          );
-          handleCleanForm();
-        });
+      handleGetCurrencies();
+      handleGetProviders();
     }
   }, [token]);
 
@@ -99,6 +122,13 @@ function CreateOrderPage() {
     setFormValues({
       ...formValues,
       concept: event.target.value,
+    });
+  };
+
+  const handleSelectedCurrency = (event: SelectChangeEvent<string>) => {
+    setFormValues({
+      ...formValues,
+      currency: event.target.value,
     });
   };
 
@@ -145,6 +175,7 @@ function CreateOrderPage() {
       concept: "",
       segment: "",
       beneficiary: "",
+      currency: "",
       descriptionPayment: "",
       comments: "",
       observations: "",
@@ -218,8 +249,8 @@ function CreateOrderPage() {
           </FormControl>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
+        <Grid container spacing={2} size={{ xs: 12, sm: 6 }}>
+          <FormControl sx={{ width: "60%" }}>
             <InputLabel id="area-concepto-label">Áreas</InputLabel>
             <Select
               labelId="area-concepto-label"
@@ -231,6 +262,22 @@ function CreateOrderPage() {
               {areas.map((area) => (
                 <MenuItem key={area.id} value={area.id}>
                   {area.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ width: "35%" }}>
+            <InputLabel id="area-concepto-moneda">Moneda</InputLabel>
+            <Select
+              labelId="area-concepto-moneda"
+              id="currency"
+              name="currency"
+              value={formValues.currency}
+              onChange={handleSelectedCurrency}
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency.id} value={currency.id}>
+                  {currency.description}
                 </MenuItem>
               ))}
             </Select>

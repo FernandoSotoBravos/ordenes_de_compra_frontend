@@ -7,7 +7,17 @@ import {
   type MRT_TableOptions,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ProductsOrder, CRUDTableProps } from "../interfaces/Order.interface";
@@ -136,10 +146,12 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
     createDisplayMode: "modal", // ('modal', and 'custom' are also available)
     editDisplayMode: "modal", // ('modal', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
+    enableStickyHeader: true,
+    enableStickyFooter: true,
     getRowId: (row) => row.id,
     muiTableContainerProps: {
       sx: {
-        minHeight: "500px",
+        minHeight: "400px",
       },
     },
     onCreatingRowCancel: () => setValidationErrors({}),
@@ -165,15 +177,39 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
         variant="contained"
         onClick={() => {
           table.setCreatingRow(true);
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
         }}
       >
         Agregar Producto
       </Button>
+    ),
+    renderBottomToolbar: ({ table }) => (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          px: 2,
+          py: 1,
+          width: "100%",
+        }}
+      >
+        {/* Puedes poner algo a la izquierda si lo deseas, o dejarlo vacío */}
+        <Box />
+
+        {/* Total alineado a la derecha pero dejando espacio antes de la paginación */}
+        <FormControl sx={{ m: 1, width: 200 }}>
+          <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-amount"
+            startAdornment={<InputAdornment position="start">$</InputAdornment>}
+            label="Total"
+            value={table
+              .getFilteredRowModel()
+              .rows.reduce((acc, row) => acc + row.original.total, 0).toFixed(4)}
+            disabled
+          />
+        </FormControl>
+      </Box>
     ),
     state: {
       // isLoading: isLoadingUsers,

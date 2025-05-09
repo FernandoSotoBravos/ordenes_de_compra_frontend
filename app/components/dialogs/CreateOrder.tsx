@@ -52,6 +52,7 @@ export default function DialogCreateOrder({
         comments: comentaries,
         description: payload.descriptionPayment,
         created_by: session?.user?.id as string,
+        currency_id: parseInt(payload.currency),
         details: payload.products.map((product) => ({
           product_id: 1,
           description: product.description,
@@ -111,14 +112,6 @@ export default function DialogCreateOrder({
             onChange={(e) => setComentaries(e.target.value)}
             maxRows={10}
             placeholder="Comentarios"
-            minRows={3}
-          />
-          <TextArea
-            name="observations"
-            value={observations}
-            onChange={(e) => setObservations(e.target.value)}
-            maxRows={10}
-            placeholder="Observaciones"
             minRows={3}
           />
           <FileUpload setFiles={setFiles} files={files} />
