@@ -44,6 +44,8 @@ export default function SignUp({ open, onClose }: SignUpProps) {
   const [roleError, setRoleError] = useState(false);
   const [roleErrorMessage, setRoleErrorMessage] = useState("");
   const [departments, setDepartments] = useState<SelectBase[]>([]);
+  const [isEnableDepartment, setIsEnableDepartment] = useState(true);
+  const [isEnableArea, setIsEnableArea] = useState(true);
   const [roles, setRoles] = useState<SelectRole[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
   const [area, setArea] = useState("");
@@ -54,9 +56,23 @@ export default function SignUp({ open, onClose }: SignUpProps) {
   const token = session?.user?.access_token;
 
   useEffect(() => {
-    departmentService.getAll(token as string).then((response) => {
-      setDepartments(response);
-    });
+    departmentService
+      .getAll(token as string)
+      .then((response) => {
+        setDepartments(response);
+
+        if (!session?.user?.super_user) {
+          setIsEnableDepartment(false);
+          setDepartment(session?.user?.department as string);
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+
+    if (!session?.user?.super_user) {
+      getAreasByDepartment(parseInt(session?.user?.department as string));
+    }
 
     roleservice
       .getAll(token as string)
@@ -135,7 +151,7 @@ export default function SignUp({ open, onClose }: SignUpProps) {
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // ¡Siempre!
+    event.preventDefault();
 
     const isValid = validateInputs();
     if (!isValid) return;
@@ -176,21 +192,30 @@ export default function SignUp({ open, onClose }: SignUpProps) {
       });
   };
 
+  const getAreasByDepartment = (deparment: number) => {
+    areaService
+      .getByDepartment(token as string, deparment)
+      .then((response) => {
+        setAreas(response);
+
+        if (session?.user?.is_leader_area) {
+          setIsEnableArea(false);
+          setArea(session?.user?.area as string);
+        }
+      })
+      .catch((error) => {
+        dialog.alert("Ha fallado al traer las areas del departamento " + error);
+        return;
+      });
+  };
+
   const handleChangeDepartment = (event: SelectChangeEvent<string>) => {
     if (!event.target.value) {
       return;
     }
 
     setDepartment(event.target.value as string);
-    areaService
-      .getByDepartment(token as string, parseInt(event.target.value))
-      .then((response) => {
-        setAreas(response);
-      })
-      .catch((error) => {
-        dialog.alert("Ha fallado al traer las areas del departamento " + error);
-        return;
-      });
+    getAreasByDepartment(parseInt(event.target.value));
   };
 
   return (
@@ -258,7 +283,8 @@ export default function SignUp({ open, onClose }: SignUpProps) {
                 error={departmentError}
                 required
                 onChange={handleChangeDepartment}
-                defaultValue={""}
+                disabled={!isEnableDepartment}
+                value={department}
               >
                 {departments.map((department) => (
                   <MenuItem key={department.id} value={department.id}>
@@ -267,26 +293,25 @@ export default function SignUp({ open, onClose }: SignUpProps) {
                 ))}
               </Select>
             </FormControl>
-            {areas.length > 0 && (
-              <FormControl fullWidth>
-                <InputLabel id="area-concepto-label">Áreas</InputLabel>
-                <Select
-                  labelId="area-concepto-label"
-                  id="area"
-                  name="area"
-                  error={areaError}
-                  required
-                  onChange={(e) => setArea(e.target.value as string)}
-                  defaultValue={""}
-                >
-                  {areas.map((area) => (
-                    <MenuItem key={area.id} value={area.id}>
-                      {area.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
+            <FormControl fullWidth>
+              <InputLabel id="area-concepto-label">Áreas</InputLabel>
+              <Select
+                labelId="area-concepto-label"
+                id="area"
+                name="area"
+                error={areaError}
+                required
+                onChange={(e) => setArea(e.target.value as string)}
+                disabled={!isEnableArea}
+                value={area}
+              >
+                {areas.map((area) => (
+                  <MenuItem key={area.id} value={area.id}>
+                    {area.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <FormControl fullWidth>
               <InputLabel id="rol-label">Rol</InputLabel>
               <Select
