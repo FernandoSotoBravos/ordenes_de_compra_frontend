@@ -37,6 +37,8 @@ function CreateOrderPage() {
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const [isEnableDepartment, setIsEnableDepartment] = useState(false);
   const [isEnableArea, setIsEnableArea] = useState(false);
+  const [departmentSelected, setDepartmentSelected] = useState("");
+  const [areaSelected, setAreaSelected] = useState("");
   const [currencies, setCurrencies] = useState<CurrencySelect[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
   const [providers, setProviders] = useState<SelectBase[]>([]);
@@ -44,9 +46,9 @@ function CreateOrderPage() {
   const [segment_business, setSegmentBusiness] = useState<string>("");
   const [tableData, setTableData] = useState<ProductsOrder[]>([]);
   const [formValues, setFormValues] = useState<OrderCreate>({
-    department: "",
+    department: session?.user?.department as string || "",
     concept: "",
-    area: "",
+    area: session?.user?.area as string || "",
     segment: "",
     beneficiary: "",
     currency: "",
@@ -72,27 +74,33 @@ function CreateOrderPage() {
   };
 
   const handleSelectedArea = (event: SelectChangeEvent<string>) => {
-    getConcepts(parseInt(event.target.value))
+    getConcepts(parseInt(event.target.value));
     setFormValues({
       ...formValues,
       area: event.target.value,
     });
   };
 
-  const getAreas = (departmentId: number) => {
-    areaService
+  const getAreas = async (departmentId: number) => {
+    await areaService
       .getByDepartment(token as string, departmentId)
       .then((data) => {
         setAreas(data);
-
-        if (!session?.user?.super_user || session.user?.is_leader_department) {
+        if ((session?.user && !session?.user?.super_user) || session?.user?.is_leader_department) {
+          
+          
           setFormValues({
             ...formValues,
             area: session?.user?.area as string,
           });
+
+          setAreaSelected(
+            data.find((dt: any) => dt.id == session?.user?.area).name
+          );
         }
       })
       .catch((error) => {
+        console.log(error);
         dialogs.alert(
           "Ha ocurrido un error al traer las areas del departamento, " +
             error.response.data.detail
@@ -120,6 +128,10 @@ function CreateOrderPage() {
             ...formValues,
             department: session?.user?.department as string,
           });
+
+          setDepartmentSelected(
+            data.find((dt: any) => dt.id == session?.user?.department).name
+          );
         }
       })
       .catch((error) => {
@@ -171,14 +183,14 @@ function CreateOrderPage() {
         setIsEnableDepartment(true);
         setIsEnableArea(true);
         return;
-      } 
-      
+      }
+
       if (session?.user?.is_leader_department) {
         setIsEnableArea(true);
         getAreas(parseInt(session?.user?.department as string));
       } else {
         getAreas(parseInt(session?.user?.department as string));
-        getConcepts(parseInt(session?.user?.area as string))
+        getConcepts(parseInt(session?.user?.area as string));
       }
     }
   }, [token]);
@@ -242,6 +254,7 @@ function CreateOrderPage() {
   };
 
   const validateForm = () => {
+    console.log("forms", formValues);
     if (
       formValues.department === "" ||
       formValues.concept === "" ||
@@ -271,44 +284,64 @@ function CreateOrderPage() {
     <Container maxWidth={false} sx={{ mt: 2 }}>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel id="departamento-label">Departamento</InputLabel>
-            <Select
-              labelId="departamento-label"
+          {session?.user?.super_user ? (
+            <FormControl fullWidth>
+              <InputLabel id="departamento-label">Departamento</InputLabel>
+              <Select
+                labelId="departamento-label"
+                id="department"
+                name="department"
+                value={formValues.department}
+                onChange={handleSelectedDepartment}
+                disabled={!isEnableDepartment}
+              >
+                {departments.length > 0 &&
+                  departments.map((department) => (
+                    <MenuItem key={department.id} value={department.id}>
+                      {department.name}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <TextField
+              fullWidth
               id="department"
               name="department"
-              value={formValues.department}
-              onChange={handleSelectedDepartment}
-              disabled={!isEnableDepartment}
-            >
-              {departments.length > 0 &&
-                departments.map((department) => (
-                  <MenuItem key={department.id} value={department.id}>
-                    {department.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
+              value={departmentSelected}
+              disabled
+            />
+          )}
         </Grid>
 
         <Grid container spacing={2} size={{ xs: 12, sm: 6 }}>
-          <FormControl sx={{ width: "60%" }}>
-            <InputLabel id="area-concepto-label">Áreas</InputLabel>
-            <Select
-              labelId="area-concepto-label"
-              id="concept"
-              name="concept"
-              value={formValues.area}
-              onChange={handleSelectedArea}
-              disabled={!isEnableArea}
-            >
-              {areas.map((area) => (
-                <MenuItem key={area.id} value={area.id}>
-                  {area.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {(session?.user?.super_user || session?.user?.is_leader_department) ? (
+            <FormControl sx={{ width: "60%" }}>
+              <InputLabel id="area-concepto-label">Áreas</InputLabel>
+              <Select
+                labelId="area-concepto-label"
+                id="area"
+                name="area"
+                value={formValues.area}
+                onChange={handleSelectedArea}
+                disabled={!isEnableArea}
+              >
+                {areas.map((area) => (
+                  <MenuItem key={area.id} value={area.id}>
+                    {area.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <TextField
+              sx={{ width: "60%" }}
+              id="area"
+              name="area"
+              value={areaSelected}
+              disabled
+            />
+          )}
           <FormControl sx={{ width: "35%" }}>
             <InputLabel id="area-concepto-moneda">Moneda</InputLabel>
             <Select
