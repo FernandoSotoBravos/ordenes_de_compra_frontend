@@ -123,18 +123,23 @@ export default function SignUp({ open, onClose }: SignUpProps) {
     }
 
     if (!role) {
-      setDepartmentError(true);
-      setDepartmentErrorMessage("Rol es requerido.");
+      setRoleError(true);
+      setRoleErrorMessage("Rol es requerido.");
       isValid = false;
     } else {
-      setDepartmentError(false);
-      setDepartmentErrorMessage("");
+      setRoleError(false);
+      setRoleErrorMessage("");
     }
 
     return isValid;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // ¡Siempre!
+
+    const isValid = validateInputs();
+    if (!isValid) return;
+
     if (
       nameError ||
       emailError ||
@@ -147,7 +152,8 @@ export default function SignUp({ open, onClose }: SignUpProps) {
       return;
     }
     const data = new FormData(event.currentTarget);
-    userService
+    const user = session?.user?.id || 1;
+    await userService
       .create({
         fullname: data.get("name") as string,
         username: data.get("email") as string,
@@ -156,15 +162,17 @@ export default function SignUp({ open, onClose }: SignUpProps) {
         department_id: parseInt(data.get("department") as string),
         area_id: parseInt(data.get("area") as string),
         role_id: parseInt(data.get("role") as string),
-        created_by: 1,
+        created_by: user as number,
       })
-      .then((response) => {
-        dialog.alert("Usuario creado exitosamente", {
+      .then(async (response) => {
+        await dialog.alert("Usuario creado exitosamente", {
           title: "Usuario creado",
         });
+
+        onClose(false);
       })
-      .catch((error) => {
-        dialog.alert(`Error al crear el usuario: ${error}`);
+      .catch(async (error) => {
+        await dialog.alert(`Error al crear el usuario: ${error}`);
       });
   };
 
@@ -185,15 +193,8 @@ export default function SignUp({ open, onClose }: SignUpProps) {
       });
   };
 
-  const handleClose = () => {
-    setAreas([]);
-    setDepartments([]);
-    setRoles([]);
-    onClose(false);
-  };
-
   return (
-    <Dialog fullWidth open={open} onClose={handleClose}>
+    <Dialog fullWidth open={open} onClose={() => onClose(false)}>
       <Card variant="outlined">
         <CardHeader title="Registrar nuevo usuario" />
         <Divider />
@@ -305,12 +306,7 @@ export default function SignUp({ open, onClose }: SignUpProps) {
               </Select>
             </FormControl>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              onClick={validateInputs}
-            >
+            <Button type="submit" fullWidth variant="contained">
               Crear usuario
             </Button>
           </Box>

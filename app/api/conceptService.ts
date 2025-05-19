@@ -69,9 +69,13 @@ const getById = async (id: string) => {
     });
 };
 
-const getByArea = async (area_id: number) => {
+const getByArea = async (token: string, area_id: number) => {
   return fetchWrapper
-    .get(`/concepts/by/area/${area_id}`, {})
+    .get(`/concepts/by/area/${area_id}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })

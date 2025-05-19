@@ -47,8 +47,10 @@ export default function DialogCreateOrder({
 
       // Crear el payload con archivos en formato Base64
       const data: OrderCreateProps = {
-        concept_id: parseInt(payload.segment),
+        concept_id: parseInt(payload.concept),
         supplier_id: parseInt(payload.beneficiary),
+        department_id: parseInt(payload.department),
+        area_id: parseInt(payload.area),
         comments: comentaries,
         description: payload.descriptionPayment,
         created_by: session?.user?.id as string,

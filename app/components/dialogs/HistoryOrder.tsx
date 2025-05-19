@@ -19,6 +19,9 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Skeleton } from "@mui/material";
+import { CustomSession } from "@/app/interfaces/Session.interface";
+import { useSession } from "@toolpad/core";
+import dayjs from "dayjs";
 
 export default function DialogHistoryOrder({
   payload,
@@ -28,12 +31,14 @@ export default function DialogHistoryOrder({
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<OrderHistory[]>([]);
   const dialogs = useDialogs();
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
 
   useEffect(() => {
     if (open) {
       setLoading(true);
       orderService
-        .getOrderHistory(payload.id)
+        .getOrderHistory(token as string, payload.id)
         .then((response) => {
           setHistory(response);
         })
@@ -44,7 +49,7 @@ export default function DialogHistoryOrder({
             });
             setLoading(false);
             onClose(null);
-            
+
             return;
           }
 
@@ -79,12 +84,14 @@ export default function DialogHistoryOrder({
                 {history.map((row, index) => (
                   <TableRow
                     key={index}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 }}}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell align="left">{row.action}</TableCell>
                     <TableCell align="left">{row.comments}</TableCell>
                     <TableCell align="left">{row.changed_by}</TableCell>
-                    <TableCell align="left">{row.created_at}</TableCell>
+                    <TableCell align="left">
+                      {dayjs(row.created_at).format("DD/MM/YYYY HH:mm")}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

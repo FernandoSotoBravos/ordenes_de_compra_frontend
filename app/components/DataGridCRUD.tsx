@@ -151,7 +151,8 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
     getRowId: (row) => row.id,
     muiTableContainerProps: {
       sx: {
-        minHeight: "400px",
+        minHeight: "300px",
+        maxHeight: "calc(100vh - 200px)",
       },
     },
     onCreatingRowCancel: () => setValidationErrors({}),

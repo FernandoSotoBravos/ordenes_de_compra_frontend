@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers";
 import { fetchWrapper } from "./app/api/axiosInstance";
+import { jwtDecode } from "jwt-decode";
 
 const providers: Provider[] = [
   Credentials({
@@ -19,17 +20,19 @@ const providers: Provider[] = [
         })
         .then((res) => {
           if (res.status === 200) {
+            const decoded: any = jwtDecode(res.data.access_token);
             return {
-              id: res.data.data.id,
-              name: res.data.data.name,
-              email: res.data.data.email,
-              area: res.data.data.area,
-              role: res.data.data.role,
-              department: res.data.data.department,
+              id: decoded.id,
+              name: decoded.name,
+              email: decoded.email,
+              area: decoded.area,
+              role: decoded.role,
+              department: decoded.department,
               access_token: res.data.access_token,
-              is_admin: res.data.data.is_admin ?? false,
-              is_leader_department: res.data.data.is_leader_department ?? false,
-              is_leader_area: res.data.data.is_leader_area ?? false,
+              is_admin: decoded.is_admin ?? false,
+              is_leader_department: decoded.is_leader_department ?? false,
+              is_leader_area: decoded.is_leader_area ?? false,
+              super_user: decoded.super_user
             };
           }
           return null;
@@ -80,6 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.area = user.area;
         token.department = user.department;
         token.access_token = user.access_token;
+        token.super_user = user.super_user;
       }
       return token;
     },
@@ -103,6 +107,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         area: token.area as string,
         department: token.department as string,
         access_token: token.access_token as string,
+        super_user: token.super_user as boolean
       };
       session.access_token = token.access_token as string;
       return session;

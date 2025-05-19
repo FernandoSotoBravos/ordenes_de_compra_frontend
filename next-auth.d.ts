@@ -14,6 +14,7 @@ declare module "next-auth" {
     area: number | string;
     department: number | string;
     access_token: string;
+    super_user: boolean
   }
 
   interface Session {

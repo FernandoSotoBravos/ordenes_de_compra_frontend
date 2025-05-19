@@ -2,7 +2,7 @@ import { CreateUser, UpdatePassword } from "../interfaces/Users.interface";
 import { fetchWrapper } from "./axiosInstance";
 
 const create = async (newUser: CreateUser) => {
-  return fetchWrapper
+  return await fetchWrapper
     .post("/users/", {
       data: newUser,
     })

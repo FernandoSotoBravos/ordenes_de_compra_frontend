@@ -1,4 +1,10 @@
-import { ChangeStatus, OrderCreateProps } from "../interfaces/Order.interface";
+import {
+  ChangeStatus,
+  Documents,
+  OrderCreateProps,
+  OrderUpdateHeaders,
+} from "../interfaces/Order.interface";
+import { AddProduct, EditProduct } from "../interfaces/Product.interface";
 import { fetchWrapper } from "./axiosInstance";
 
 const create = async (order: OrderCreateProps, token: string) => {
@@ -17,16 +23,109 @@ const create = async (order: OrderCreateProps, token: string) => {
     });
 };
 
-const update = async (id: number, concept: any) => {
+const updateHeaders = async (
+  token: string,
+  id: number,
+  data: OrderUpdateHeaders
+) => {
   return fetchWrapper
-    .put(`/orders/${id}`, {
-      data: concept,
+    .put(`/orders/headers/${id}`, {
+      data: data,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
     })
     .catch((error) => {
       return error;
+    });
+};
+
+const addItemToOrder = async (token: string, id: number, data: AddProduct) => {
+  return fetchWrapper
+    .put(`/orders/${id}/add_product`, {
+      data: data,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const updateItemOrder = async (
+  token: string,
+  id: number,
+  data: EditProduct
+) => {
+  return fetchWrapper
+    .put(`/orders/${id}/update_product`, {
+      data: data,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const addDocument = async (token: string, id: number, data: Documents[]) => {
+  return fetchWrapper
+    .put(`/orders/${id}/document`, {
+      data: { documents: data },
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const deleteDocument = async (token: string, filename: string, id: number) => {
+  return fetchWrapper
+    .delete(`/orders/${id}/document?filename=${filename}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const deleteItemInOrder = async (
+  token: string,
+  id: number,
+  order_id: number
+) => {
+  return fetchWrapper
+    .delete(`/orders/${order_id}/remove_product/${id}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
     });
 };
 
@@ -41,14 +140,18 @@ const remove = async (id: number, commentaries: string) => {
     });
 };
 
-const getById = async (id: string) => {
+const getById = async (token: string, id: string) => {
   return fetchWrapper
-    .get(`/orders/${id}`, {})
+    .get(`/orders/${id}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })
     .catch((error) => {
-      console.error(error);
+      throw error;
     });
 };
 
@@ -100,9 +203,13 @@ const changeStatus = async (token: string, props: ChangeStatus) => {
     });
 };
 
-const getOrderHistory = async (id: number) => {
+const getOrderHistory = async (token: string, id: number) => {
   return fetchWrapper
-    .get(`/orders/${id}/history`, {})
+    .get(`/orders/${id}/history`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })
@@ -111,9 +218,13 @@ const getOrderHistory = async (id: number) => {
     });
 };
 
-const getDocuments = async (id: number) => {
+const getDocuments = async (token: string, id: number) => {
   return fetchWrapper
-    .get(`/orders/${id}/documents`, {})
+    .get(`/orders/${id}/documents`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })
@@ -122,10 +233,17 @@ const getDocuments = async (id: number) => {
     });
 };
 
-const downloadDocument = async (id: number, document: string) => {
+const downloadDocument = async (
+  token: string,
+  id: number,
+  document: string
+) => {
   return fetchWrapper
     .get(`/orders/${id}/document/${document}`, {
       responseType: "blob",
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -135,10 +253,13 @@ const downloadDocument = async (id: number, document: string) => {
     });
 };
 
-const downloadPDFOrder = async (id: number) => {
+const downloadPDFOrder = async (token: string, id: number) => {
   return fetchWrapper
     .get(`/orders/${id}/pdf`, {
       responseType: "blob",
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -152,11 +273,16 @@ export const orderService = {
   create,
   getAll,
   getById,
-  update,
+  updateHeaders,
+  addItemToOrder,
+  updateItemOrder,
+  deleteItemInOrder,
   remove,
   changeStatus,
   getOrderHistory,
   getDocuments,
   downloadDocument,
   downloadPDFOrder,
+  addDocument,
+  deleteDocument
 };

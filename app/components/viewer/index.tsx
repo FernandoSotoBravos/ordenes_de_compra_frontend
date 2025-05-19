@@ -20,6 +20,8 @@ import { DialogProps, useDialogs } from "@toolpad/core/useDialogs";
 import { orderService } from "@/app/api/orderService";
 import { pdfjs } from "react-pdf";
 import { Skeleton } from "@mui/material";
+import { CustomSession } from "@/app/interfaces/Session.interface";
+import { useSession } from "@toolpad/core";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -36,6 +38,8 @@ const Viewer = ({
   const [scale, setScale] = useState(1.0);
   const [loading, setLoading] = useState(false);
   const dialogs = useDialogs();
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
 
   const downloadPDF = () => {
     if (!pdf) {
@@ -73,7 +77,7 @@ const Viewer = ({
   const handleDownloadFile = async () => {
     setLoading(true);
     orderService
-      .downloadPDFOrder(Number(payload.id))
+      .downloadPDFOrder(token as string, Number(payload.id))
       .then((response) => {
         setPdf(response);
         setLoading(false);

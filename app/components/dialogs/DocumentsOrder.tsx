@@ -21,6 +21,8 @@ import {
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import { Download } from "@mui/icons-material";
+import { CustomSession } from "@/app/interfaces/Session.interface";
+import { useSession } from "@toolpad/core";
 
 export default function DialogDocumentsOrder({
   payload,
@@ -30,10 +32,12 @@ export default function DialogDocumentsOrder({
   const [loading, setLoading] = useState(false);
   //   const [documents, setDocuments] = useState<string[]>([]);
   const dialogs = useDialogs();
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
 
   const handleDownloadFile = (filename: string) => {
     orderService
-      .downloadDocument(payload.id, filename)
+      .downloadDocument(token as string, payload.id, filename)
       .then((response) => {
         const url = window.URL.createObjectURL(new Blob([response]));
         const link = document.createElement("a");

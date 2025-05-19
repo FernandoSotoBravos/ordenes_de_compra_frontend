@@ -9,6 +9,7 @@ import {
   type MRT_TableOptions,
   useMaterialReactTable,
   MRT_PaginationState,
+  MRT_ActionMenuItem,
 } from "material-react-table";
 import {
   Box,
@@ -53,6 +54,7 @@ import { useSession } from "@toolpad/core";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { StatusRole } from "@/app/mocks/statusRole";
 import Viewer from "@/app/components/viewer";
+import { useRouter } from "next/navigation";
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -60,14 +62,8 @@ const RUDOrders = () => {
   >({});
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+
+  const router = useRouter();
 
   const isPower =
     session?.user?.is_admin ||
@@ -140,7 +136,6 @@ const RUDOrders = () => {
         header: "Fecha de Creación",
         Cell: ({ cell }) => {
           return dayjs(cell.getValue() as string | number | Date)
-            .subtract(7, "hours")
             .format("DD/MM/YYYY HH:mm");
         },
         muiEditTextFieldProps: {
@@ -222,31 +217,34 @@ const RUDOrders = () => {
     values,
     table,
   }) => {
-    // const newValidationErrors = validateOrder(values);
-    // if (Object.values(newValidationErrors).some((error) => error)) {
-    //   setValidationErrors(newValidationErrors);
-    //   return;
-    // }
     setValidationErrors({});
     await updateOrder(values);
     table.setEditingRow(null); //exit editing mode
   };
 
   //DELETE action
-  const openRejectConfirmModal = async (row: MRT_Row<Order>) => {
+  const openRejectConfirmModal = async (
+    menuClose: () => void,
+    row: MRT_Row<Order>
+  ) => {
     const result = await dialogs.open(DialogStatusOrder, {
       id: row.original.id,
       status: "REJECTED",
       title: "Rechazar Orden de Compra",
     });
     if (result === null) {
+      menuClose();
       return;
     }
 
     deleteOrder(row.original.id);
+    menuClose();
   };
 
-  const openAcceptConfirmModal = async (row: MRT_Row<Order>) => {
+  const openAcceptConfirmModal = async (
+    menuClose: () => void,
+    row: MRT_Row<Order>
+  ) => {
     const status = StatusRole[session?.user?.role as number];
 
     if (!status) {
@@ -260,48 +258,75 @@ const RUDOrders = () => {
       title: "Aceptar Orden de Compra",
     });
     if (result === null) {
+      menuClose();
       return;
     }
 
     deleteOrder(row.original.id);
+    menuClose();
   };
 
-  const openPDFViewer = async (row: MRT_Row<Order>) => {
-    handleClose();
-
+  const openPDFViewer = async (menuClose: () => void, row: MRT_Row<Order>) => {
     const result = await dialogs.open(Viewer, {
       id: row.original.id,
     });
     if (result === null) {
+      menuClose();
       return;
     }
+
+    menuClose();
   };
 
-  const openHistoryOrder = async (row: MRT_Row<Order>) => {
+  const openHistoryOrder = async (
+    menuClose: () => void,
+    row: MRT_Row<Order>
+  ) => {
     const result = await dialogs.open(DialogHistoryOrder, {
       id: row.original.id,
     });
     if (result === null) {
+      menuClose();
       return;
     }
+
+    menuClose();
   };
 
-  const openDocumentsOrder = async (row: MRT_Row<Order>) => {
+  const openDocumentsOrder = async (
+    menuClose: () => void,
+    row: MRT_Row<Order>
+  ) => {
     const result = await dialogs.open(DialogDocumentsOrder, {
       id: row.original.id,
       documents: row.original.documents,
     });
     if (result === null) {
+      menuClose();
       return;
     }
+
+    menuClose();
+  };
+
+  const handleEditingRow = (menuClose: () => void, row: MRT_Row<Order>) => {
+    router.push(`/orders/edit/${row.original.id}`);
+  };
+
+  const availableEdit = (row: MRT_Row<Order>) => {
+    const isAvailable = [1, 4].includes(row.original.status_id);
+    const isCreator =
+      row.original.created_user?.toLowerCase() ===
+      session?.user?.name?.toLowerCase();
+
+    return !(isAvailable && isCreator);
   };
 
   const table = useMaterialReactTable({
     columns,
     data: fetchedOrders,
-    editDisplayMode: "modal",
     positionActionsColumn: "last",
-    enableEditing: true,
+    enableRowActions: true,
     enableStickyHeader: true,
     enableExpandAll: false,
     getRowId: (row) => (row.id ? row.id.toString() : ""),
@@ -313,8 +338,9 @@ const RUDOrders = () => {
       : undefined,
     muiTableContainerProps: {
       sx: {
-        minHeight: "500px",
+        minHeight: "300px",
         minWidth: "100%",
+        maxHeight: "calc(100vh - 200px)",
       },
     },
     muiDetailPanelProps: () => ({
@@ -325,106 +351,60 @@ const RUDOrders = () => {
             : "rgba(0,0,0,0.1)",
       }),
     }),
-    onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSaveOrder,
-    renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
-      <>
-        <DialogTitle variant="h3">Edit Order</DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
-        >
-          {internalEditComponents} {/* or render custom edit components here */}
-        </DialogContent>
-        <DialogActions>
-          <MRT_EditActionButtons variant="text" table={table} row={row} />
-        </DialogActions>
-      </>
-    ),
-    renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: "flex", gap: "1rem" }}>
-        <IconButton
-          aria-label="more"
-          id="long-button"
-          aria-controls={open ? "long-menu" : undefined}
-          aria-expanded={open ? "true" : undefined}
-          aria-haspopup="true"
-          onClick={handleClick}
-        >
-          <MoreVertIcon />
-        </IconButton>
-        <Menu
-          id="long-menu"
-          MenuListProps={{
-            "aria-labelledby": "long-button",
-          }}
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          slotProps={{
-            paper: {
-              style: {
-                maxHeight: 48 * 4.5,
-                width: "20ch",
-              },
-            },
-          }}
-        >
-          <Tooltip title="Mostrar">
-            <MenuItem
-              sx={{ display: "flex", gap: "1rem" }}
-              onClick={() => openPDFViewer(row)}
-            >
-              <RemoveRedEyeIcon sx={{ color: "red" }} />
-              Abrir PDF
-            </MenuItem>
-          </Tooltip>
-          {row.original.status_id == 4 ||
-            (!isPower && (
-              <MenuItem
-                sx={{ display: "flex", gap: "1rem" }}
-                onClick={() => table.setEditingRow(row)}
-              >
-                <EditIcon sx={{ color: "#2196F3" }} />
-                Editar
-              </MenuItem>
-            ))}
-          {isPower && (
-            <MenuItem
-              sx={{ display: "flex", gap: "1rem" }}
-              onClick={() => openAcceptConfirmModal(row)}
-            >
-              <ThumbUpIcon sx={{ color: "#4caf50" }} />
-              Aprobar
-            </MenuItem>
-          )}
-          {isPower && (
-            <MenuItem
-              sx={{ display: "flex", gap: "1rem" }}
-              onClick={() => openRejectConfirmModal(row)}
-            >
-              <ThumbDownIcon sx={{ color: "#f44336" }} />
-              Rechazar
-            </MenuItem>
-          )}
-          <MenuItem
-            sx={{ display: "flex", gap: "1rem" }}
-            onClick={() => openHistoryOrder(row)}
-          >
-            <TimelineIcon sx={{ color: "primary" }} />
-            Historial
-          </MenuItem>
-          {row.original.documents && (
-            <MenuItem
-              sx={{ display: "flex", gap: "1rem" }}
-              onClick={() => openDocumentsOrder(row)}
-            >
-              <PictureAsPdfIcon sx={{ color: "primary" }} />
-              Documentos
-            </MenuItem>
-          )}
-        </Menu>
-      </Box>
-    ),
+    renderRowActionMenuItems: ({ closeMenu, row, table }) => [
+      <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
+        icon={<RemoveRedEyeIcon />}
+        key="pdf"
+        label="Abrir PDF"
+        onClick={() => openPDFViewer(closeMenu, row)}
+        table={table}
+      />,
+      <MRT_ActionMenuItem
+        icon={<EditIcon />}
+        key="edit"
+        label="Editar"
+        disabled={availableEdit(row)}
+        onClick={() => handleEditingRow(closeMenu, row)}
+        table={table}
+      />,
+      <div key="approbe">
+        {isPower && (
+          <MRT_ActionMenuItem
+            icon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
+            key="approbe"
+            label="Aprobar"
+            onClick={() => openAcceptConfirmModal(closeMenu, row)}
+            table={table}
+          />
+        )}
+      </div>,
+      <div key="reject">
+        {isPower && (
+          <MRT_ActionMenuItem
+            icon={<ThumbDownIcon sx={{ color: "#f44336" }} />}
+            key="dismiss"
+            label="Rechazar"
+            onClick={() => openRejectConfirmModal(closeMenu, row)}
+            table={table}
+          />
+        )}
+      </div>,
+      <MRT_ActionMenuItem
+        icon={<TimelineIcon sx={{ color: "primary" }} />}
+        key="history"
+        label="Historial"
+        onClick={() => openHistoryOrder(closeMenu, row)}
+        table={table}
+      />,
+      <MRT_ActionMenuItem
+        icon={<PictureAsPdfIcon sx={{ color: "primary" }} />}
+        key="docs"
+        label="Documentos"
+        onClick={() => openDocumentsOrder(closeMenu, row)}
+        disabled={!row.original.documents}
+        table={table}
+      />,
+    ],
     state: {
       isLoading: isLoadingOrders,
       isSaving: isUpdatingOrder || isDeletingOrder,
@@ -457,20 +437,7 @@ function useGetOrders(token: string) {
 function useUpdateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (order: Order) => {
-      // const updateOrder: updateOrder = {
-      //   name: Order.name,
-      //   department_id: parseInt(Order.department),
-      // };
-      // return await OrderService.update(Order.id, updateOrder)
-      //   .then((response) => {
-      //     return response;
-      //   })
-      //   .catch((error) => {
-      //     return error;
-      //   });
-    },
-    //client side optimistic update
+    mutationFn: async (order: Order) => {},
     onMutate: (newOrderInfo: Order) => {
       queryClient.setQueryData(["Orders"], (prevOrders: any) =>
         prevOrders?.map((prevOrder: Order) =>
@@ -488,7 +455,6 @@ function useDeleteOrder() {
     mutationFn: async (orderId: number) => {
       return true;
     },
-    //client side optimistic update
     onMutate: (OrderId: number) => {
       queryClient.setQueryData(["Orders"], (prevOrders: any) =>
         prevOrders?.filter((Order: Order) => Order.id !== OrderId)

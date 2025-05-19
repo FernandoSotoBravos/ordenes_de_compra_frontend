@@ -35,6 +35,8 @@ function CreateOrderPage() {
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
   const [departments, setDepartments] = useState<SelectBase[]>([]);
+  const [isEnableDepartment, setIsEnableDepartment] = useState(false);
+  const [isEnableArea, setIsEnableArea] = useState(false);
   const [currencies, setCurrencies] = useState<CurrencySelect[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
   const [providers, setProviders] = useState<SelectBase[]>([]);
@@ -44,6 +46,7 @@ function CreateOrderPage() {
   const [formValues, setFormValues] = useState<OrderCreate>({
     department: "",
     concept: "",
+    area: "",
     segment: "",
     beneficiary: "",
     currency: "",
@@ -53,11 +56,71 @@ function CreateOrderPage() {
     products: [],
   });
 
+  const getConcepts = (areaId: number) => {
+    conceptService
+      .getByArea(token as string, areaId)
+      .then((data) => {
+        setConcepts(data);
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer los conceptos del area, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
+  };
+
+  const handleSelectedArea = (event: SelectChangeEvent<string>) => {
+    getConcepts(parseInt(event.target.value))
+    setFormValues({
+      ...formValues,
+      area: event.target.value,
+    });
+  };
+
+  const getAreas = (departmentId: number) => {
+    areaService
+      .getByDepartment(token as string, departmentId)
+      .then((data) => {
+        setAreas(data);
+
+        if (!session?.user?.super_user || session.user?.is_leader_department) {
+          setFormValues({
+            ...formValues,
+            area: session?.user?.area as string,
+          });
+        }
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer las areas del departamento, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
+  };
+
+  const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
+    getAreas(parseInt(event.target.value));
+    setFormValues({
+      ...formValues,
+      department: event.target.value,
+    });
+  };
+
   const handleGetDepartments = async () => {
     await departmentService
       .getAll(token as string)
       .then((data) => {
         setDepartments(data);
+
+        if (!session?.user?.super_user) {
+          setFormValues({
+            ...formValues,
+            department: session?.user?.department as string,
+          });
+        }
       })
       .catch((error) => {
         dialogs.alert(
@@ -85,17 +148,17 @@ function CreateOrderPage() {
 
   const handleGetProviders = async () => {
     await suppliersService
-    .getAll()
-    .then((data) => {
-      setProviders(data);
-    })
-    .catch((error) => {
-      dialogs.alert(
-        "Ha ocurrido un error al traer los proveedores, " +
-          error.response.data.detail
-      );
-      handleCleanForm();
-    });
+      .getAll()
+      .then((data) => {
+        setProviders(data);
+      })
+      .catch((error) => {
+        dialogs.alert(
+          "Ha ocurrido un error al traer los proveedores, " +
+            error.response.data.detail
+        );
+        handleCleanForm();
+      });
   };
 
   useMemo(() => {
@@ -103,51 +166,27 @@ function CreateOrderPage() {
       handleGetDepartments();
       handleGetCurrencies();
       handleGetProviders();
+
+      if (session.user?.super_user) {
+        setIsEnableDepartment(true);
+        setIsEnableArea(true);
+        return;
+      } 
+      
+      if (session?.user?.is_leader_department) {
+        setIsEnableArea(true);
+        getAreas(parseInt(session?.user?.department as string));
+      } else {
+        getAreas(parseInt(session?.user?.department as string));
+        getConcepts(parseInt(session?.user?.area as string))
+      }
     }
   }, [token]);
-
-  const handleSelectedArea = (event: SelectChangeEvent<string>) => {
-    conceptService
-      .getByArea(parseInt(event.target.value))
-      .then((data) => {
-        setConcepts(data);
-      })
-      .catch((error) => {
-        dialogs.alert(
-          "Ha ocurrido un error al traer los conceptos del area, " +
-            error.response.data.detail
-        );
-        handleCleanForm();
-      });
-    setFormValues({
-      ...formValues,
-      concept: event.target.value,
-    });
-  };
 
   const handleSelectedCurrency = (event: SelectChangeEvent<string>) => {
     setFormValues({
       ...formValues,
       currency: event.target.value,
-    });
-  };
-
-  const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
-    areaService
-      .getByDepartment(token as string, parseInt(event.target.value))
-      .then((data) => {
-        setAreas(data);
-      })
-      .catch((error) => {
-        dialogs.alert(
-          "Ha ocurrido un error al traer las areas del departamento, " +
-            error.response.data.detail
-        );
-        handleCleanForm();
-      });
-    setFormValues({
-      ...formValues,
-      department: event.target.value,
     });
   };
 
@@ -172,6 +211,7 @@ function CreateOrderPage() {
     setSegmentBusiness("");
     setFormValues({
       department: "",
+      area: "",
       concept: "",
       segment: "",
       beneficiary: "",
@@ -197,7 +237,7 @@ function CreateOrderPage() {
     setSegmentBusiness(concept?.segment_business.toString() || "");
     setFormValues({
       ...formValues,
-      segment: event.target.value,
+      concept: event.target.value,
     });
   };
 
@@ -205,7 +245,8 @@ function CreateOrderPage() {
     if (
       formValues.department === "" ||
       formValues.concept === "" ||
-      formValues.segment === "" ||
+      formValues.area === "" ||
+      formValues.department === "" ||
       formValues.beneficiary === "" ||
       formValues.descriptionPayment === "" ||
       formValues.products.length === 0
@@ -227,7 +268,7 @@ function CreateOrderPage() {
   };
 
   return (
-    <Container>
+    <Container maxWidth={false} sx={{ mt: 2 }}>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <FormControl fullWidth>
@@ -238,6 +279,7 @@ function CreateOrderPage() {
               name="department"
               value={formValues.department}
               onChange={handleSelectedDepartment}
+              disabled={!isEnableDepartment}
             >
               {departments.length > 0 &&
                 departments.map((department) => (
@@ -256,8 +298,9 @@ function CreateOrderPage() {
               labelId="area-concepto-label"
               id="concept"
               name="concept"
-              value={formValues.concept}
+              value={formValues.area}
               onChange={handleSelectedArea}
+              disabled={!isEnableArea}
             >
               {areas.map((area) => (
                 <MenuItem key={area.id} value={area.id}>
@@ -291,7 +334,7 @@ function CreateOrderPage() {
               labelId="concepto-label"
               id="segment"
               name="segment"
-              value={formValues.segment}
+              value={formValues.concept}
               onChange={handleSegmentBusiness}
               disabled={concepts.length === 0}
             >

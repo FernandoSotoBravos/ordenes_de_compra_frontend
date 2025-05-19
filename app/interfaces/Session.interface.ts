@@ -14,5 +14,6 @@ export interface CustomSession extends Session {
     is_leader_department?: boolean | null | undefined;
     is_leader_area?: boolean | null | undefined;
     access_token: string;
+    super_user: boolean
   };
 }

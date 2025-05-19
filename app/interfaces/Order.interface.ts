@@ -1,4 +1,7 @@
 import dayjs from "dayjs";
+import { ConceptSelect } from "./Concepts.interface";
+import { CurrencySelect } from "./Currency.interface";
+import { SelectBase } from "./SelecteBase.interface";
 
 export interface ProductsOrder {
   id: string;
@@ -19,6 +22,7 @@ export type OrderDocumentsProps = {
 
 export interface OrderCreate {
   department: string;
+  area: string;
   concept: string;
   segment: string;
   beneficiary: string;
@@ -60,6 +64,7 @@ export interface OrderCreateProps {
 }
 
 export interface OrderDetail {
+  id?: number;
   product: string;
   description: string;
   quantity: number;
@@ -71,7 +76,11 @@ export interface Order {
   id: number;
   concept: string;
   supplier: string;
+  area?: string;
+  department?: string;
+  currency?: string;
   created_by: string;
+  created_user?: string;
   created_at: dayjs.Dayjs;
   total: number;
   subtotal: number;
@@ -93,9 +102,29 @@ export interface OrderHistory {
   created_at: string;
 }
 
-
 export interface ChangeStatus {
   orderId: number;
   status: string;
   comments: string;
+}
+
+export interface OrderDocument {
+  name: string;
+  folder: string;
+}
+
+export interface OrderUpdateHeaders {
+  concept_id: number;
+  area_id: number;
+  department_id: number;
+  supplier_id: number;
+  currency_id: number;
+  comments: string;
+  description: string;
+}
+
+export interface Documents {
+  filename: string;
+  content: string;
+  content_type: string;
 }

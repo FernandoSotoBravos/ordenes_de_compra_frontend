@@ -31,6 +31,11 @@ const NAVIGATION: Navigation = [
         segment: "list",
         title: "Listado de ordenes",
       },
+      {
+        segment: "edit",
+        title: "Editar orden",
+        pattern: 'edit/:id',
+      },
     ],
   },
   {
