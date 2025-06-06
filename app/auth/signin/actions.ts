@@ -31,7 +31,7 @@ async function signIn(
       return {
         error:
           error.type === "CredentialsSignin"
-            ? "Invalid credentials."
+            ? "Credenciales Invalidas."
             : "An error with Auth.js occurred.",
         type: error.type,
       };

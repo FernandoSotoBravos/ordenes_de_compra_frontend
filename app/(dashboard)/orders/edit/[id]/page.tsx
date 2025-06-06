@@ -54,6 +54,7 @@ import { areaService } from "@/app/api/areaService";
 import { AddProduct, EditProduct } from "@/app/interfaces/Product.interface";
 import EditIcon from "@mui/icons-material/Edit";
 import { useRouter } from "next/navigation";
+import { MRT_Localization_ES } from "material-react-table/locales/es";
 
 export default function EditOrderPage() {
   const { id } = useParams();
@@ -666,6 +667,7 @@ export default function EditOrderPage() {
               columnVisibility: { product: false },
             }}
             createDisplayMode="modal"
+            localization={MRT_Localization_ES}
             editDisplayMode="modal"
             renderCreateRowDialogContent={({
               table,
@@ -796,7 +798,7 @@ export default function EditOrderPage() {
                 <DialogContent
                   sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
                 >
-                  <FileUpload setFiles={setFiles} files={files} />
+                  <FileUpload setFiles={setFiles} files={files} multiple={true} />
                 </DialogContent>
                 <DialogActions>
                   <MRT_EditActionButtons

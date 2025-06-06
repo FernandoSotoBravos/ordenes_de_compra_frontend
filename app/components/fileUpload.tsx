@@ -13,11 +13,12 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { Delete } from "@mui/icons-material";
 
 interface FileUploadProps {
+  multiple?: boolean;
   setFiles: (files: File[]) => void;
   files: File[];
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ setFiles, files }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ multiple, setFiles, files }) => {
   const [dragging, setDragging] = useState(false);
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -79,7 +80,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles, files }) => {
         </Typography>
         <Button variant="contained" component="label">
           Seleccionar Archivos
-          <input type="file" hidden multiple onChange={handleFileSelect} />
+          <input type="file" hidden multiple={multiple} onChange={handleFileSelect} />
         </Button>
       </Paper>
 

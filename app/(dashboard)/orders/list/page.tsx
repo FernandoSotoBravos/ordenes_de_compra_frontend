@@ -55,6 +55,7 @@ import { CustomSession } from "@/app/interfaces/Session.interface";
 import { StatusRole } from "@/app/mocks/statusRole";
 import Viewer from "@/app/components/viewer";
 import { useRouter } from "next/navigation";
+import { MRT_Localization_ES } from 'material-react-table/locales/es';
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -229,7 +230,7 @@ const RUDOrders = () => {
   ) => {
     const result = await dialogs.open(DialogStatusOrder, {
       id: row.original.id,
-      status: "REJECTED",
+      status: "Rechazada",
       title: "Rechazar Orden de Compra",
     });
     if (result === null) {
@@ -351,6 +352,7 @@ const RUDOrders = () => {
             : "rgba(0,0,0,0.1)",
       }),
     }),
+    localization: MRT_Localization_ES,
     renderRowActionMenuItems: ({ closeMenu, row, table }) => [
       <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
         icon={<RemoveRedEyeIcon />}
@@ -368,7 +370,7 @@ const RUDOrders = () => {
         table={table}
       />,
       <div key="approbe">
-        {isPower && (
+        {(isPower && row.original.status_id != 7) && (
           <MRT_ActionMenuItem
             icon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
             key="approbe"

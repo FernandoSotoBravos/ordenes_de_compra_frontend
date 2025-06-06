@@ -9,6 +9,7 @@ const providers: Provider[] = [
     credentials: {
       email: { label: "Email Address", type: "email" },
       password: { label: "Password", type: "password" },
+      sub1mit: { label: "Iniciar Sesión", type: "submit" },
     },
     async authorize(c) {
       return fetchWrapper

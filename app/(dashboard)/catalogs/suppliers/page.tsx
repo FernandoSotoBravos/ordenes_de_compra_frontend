@@ -39,6 +39,7 @@ import {
   updateSupplier,
 } from "@/app/interfaces/Suppliers.interface";
 import { suppliersService } from "@/app/api/suppliersService";
+import { MRT_Localization_ES } from "material-react-table/locales/es";
 
 const CRUDSuppliers = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -345,10 +346,11 @@ const CRUDSuppliers = () => {
     onCreatingRowSave: handleCreateSupplier,
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveSupplier,
+    localization: MRT_Localization_ES,
     //optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <Box>
-        <DialogTitle variant="h3">Create New Supplier</DialogTitle>
+        <DialogTitle variant="h3">Crear nuevo proveedor</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
@@ -362,7 +364,7 @@ const CRUDSuppliers = () => {
     //optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Edit Supplier</DialogTitle>
+        <DialogTitle variant="h3">Editar Proveedor</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
@@ -400,7 +402,7 @@ const CRUDSuppliers = () => {
           // );
         }}
       >
-        Create New Supplier
+        Crear nuevo proveedor
       </Button>
     ),
     state: {

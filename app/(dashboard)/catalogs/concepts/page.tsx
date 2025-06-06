@@ -36,6 +36,7 @@ import {
 import { conceptService } from "@/app/api/conceptService";
 import { areaService } from "@/app/api/areaService";
 import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
+import { MRT_Localization_ES } from "material-react-table/locales/es";
 
 const CRUDConcepts = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -172,6 +173,7 @@ const CRUDConcepts = () => {
     createDisplayMode: "modal", //default ('row', and 'custom' are also available)
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
+    localization: MRT_Localization_ES,
     getRowId: (row) => (row.id ? row.id.toString() : ""),
     muiToolbarAlertBannerProps: isLoadingConceptsError
       ? {
@@ -191,7 +193,7 @@ const CRUDConcepts = () => {
     //optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Create New Concept</DialogTitle>
+        <DialogTitle variant="h3">Crear nuevo concepto</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
@@ -205,7 +207,7 @@ const CRUDConcepts = () => {
     //optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Edit Concept</DialogTitle>
+        <DialogTitle variant="h3">Editar Concepto</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
@@ -243,7 +245,7 @@ const CRUDConcepts = () => {
           // );
         }}
       >
-        Create New Concept
+        Crear nuevo concepto
       </Button>
     ),
     state: {

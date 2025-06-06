@@ -1,7 +1,7 @@
 export const StatusRole: Record<number, string | null> = {
-  4: "CREATED",
-  2: "APPROVED LEADER",
-  3: "APPROVED LEADER",
-  6: "APPROVED CONTROLSHIP",
-  7: "APPROVED MANAGEMENT",
+  4: "Creada",
+  2: "Aprobada por Líder",
+  3: "Aprobada por Líder",
+  6: "Aprobada por contralor",
+  7: "Aprobada por gerencia",
 };

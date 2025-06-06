@@ -116,7 +116,7 @@ export default function DialogCreateOrder({
             placeholder="Comentarios"
             minRows={3}
           />
-          <FileUpload setFiles={setFiles} files={files} />
+          <FileUpload setFiles={setFiles} files={files} multiple={true} />
         </Grid>
       </DialogContent>
       <DialogActions>

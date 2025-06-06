@@ -9,10 +9,20 @@ import { SessionProvider, signIn, signOut } from "next-auth/react";
 import theme from "../theme";
 import { auth } from "../auth";
 
-const NAVIGATION: Navigation = [
+const AUTHENTICATION = {
+  signIn,
+  signOut,
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
+
+  let NAVIGATION: Navigation = [
   {
     kind: "header",
-    title: "Main items",
+    title: "Menu",
   },
   {
     title: "Dashboard",
@@ -59,19 +69,18 @@ const NAVIGATION: Navigation = [
         segment: "concepts",
         title: "Conceptos",
       },
+      // {
+      //   segment: "products",
+      //   title: "Productos"
+      // }
     ],
   },
 ];
 
-const AUTHENTICATION = {
-  signIn,
-  signOut,
-};
-
-export default async function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  const session = await auth();
+  if ([2, 4, 5].includes(session?.user?.role as number)) {
+    // @ts-ignore
+    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "catalogs")
+  }
 
   return (
     <html lang="en" data-toolpad-color-scheme="light">

@@ -22,6 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ProductsOrder, CRUDTableProps } from "../interfaces/Order.interface";
 import { useDialogs } from "@toolpad/core";
+import { MRT_Localization_ES } from "material-react-table/locales/es";
 
 const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
   const [validationErrors, setValidationErrors] = useState<
@@ -159,6 +160,7 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
     onCreatingRowSave: handleCreateProduct,
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveProduct,
+    localization: MRT_Localization_ES,
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">

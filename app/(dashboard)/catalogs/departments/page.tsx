@@ -35,6 +35,7 @@ import {
 import { departmentService } from "@/app/api/departmentService";
 import { useSession } from "@toolpad/core";
 import { CustomSession } from "@/app/interfaces/Session.interface";
+import { MRT_Localization_ES } from "material-react-table/locales/es";
 
 const CRUDDepartments = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -123,8 +124,10 @@ const CRUDDepartments = () => {
     columns,
     data: fetchedDepartments,
     createDisplayMode: "modal", //default ('row', and 'custom' are also available)
+    
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
+    localization: MRT_Localization_ES,
     getRowId: (row) => (row.id ? row.id.toString() : ""),
     muiToolbarAlertBannerProps: isLoadingDepartmentsError
       ? {
@@ -144,7 +147,7 @@ const CRUDDepartments = () => {
     //optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Create New Department</DialogTitle>
+        <DialogTitle variant="h3">Crear nuevo departamento</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
@@ -158,7 +161,7 @@ const CRUDDepartments = () => {
     //optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Edit Department</DialogTitle>
+        <DialogTitle variant="h3">Editar Departmento</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
@@ -196,7 +199,7 @@ const CRUDDepartments = () => {
           // );
         }}
       >
-        Create New Department
+        Crear nuevo Departamento
       </Button>
     ),
     state: {

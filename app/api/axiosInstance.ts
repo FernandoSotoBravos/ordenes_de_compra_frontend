@@ -17,7 +17,7 @@ client.interceptors.response.use(
       (error.response && error.response.status === 403) ||
       error.response.status === 401
     ) {
-      signOut({ redirectTo: "/auth/signin" });
+      signOut({ callbackUrl: "/auth/signin" });
     }
     return Promise.reject(error);
   }
