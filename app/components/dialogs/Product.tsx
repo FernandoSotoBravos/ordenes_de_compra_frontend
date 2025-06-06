@@ -125,7 +125,6 @@ export default function DialogProduct({
             onChange={(e) => setForm({ ...form, quantity: parseFloat(e.target.value) })}
             fullWidth
           />
-          // aqui ira el select de la bodega
           <FileUpload setFiles={setFiles} files={files} />
         </Stack>
       </DialogContent>
