@@ -2,6 +2,7 @@ import * as React from "react";
 import { AppProvider } from "@toolpad/core/nextjs";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import type { Navigation } from "@toolpad/core/AppProvider";
@@ -28,6 +29,26 @@ export default async function RootLayout({
     title: "Dashboard",
     icon: <DashboardIcon />,
   },
+  // {
+  //   segment: "requisitions",
+  //   title: "Requisiciones",
+  //   icon: <ArticleOutlinedIcon />,
+  //   children: [
+  //     {
+  //       segment: "create",
+  //       title: "Crear nueva requisicion de compra",
+  //     },
+  //     {
+  //       segment: "list",
+  //       title: "Listado de requisiciones",
+  //     },
+  //     {
+  //       segment: "edit",
+  //       title: "Editar requisicion",
+  //       pattern: 'edit/:id',
+  //     },
+  //   ],
+  // },
   {
     segment: "orders",
     title: "Ordenes",
@@ -35,7 +56,7 @@ export default async function RootLayout({
     children: [
       {
         segment: "create",
-        title: "Crear nueva orden",
+        title: "Crear nueva orden de pago",
       },
       {
         segment: "list",

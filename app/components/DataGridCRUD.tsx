@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   // createRow,
   type MRT_ColumnDef,
+  MRT_EditActionButtons,
   type MRT_Row,
   type MRT_TableOptions,
   useMaterialReactTable,
@@ -10,12 +11,16 @@ import {
 import {
   Box,
   Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   IconButton,
   InputAdornment,
   InputLabel,
   OutlinedInput,
   Stack,
+  TextField,
   Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -156,6 +161,35 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
         maxHeight: "calc(100vh - 200px)",
       },
     },
+
+    renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => {
+      const filteredComponents = internalEditComponents.filter(
+        (component: any) =>
+          component?.props?.cell?.column?.id &&
+          !["id", "total"].includes(component.props.cell.column.id)
+      );
+
+      return (
+        <>
+          <DialogTitle variant="h6">Agregar producto</DialogTitle>
+          <DialogContent
+            dividers
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              maxHeight: "70vh",
+              overflowY: "auto",
+            }}
+          >
+            {filteredComponents}
+          </DialogContent>
+          <DialogActions>
+            <MRT_EditActionButtons variant="text" table={table} row={row} />
+          </DialogActions>
+        </>
+      );
+    },
     onCreatingRowCancel: () => setValidationErrors({}),
     onCreatingRowSave: handleCreateProduct,
     onEditingRowCancel: () => setValidationErrors({}),
@@ -163,12 +197,12 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
     localization: MRT_Localization_ES,
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
-        <Tooltip title="Edit">
+        <Tooltip title="Editar">
           <IconButton onClick={() => table.setEditingRow(row)}>
             <EditIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Delete">
+        <Tooltip title="Eliminar">
           <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
             <DeleteIcon />
           </IconButton>
@@ -208,7 +242,8 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
             label="Total"
             value={table
               .getFilteredRowModel()
-              .rows.reduce((acc, row) => acc + row.original.total, 0).toFixed(4)}
+              .rows.reduce((acc, row) => acc + row.original.total, 0)
+              .toFixed(2)}
             disabled
           />
         </FormControl>
