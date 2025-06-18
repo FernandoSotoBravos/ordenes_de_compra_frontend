@@ -94,3 +94,8 @@ export interface RequisitionDocument {
   name: string;
   folder: string;
 }
+
+export interface DocumentsRequisition {
+  name: string;
+  folder: unknown;
+}

@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -25,6 +25,7 @@ import Grid from "@mui/material/Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { requisitionService } from "@/app/api/requisitionService";
 import {
+  DocumentsRequisition,
   Requisition,
   RequisitionDetail,
   RequisitionDocument,
@@ -150,7 +151,7 @@ export default function EditrequisitionPage() {
     }
   };
 
-  const buildDocuments = () => {
+  const buildDocuments: () => DocumentsRequisition[] = () => {
     const documents = Object.entries(requisition?.documents ?? {}).map(
       ([key, value]) => ({
         name: key,
@@ -307,6 +308,11 @@ export default function EditrequisitionPage() {
     },
   ];
 
+  const columnsDocs: MRT_ColumnDef<DocumentsRequisition>[] = [
+    { header: "Nombre", accessorKey: "name" },
+    { header: "Folder", accessorKey: "folder" },
+  ];
+
   const openDeleteConfirmModal = async (row: MRT_Row<any>) => {
     const result = await dialogs.confirm(
       "Deseas eliminar el documento de la lista?",
@@ -371,7 +377,7 @@ export default function EditrequisitionPage() {
     });
   };
 
-  const handleSaveDocuments: MRT_TableOptions<RequisitionDetail>["onCreatingRowSave"] =
+  const handleSaveDocuments: MRT_TableOptions<DocumentsRequisition>["onCreatingRowSave"] =
     async ({ values, table }) => {
       if (!files) {
         dialogs.alert("No has seleccionado ningun documento para subirlo", {
@@ -428,11 +434,7 @@ export default function EditrequisitionPage() {
     };
 
   const handleSaveHeaders = async () => {
-    if (
-      !requisition ||
-      !requisition.area ||
-      !requisition.department
-    ) {
+    if (!requisition || !requisition.area || !requisition.department) {
       return;
     }
 
@@ -673,14 +675,10 @@ export default function EditrequisitionPage() {
             Documentos adjuntos
           </Typography>
 
-          {/* Aquí puedes crear otro MaterialReactTable para documentos */}
-          <MaterialReactTable
+          <MaterialReactTable<DocumentsRequisition>
             createDisplayMode="modal"
-            columns={[
-              { header: "Nombre", accessorKey: "name" },
-              { header: "Folder", accessorKey: "folder" },
-            ]}
-            data={buildDocuments() as any}
+            columns={columnsDocs}
+            data={buildDocuments()}
             onCreatingRowSave={handleSaveDocuments}
             enableRowActions
             renderRowActions={({ row }) => (
