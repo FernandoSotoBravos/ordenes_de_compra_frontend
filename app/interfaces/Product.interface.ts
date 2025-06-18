@@ -1,7 +1,10 @@
-export interface AddProduct {
+export interface AddProductBase {
   quantity: number;
-  unit_price: number;
   description: string;
+}
+
+export interface AddProduct extends AddProductBase {
+  unit_price: number;
   total: number;
 }
 
@@ -17,7 +20,11 @@ export interface Product {
 }
 
 export interface EditProduct extends AddProduct {
-  id: number
+  id: number;
+}
+
+export interface EditProductRequisition extends AddProductBase {
+  id: number;
 }
 
 export interface ProductEdit extends Product {
@@ -28,4 +35,3 @@ export interface ProductDialog {
   action: "create" | "edit";
   payload?: ProductEdit;
 }
-

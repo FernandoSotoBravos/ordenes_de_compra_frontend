@@ -20,20 +20,16 @@ import {
   TextField,
   Tooltip,
   Typography,
-  Fab,
 } from "@mui/material";
-import { green } from "@mui/material/colors";
-import CheckIcon from "@mui/icons-material/Check";
-import SaveIcon from "@mui/icons-material/Save";
 import Grid from "@mui/material/Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { orderService } from "@/app/api/orderService";
+import { requisitionService } from "@/app/api/requisitionService";
 import {
-  Order,
-  OrderDetail,
-  OrderDocument,
-  OrderUpdateHeaders,
-} from "@/app/interfaces/Order.interface";
+  Requisition,
+  RequisitionDetail,
+  RequisitionDocument,
+  RequisitionUpdateHeaders,
+} from "@/app/interfaces/Requisitions.interface";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -46,46 +42,32 @@ import { useDialogs } from "@toolpad/core";
 import { departmentService } from "@/app/api/departmentService";
 import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
-import { CurrencySelect } from "@/app/interfaces/Currency.interface";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { useSession } from "@toolpad/core";
-import { currencyService } from "@/app/api/currencyService";
-import { suppliersService } from "@/app/api/suppliersService";
 import FileUpload from "@/app/components/fileUpload";
 import TextArea from "@/app/components/TextArea";
 import { conceptService } from "@/app/api/conceptService";
 import { areaService } from "@/app/api/areaService";
-import { AddProduct, EditProduct } from "@/app/interfaces/Product.interface";
+import {
+  AddProductBase,
+  EditProductRequisition,
+} from "@/app/interfaces/Product.interface";
 import EditIcon from "@mui/icons-material/Edit";
 import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
 
-export default function EditOrderPage() {
+export default function EditrequisitionPage() {
   const { id } = useParams();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [requisition, setRequisition] = useState<Requisition | null>(null);
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
   const [loading, setLoading] = useState(true);
-  const [loadingSave, setLoadingSave] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [departments, setDepartments] = useState<SelectBase[]>([]);
-  const [currencies, setCurrencies] = useState<CurrencySelect[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
-  const [providers, setProviders] = useState<SelectBase[]>([]);
   const [concepts, setConcepts] = useState<ConceptSelect[]>([]);
-  const [segment_business, setSegmentBusiness] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
   const dialogs = useDialogs();
   const router = useRouter();
-
-  const buttonSx = {
-    ...(success && {
-      bgcolor: green[500],
-      "&:hover": {
-        bgcolor: green[700],
-      },
-    }),
-  };
 
   const handleGetDepartments = async () => {
     await departmentService
@@ -96,20 +78,6 @@ export default function EditOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer los departamentos, " +
-            error.response.data.detail
-        );
-      });
-  };
-
-  const handleGetCurrencies = async () => {
-    await currencyService
-      .getAll(token as string)
-      .then((data) => {
-        setCurrencies(data);
-      })
-      .catch((error) => {
-        dialogs.alert(
-          "Ha ocurrido un error al traer los tipo de moneda, " +
             error.response.data.detail
         );
       });
@@ -145,16 +113,14 @@ export default function EditOrderPage() {
 
   const setCurrentDepartment = () => {
     const currentDepartment = session?.user?.department;
-
-    console.log("departamento actual", currentDepartment);
   };
 
   const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
     const selectedDepartment = event.target.value;
 
-    if (order) {
-      setOrder({
-        ...order,
+    if (requisition) {
+      setRequisition({
+        ...requisition,
         department: selectedDepartment,
       });
     }
@@ -165,9 +131,9 @@ export default function EditOrderPage() {
 
     handleGetConcept(parseInt(selectedArea));
 
-    if (order) {
-      setOrder({
-        ...order,
+    if (requisition) {
+      setRequisition({
+        ...requisition,
         area: selectedArea,
       });
     }
@@ -176,30 +142,16 @@ export default function EditOrderPage() {
   const handleSelectedConcept = (event: SelectChangeEvent<string>) => {
     const selectedConcept = event.target.value;
 
-    if (order) {
-      setOrder({
-        ...order,
+    if (requisition) {
+      setRequisition({
+        ...requisition,
         concept: selectedConcept,
       });
     }
   };
 
-  const handleGetProviders = async () => {
-    await suppliersService
-      .getAll()
-      .then((data) => {
-        setProviders(data);
-      })
-      .catch((error) => {
-        dialogs.alert(
-          "Ha ocurrido un error al traer los proveedores, " +
-            error.response.data.detail
-        );
-      });
-  };
-
   const buildDocuments = () => {
-    const documents = Object.entries(order?.documents ?? {}).map(
+    const documents = Object.entries(requisition?.documents ?? {}).map(
       ([key, value]) => ({
         name: key,
         folder: value,
@@ -208,91 +160,90 @@ export default function EditOrderPage() {
     return documents;
   };
 
-  const fetchOrder = async () => {
-    await orderService
+  const fetchRequisition = async () => {
+    await requisitionService
       .getById(token as string, id as string)
       .then((res) => {
-        if (![1, 7].includes(res.status_id)) {
+        if (![1, 4].includes(res.status_id)) {
           dialogs.alert(
-            "No puedes editar una orden que ya fue aprobada o no esta rechazada",
+            "No puedes editar una requisicion que ya fue aprobada o no esta rechazada",
             {
               title: "Error",
             }
           );
 
-          router.push(`/orders/list/`);
+          router.push(`/requisitions/list/`);
           return;
         }
-
-        console.log(res.created_user.toLowerCase());
-        console.log(session?.user?.name?.toLowerCase());
 
         if (
           res.created_user?.toLowerCase() !== session?.user?.name?.toLowerCase()
         ) {
-          dialogs.alert("No puedes editar una orden que no te pertenece", {
-            title: "Error",
-          });
+          dialogs.alert(
+            "No puedes editar una requisicion que no te pertenece",
+            {
+              title: "Error",
+            }
+          );
 
-          router.push(`/orders/list/`);
+          router.push(`/requisitions/list/`);
           return;
         }
 
-        setOrder(res);
+        setRequisition(res);
         handleGetAreas(res.department);
         handleGetConcept(res.area);
       })
       .catch((err) => {
-        dialogs.alert(`Error al obtener la orden ${err}`);
-        console.error("Error al obtener la orden: " + err);
+        dialogs.alert(`Error al obtener la requisicion ${err}`);
+        console.error("Error al obtener la requisicion: " + err);
       })
       .finally(() => {
         setLoading(false);
       });
   };
 
-  const handleCreateProduct: MRT_TableOptions<OrderDetail>["onCreatingRowSave"] =
+  const handleCreateProduct: MRT_TableOptions<RequisitionDetail>["onCreatingRowSave"] =
     async ({ values, table }) => {
       // Validar y agregar el nuevo producto
       const total = values.quantity * values.unit_price;
-      const data: AddProduct = {
+      const data: AddProductBase = {
         quantity: parseFloat(values.quantity),
-        unit_price: parseFloat(values.unit_price),
         description: values.description,
-        total: total,
       };
 
-      if (!order) {
-        dialogs.alert("No hay una orden en curso", {
+      if (!requisition) {
+        dialogs.alert("No hay una requisicion en curso", {
           title: "Error",
         });
         table.setCreatingRow(null);
         return;
       }
 
-      await orderService
-        .addItemToOrder(token as string, order?.id, data)
+      await requisitionService
+        .addItemToRequisition(token as string, requisition?.id, data)
         .then((response) => {
-          dialogs.alert("Se ha actualizado la orden con exito", {
+          dialogs.alert("Se ha actualizado la requisicion con exito", {
             title: "Actualizacion",
           });
-          fetchOrder();
+          fetchRequisition();
         })
         .catch((err) => {
-          dialogs.alert("Ha ocurrido un error al actualizar la orden " + err, {
-            title: "Error",
-          });
+          dialogs.alert(
+            "Ha ocurrido un error al actualizar la requisicion " + err,
+            {
+              title: "Error",
+            }
+          );
         });
 
       table.setCreatingRow(null);
     };
 
-  const handleEditProduct: MRT_TableOptions<OrderDetail>["onEditingRowSave"] =
+  const handleEditProduct: MRT_TableOptions<RequisitionDetail>["onEditingRowSave"] =
     async ({ values, table }) => {
-      console.log("valores", values);
-
-      if (!order) {
-        dialogs.alert("No hay una orden en curso", {
+      if (!requisition) {
+        dialogs.alert("No hay una requisicion en curso", {
           title: "Error",
         });
         table.setEditingRow(null);
@@ -300,62 +251,40 @@ export default function EditOrderPage() {
       }
 
       const total = values.quantity * values.unit_price;
-      const data: EditProduct = {
+      const data: EditProductRequisition = {
         id: values.id,
         quantity: parseFloat(values.quantity),
-        unit_price: parseFloat(values.unit_price),
         description: values.description,
-        total: total,
       };
 
-      await orderService
-        .updateItemOrder(token as string, order?.id, data)
+      await requisitionService
+        .updateItemRequisition(token as string, requisition?.id, data)
         .then((response) => {
-          dialogs.alert("Se ha actualizado la orden con exito", {
+          dialogs.alert("Se ha actualizado la requisicion con exito", {
             title: "Actualizacion",
           });
-          fetchOrder();
+          fetchRequisition();
         })
         .catch((err) => {
-          dialogs.alert("Ha ocurrido un error al actualizar la orden " + err, {
-            title: "Error",
-          });
+          dialogs.alert(
+            "Ha ocurrido un error al actualizar la requisicion " + err,
+            {
+              title: "Error",
+            }
+          );
         });
 
       table.setEditingRow(null);
     };
 
-  const handleSaveCancelOrder = async () => {
-    setLoadingSave(true);
-    setSuccess(false);
-    await orderService
-      .restoreOrder(token as string, id as string)
-      .then((res) => {
-        setSuccess(true);
-        if (res) {
-          router.push(`/orders/list/`);
-        }
-      })
-      .catch((err) => {
-        dialogs.alert(`Error al restaurar la orden ${err}`);
-        console.error("Error al restaurar la orden: " + err);
-        setSuccess(false);
-      })
-      .finally(() => {
-        setLoadingSave(false);
-      });
-  };
-
   useEffect(() => {
     if (id) {
-      fetchOrder();
-      handleGetCurrencies();
-      handleGetProviders();
+      fetchRequisition();
       handleGetDepartments();
     }
   }, [id]);
 
-  const columns: MRT_ColumnDef<OrderDetail>[] = [
+  const columns: MRT_ColumnDef<RequisitionDetail>[] = [
     {
       header: "rowId",
       accessorKey: "id",
@@ -376,15 +305,6 @@ export default function EditOrderPage() {
       header: "Cantidad",
       accessorKey: "quantity",
     },
-    {
-      header: "Precio Unitario",
-      accessorKey: "unit_price",
-    },
-    {
-      header: "Total",
-      accessorKey: "total",
-      enableEditing: false,
-    },
   ];
 
   const openDeleteConfirmModal = async (row: MRT_Row<any>) => {
@@ -392,14 +312,14 @@ export default function EditOrderPage() {
       "Deseas eliminar el documento de la lista?",
       { title: "Eliminar item" }
     );
-    if (result && order) {
-      await orderService
-        .deleteDocument(token as string, row.original.name, order.id)
+    if (result && requisition) {
+      await requisitionService
+        .deleteDocument(token as string, row.original.name, requisition.id)
         .then((response) => {
           dialogs.alert("Se ha eliminado el documento con exito", {
             title: "Actualizacion",
           });
-          fetchOrder();
+          fetchRequisition();
         })
         .catch((err) => {
           dialogs.alert(
@@ -414,35 +334,44 @@ export default function EditOrderPage() {
     }
   };
 
-  const openDeleteConfirmModalItem = async (row: MRT_Row<OrderDetail>) => {
+  const openDeleteConfirmModalItem = async (
+    row: MRT_Row<RequisitionDetail>
+  ) => {
     const result = await dialogs.confirm(
       "Deseas eliminar el elemento de la lista?",
       { title: "Eliminar item" }
     );
-    if (result && order && row.original.id) {
-      await orderService
-        .deleteItemInOrder(token as string, row.original.id, order.id!)
+    if (result && requisition && row.original.id) {
+      await requisitionService
+        .deleteItemInRequisition(
+          token as string,
+          row.original.id,
+          requisition.id!
+        )
         .then((response) => {
-          dialogs.alert("Se ha actualizado la orden con exito", {
+          dialogs.alert("Se ha actualizado la requisicion con exito", {
             title: "Actualizacion",
           });
-          fetchOrder();
+          fetchRequisition();
         })
         .catch((err) => {
-          dialogs.alert("Ha ocurrido un error al actualizar la orden " + err, {
-            title: "Error",
-          });
+          dialogs.alert(
+            "Ha ocurrido un error al actualizar la requisicion " + err,
+            {
+              title: "Error",
+            }
+          );
         });
 
       return;
     }
 
-    dialogs.alert("No se encotro orden activa ni productos", {
+    dialogs.alert("No se encotro requisicion activa ni productos", {
       title: "Error",
     });
   };
 
-  const handleSaveDocuments: MRT_TableOptions<OrderDetail>["onCreatingRowSave"] =
+  const handleSaveDocuments: MRT_TableOptions<RequisitionDetail>["onCreatingRowSave"] =
     async ({ values, table }) => {
       if (!files) {
         dialogs.alert("No has seleccionado ningun documento para subirlo", {
@@ -452,8 +381,8 @@ export default function EditOrderPage() {
         return;
       }
 
-      if (!order) {
-        dialogs.alert("No existe una orden en curso", {
+      if (!requisition) {
+        dialogs.alert("No existe una requisicion en curso", {
           title: "Alerta",
         });
 
@@ -477,18 +406,21 @@ export default function EditOrderPage() {
         content: base64File.split(",")[1],
       }));
 
-      await orderService
-        .addDocument(token as string, order?.id, formatFiles)
+      await requisitionService
+        .addDocument(token as string, requisition?.id, formatFiles)
         .then((response) => {
           dialogs.alert("Se ha actualizado los documentos correctamente", {
             title: "Actualizacion",
           });
-          fetchOrder();
+          fetchRequisition();
         })
         .catch((err) => {
-          dialogs.alert("Ha ocurrido un error al actualizar la orden " + err, {
-            title: "Error",
-          });
+          dialogs.alert(
+            "Ha ocurrido un error al actualizar la requisicion " + err,
+            {
+              title: "Error",
+            }
+          );
         });
 
       setFiles([]);
@@ -496,32 +428,36 @@ export default function EditOrderPage() {
     };
 
   const handleSaveHeaders = async () => {
-    if (!order || !order.area || !order.department || !order.currency) {
+    if (
+      !requisition ||
+      !requisition.area ||
+      !requisition.department
+    ) {
       return;
     }
 
-    const data: OrderUpdateHeaders = {
-      comments: order.comments,
-      description: order.description,
-      concept_id: parseInt(order.concept),
-      area_id: parseInt(order.area),
-      department_id: parseInt(order.department),
-      supplier_id: parseInt(order?.supplier),
-      currency_id: parseInt(order.currency),
+    const data: RequisitionUpdateHeaders = {
+      comments: requisition.comments,
+      concept_id: parseInt(requisition.concept),
+      area_id: parseInt(requisition.area),
+      department_id: parseInt(requisition.department),
     };
 
-    await orderService
-      .updateHeaders(token as string, order?.id, data)
+    await requisitionService
+      .updateHeaders(token as string, requisition?.id, data)
       .then((response) => {
-        dialogs.alert("Se ha actualizado la orden con exito", {
+        dialogs.alert("Se ha actualizado la requisicion con exito", {
           title: "Actualizacion",
         });
-        fetchOrder();
+        fetchRequisition();
       })
       .catch((err) => {
-        dialogs.alert("Ha ocurrido un error al actualizar la orden " + err, {
-          title: "Error",
-        });
+        dialogs.alert(
+          "Ha ocurrido un error al actualizar la requisicion " + err,
+          {
+            title: "Error",
+          }
+        );
       });
   };
 
@@ -533,11 +469,11 @@ export default function EditOrderPage() {
     );
   }
 
-  if (!order) {
+  if (!requisition) {
     return (
       <Container maxWidth={false}>
         <Typography variant="h6" color="error">
-          No se encontró la orden.
+          No se encontró la requisicion.
         </Typography>
       </Container>
     );
@@ -552,7 +488,7 @@ export default function EditOrderPage() {
             <InputLabel id="departamento-label">Departamento</InputLabel>
             <Select
               labelId="department-label"
-              value={order.department}
+              value={requisition.department}
               onChange={handleSelectedDepartment}
             >
               {departments.map((department) => (
@@ -569,7 +505,7 @@ export default function EditOrderPage() {
                 <InputLabel id="area-label">Áreas</InputLabel>
                 <Select
                   labelId="area-label"
-                  value={order.area}
+                  value={requisition.area}
                   onChange={handleSelectArea}
                 >
                   {areas.map((area) => (
@@ -587,7 +523,7 @@ export default function EditOrderPage() {
                   labelId="concepto-label"
                   id="concept"
                   name="concept"
-                  value={order.concept}
+                  value={requisition.concept}
                   onChange={handleSelectedConcept}
                   disabled={concepts.length === 0}
                 >
@@ -601,87 +537,24 @@ export default function EditOrderPage() {
             </Grid>
           </Grid>
 
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <FormControl sx={{ width: "60%" }}>
-              <InputLabel id="beneficiario-label">Beneficiario</InputLabel>
-              <Select
-                labelId="beneficiario-label"
-                value={order.supplier}
-                onChange={(e) =>
-                  setOrder({ ...order, supplier: e.target.value })
-                }
-              >
-                {providers.map((provider) => (
-                  <MenuItem key={provider.id} value={provider.id}>
-                    {provider.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl sx={{ width: "35%" }}>
-              <InputLabel id="moneda-label">Moneda</InputLabel>
-              <Select
-                labelId="moneda-label"
-                id="currency"
-                value={order.currency}
-                onChange={(e) =>
-                  setOrder({ ...order, currency: e.target.value })
-                }
-              >
-                {currencies.map((currency) => (
-                  <MenuItem key={currency.id} value={currency.id}>
-                    {currency.description}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel id="description-label" sx={{ mb: 2 }}>
-              Descripcion del pago
-            </InputLabel>
-            <TextArea
-              name="descriptionPayment"
-              value={order.description}
-              onChange={(e) =>
-                setOrder({ ...order, description: e.target.value })
-              }
-              maxRows={2}
-              placeholder="Descripción del Pago"
-              minRows={3}
-            />
-          </FormControl>
-
           <FormControl fullWidth>
             <InputLabel id="commentaries-label" sx={{ mb: 2 }}>
               Comentarios
             </InputLabel>
             <TextArea
               name="descriptionPayment"
-              value={order.comments}
-              onChange={(e) => setOrder({ ...order, comments: e.target.value })}
+              value={requisition.comments}
+              onChange={(e) =>
+                setRequisition({ ...requisition, comments: e.target.value })
+              }
               maxRows={2}
               placeholder="Comentarios del Pago"
               minRows={3}
             />
           </FormControl>
 
+          {/* // seccion de guardados */}
           <Grid container sx={{ mb: 2, mt: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
-              <OutlinedInput
-                type="money"
-                contentEditable={false}
-                id="outlined-adornment-amount"
-                label="Total"
-                value={order.total.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-                disabled
-              />
-            </FormControl>
             <Button
               variant="contained"
               fullWidth
@@ -694,10 +567,14 @@ export default function EditOrderPage() {
           </Grid>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 8 }} sx={{ border: "1px solid #ccc", p: 2 }}>
+        {/* Sección derecha: Tabla */}
+        <Grid
+          size={{ xs: 12, md: 8 }}
+          sx={{ brequisition: "1px solid #ccc", p: 2 }}
+        >
           <MaterialReactTable
             columns={columns}
-            data={order.details}
+            data={requisition.details}
             onCreatingRowSave={handleCreateProduct}
             onEditingRowSave={handleEditProduct}
             state={{
@@ -790,6 +667,7 @@ export default function EditOrderPage() {
           />
         </Grid>
 
+        {/* Sección inferior: Documentos */}
         <Grid size={{ xs: 12 }}>
           <Typography variant="h6" gutterBottom>
             Documentos adjuntos
@@ -852,36 +730,6 @@ export default function EditOrderPage() {
           />
         </Grid>
       </Grid>
-      {order.status_id == 7 && (
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: 24,
-            right: 24,
-            zIndex: 999,
-          }}
-        >
-          <Fab
-            aria-label="save"
-            sx={buttonSx}
-            onClick={handleSaveCancelOrder}
-          >
-            {success ? <CheckIcon /> : <SaveIcon />}
-          </Fab>
-          {loadingSave && (
-            <CircularProgress
-              size={68}
-              sx={{
-                color: green[500],
-                position: "absolute",
-                top: -6,
-                left: -6,
-                zIndex: 1,
-              }}
-            />
-          )}
-        </Box>
-      )}
     </Container>
   );
 }

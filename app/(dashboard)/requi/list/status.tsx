@@ -1,8 +1,8 @@
 import PendingIcon from "@mui/icons-material/Pending";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
-import CreditScoreIcon from "@mui/icons-material/CreditScore";
 import PreviewIcon from "@mui/icons-material/Preview";
+import CreditScoreIcon from "@mui/icons-material/CreditScore";
 import { Box, Chip, Typography } from "@mui/material";
 
 const stategyStatus: Record<
@@ -41,11 +41,11 @@ const stategyStatus: Record<
   },
 };
 
-interface StatusOrderProps {
+interface StatusRequiProps {
   status: string;
 }
 
-export const StatusOrderComponent = ({ status }: StatusOrderProps) => {
+export const StatusRequisitionComponent = ({ status }: StatusRequiProps) => {
   const { Icon, color, text } = stategyStatus[status];
   return (
     <Box display="flex" alignItems="center" justifyContent="center">

@@ -1,28 +1,15 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  MRT_EditActionButtons,
   MaterialReactTable,
   // createRow,
   type MRT_ColumnDef,
   type MRT_Row,
   type MRT_TableOptions,
   useMaterialReactTable,
-  MRT_PaginationState,
   MRT_ActionMenuItem,
 } from "material-react-table";
-import {
-  Box,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Menu,
-  MenuItem,
-  Stack,
-  Tooltip,
-} from "@mui/material";
+
 import {
   QueryClient,
   QueryClientProvider,
@@ -36,34 +23,27 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import Typography from "@mui/material/Typography";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import {
-  Order,
-  OrderDetail,
-  OrderHistory,
-} from "@/app/interfaces/Order.interface";
-import { orderService } from "@/app/api/orderService";
-import { StatusOrderComponent } from "./status";
+import { Requisition } from "@/app/interfaces/Requisitions.interface";
+import { requisitionService } from "@/app/api/requisitionService";
+import { StatusRequisitionComponent } from "./status";
 import dayjs from "dayjs";
 import { useDialogs } from "@toolpad/core";
-import DialogStatusOrder from "@/app/components/dialogs/ChangeStatusOrder";
-import DialogHistoryOrder from "@/app/components/dialogs/HistoryOrder";
-import DialogDocumentsOrder from "@/app/components/dialogs/DocumentsOrder";
 import { useSession } from "@toolpad/core";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { StatusRole } from "@/app/mocks/statusRole";
 import Viewer from "@/app/components/viewer";
 import { useRouter } from "next/navigation";
-import { MRT_Localization_ES } from 'material-react-table/locales/es';
+import { MRT_Localization_ES } from "material-react-table/locales/es";
+import DialogHistoryRequisition from "@/app/components/dialogs/HistoryRequisition";
+import DialogDocumentsRequisition from "@/app/components/dialogs/DocumentsRequisition";
+import DialogStatusRequisition from "@/app/components/dialogs/ChangeStatusRequi";
 
-const RUDOrders = () => {
+const RUDRequisitions = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
-  const token = session?.user?.access_token;
 
   const router = useRouter();
 
@@ -73,7 +53,9 @@ const RUDOrders = () => {
     session?.user?.is_leader_department ||
     [6, 7].includes(session?.user?.role as number);
 
-  const columns = useMemo<MRT_ColumnDef<Order>[]>(
+  const token = session?.user?.access_token;
+
+  const columns = useMemo<MRT_ColumnDef<Requisition>[]>(
     () => [
       {
         accessorKey: "id",
@@ -86,9 +68,7 @@ const RUDOrders = () => {
         header: "Estado",
         Cell: ({ cell }) => {
           const status = cell.getValue() as string;
-          debugger;
-          console.log(status, "aqui")
-          return <StatusOrderComponent status={status} />;
+          return <StatusRequisitionComponent status={status} />;
         },
       },
       {
@@ -106,28 +86,13 @@ const RUDOrders = () => {
         },
       },
       {
-        accessorKey: "supplier",
-        header: "Proveedor",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.supplier,
-          helperText: validationErrors?.supplier,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              supplier: undefined,
-            }),
-        },
-      },
-      {
         accessorKey: "created_user",
         header: "Creado por",
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.created_user,
           helperText: validationErrors?.created_user,
-          //remove any previous validation errors when Order focuses on the input
+          //remove any previous validation errors when Requisition focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
@@ -139,33 +104,19 @@ const RUDOrders = () => {
         accessorKey: "created_at",
         header: "Fecha de Creación",
         Cell: ({ cell }) => {
-          return dayjs(cell.getValue() as string | number | Date)
-            .format("DD/MM/YYYY HH:mm");
+          return dayjs(cell.getValue() as string | number | Date).format(
+            "DD/MM/YYYY HH:mm"
+          );
         },
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.created_at,
           helperText: validationErrors?.created_at,
-          //remove any previous validation errors when Order focuses on the input
+          //remove any previous validation errors when Requisition focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
               created_at: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "total",
-        header: "Total",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.total,
-          helperText: validationErrors?.total,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              total: undefined,
             }),
         },
       },
@@ -176,26 +127,11 @@ const RUDOrders = () => {
           required: true,
           error: !!validationErrors?.comments,
           helperText: validationErrors?.comments,
-          //remove any previous validation errors when Order focuses on the input
+          //remove any previous validation errors when Requisition focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
               comments: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "description",
-        header: "Descripción",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.description,
-          helperText: validationErrors?.description,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              description: undefined,
             }),
         },
       },
@@ -204,36 +140,34 @@ const RUDOrders = () => {
   );
 
   const {
-    data: fetchedOrders = [],
-    isError: isLoadingOrdersError,
-    isFetching: isFetchingOrders,
-    isLoading: isLoadingOrders,
-  } = useGetOrders(session?.user?.access_token as string);
+    data: fetchedRequisitions = [],
+    isError: isLoadingRequisitionsError,
+    isFetching: isFetchingRequisitions,
+    isLoading: isLoadingRequisitions,
+  } = useGetRequisitions(session?.user?.access_token as string);
   //call UPDATE hook
-  const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
-    useUpdateOrder();
+  const { mutateAsync: updateRequisition, isPending: isUpdatingRequisition } =
+    useUpdateRequisition();
   //call DELETE hook
-  const { mutateAsync: deleteOrder, isPending: isDeletingOrder } =
-    useDeleteOrder();
+  const { mutateAsync: deleteRequisition, isPending: isDeletingRequisition } =
+    useDeleteRequisition();
 
   //UPDATE action
-  const handleSaveOrder: MRT_TableOptions<Order>["onEditingRowSave"] = async ({
-    values,
-    table,
-  }) => {
-    setValidationErrors({});
-    await updateOrder(values);
-    table.setEditingRow(null); //exit editing mode
-  };
+  const handleSaveRequisition: MRT_TableOptions<Requisition>["onEditingRowSave"] =
+    async ({ values, table }) => {
+      setValidationErrors({});
+      await updateRequisition(values);
+      table.setEditingRow(null); //exit editing mode
+    };
 
   //DELETE action
   const openRejectConfirmModal = async (
     menuClose: () => void,
-    row: MRT_Row<Order>
+    row: MRT_Row<Requisition>
   ) => {
-    const result = await dialogs.open(DialogStatusOrder, {
+    const result = await dialogs.open(DialogStatusRequisition, {
       id: row.original.id,
-      status: 7, // rechazada
+      status: "Rechazada",
       title: "Rechazar Orden de Compra",
     });
     if (result === null) {
@@ -241,15 +175,14 @@ const RUDOrders = () => {
       return;
     }
 
-    deleteOrder(row.original.id);
+    deleteRequisition(row.original.id);
     menuClose();
   };
 
   const openAcceptConfirmModal = async (
     menuClose: () => void,
-    row: MRT_Row<Order>
+    row: MRT_Row<Requisition>
   ) => {
-    // se obtiene el siguiente estatus en base al rol que esta autorizando
     const status = StatusRole[session?.user?.role as number];
 
     if (!status) {
@@ -257,7 +190,7 @@ const RUDOrders = () => {
       return;
     }
 
-    const result = await dialogs.open(DialogStatusOrder, {
+    const result = await dialogs.open(DialogStatusRequisition, {
       id: row.original.id,
       status: status,
       title: "Aceptar Orden de Compra",
@@ -267,13 +200,13 @@ const RUDOrders = () => {
       return;
     }
 
-    deleteOrder(row.original.id);
+    deleteRequisition(row.original.id);
     menuClose();
   };
 
   const handleDownloadFile = async (orderId: number) => {
-    return orderService
-      .downloadPDFOrder(token as string, orderId)
+    return requisitionService
+      .downloadPDFRequisition(token as string, orderId)
       .then((response) => {
         return response;
       })
@@ -286,12 +219,15 @@ const RUDOrders = () => {
       });
   };
 
-  const openPDFViewer = async (menuClose: () => void, row: MRT_Row<Order>) => {
-    const file: Blob = await handleDownloadFile(row.original.id)
+  const openPDFViewer = async (
+    menuClose: () => void,
+    row: MRT_Row<Requisition>
+  ) => {
+    const file: Blob = await handleDownloadFile(row.original.id);
 
     const result = await dialogs.open(Viewer, {
       id: row.original.id,
-      file: file
+      file: file,
     });
     if (result === null) {
       menuClose();
@@ -301,11 +237,11 @@ const RUDOrders = () => {
     menuClose();
   };
 
-  const openHistoryOrder = async (
+  const openHistoryRequisition = async (
     menuClose: () => void,
-    row: MRT_Row<Order>
+    row: MRT_Row<Requisition>
   ) => {
-    const result = await dialogs.open(DialogHistoryOrder, {
+    const result = await dialogs.open(DialogHistoryRequisition, {
       id: row.original.id,
     });
     if (result === null) {
@@ -316,11 +252,11 @@ const RUDOrders = () => {
     menuClose();
   };
 
-  const openDocumentsOrder = async (
+  const openDocumentsRequisition = async (
     menuClose: () => void,
-    row: MRT_Row<Order>
+    row: MRT_Row<Requisition>
   ) => {
-    const result = await dialogs.open(DialogDocumentsOrder, {
+    const result = await dialogs.open(DialogDocumentsRequisition, {
       id: row.original.id,
       documents: row.original.documents,
     });
@@ -332,12 +268,15 @@ const RUDOrders = () => {
     menuClose();
   };
 
-  const handleEditingRow = (menuClose: () => void, row: MRT_Row<Order>) => {
-    router.push(`/orders/edit/${row.original.id}`);
+  const handleEditingRow = (
+    menuClose: () => void,
+    row: MRT_Row<Requisition>
+  ) => {
+    router.push(`/requi/edit/${row.original.id}`);
   };
 
-  const availableEdit = (row: MRT_Row<Order>) => {
-    const isAvailable = [1, 7].includes(row.original.status_id);
+  const availableEdit = (row: MRT_Row<Requisition>) => {
+    const isAvailable = [1, 4].includes(row.original.status_id);
     const isCreator =
       row.original.created_user?.toLowerCase() ===
       session?.user?.name?.toLowerCase();
@@ -347,13 +286,13 @@ const RUDOrders = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data: fetchedOrders,
+    data: fetchedRequisitions,
     positionActionsColumn: "last",
     enableRowActions: true,
     enableStickyHeader: true,
     enableExpandAll: false,
     getRowId: (row) => (row.id ? row.id.toString() : ""),
-    muiToolbarAlertBannerProps: isLoadingOrdersError
+    muiToolbarAlertBannerProps: isLoadingRequisitionsError
       ? {
           color: "error",
           children: "Error loading data",
@@ -392,7 +331,7 @@ const RUDOrders = () => {
         table={table}
       />,
       <div key="approbe">
-        {(isPower && ![7,8].includes(row.original.status_id)) && (
+        {isPower && row.original.status_id != 7 && (
           <MRT_ActionMenuItem
             icon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
             key="approbe"
@@ -403,7 +342,7 @@ const RUDOrders = () => {
         )}
       </div>,
       <div key="reject">
-        {isPower && ![7,8].includes(row.original.status_id) && (
+        {isPower && (
           <MRT_ActionMenuItem
             icon={<ThumbDownIcon sx={{ color: "#f44336" }} />}
             key="dismiss"
@@ -417,40 +356,40 @@ const RUDOrders = () => {
         icon={<TimelineIcon sx={{ color: "primary" }} />}
         key="history"
         label="Historial"
-        onClick={() => openHistoryOrder(closeMenu, row)}
+        onClick={() => openHistoryRequisition(closeMenu, row)}
         table={table}
       />,
       <MRT_ActionMenuItem
         icon={<PictureAsPdfIcon sx={{ color: "primary" }} />}
         key="docs"
         label="Documentos"
-        onClick={() => openDocumentsOrder(closeMenu, row)}
+        onClick={() => openDocumentsRequisition(closeMenu, row)}
         disabled={!row.original.documents}
         table={table}
       />,
     ],
     state: {
-      isLoading: isLoadingOrders,
-      isSaving: isUpdatingOrder || isDeletingOrder,
-      showAlertBanner: isLoadingOrdersError,
-      showProgressBars: isFetchingOrders,
+      isLoading: isLoadingRequisitions,
+      isSaving: isUpdatingRequisition || isDeletingRequisition,
+      showAlertBanner: isLoadingRequisitionsError,
+      showProgressBars: isFetchingRequisitions,
     },
   });
 
   return <MaterialReactTable table={table} />;
 };
 
-function useGetOrders(token: string) {
-  return useQuery<Order[]>({
-    queryKey: ["Orders"],
+function useGetRequisitions(token: string) {
+  return useQuery<Requisition[]>({
+    queryKey: ["Requisitions"],
     queryFn: async () => {
-      return await orderService
+      return await requisitionService
         .getAll(token)
         .then((response) => {
           return response;
         })
         .catch((error) => {
-          alert("Error loading Orders " + error);
+          alert("Error loading Requisitions " + error);
           return [];
         });
     },
@@ -458,42 +397,48 @@ function useGetOrders(token: string) {
   });
 }
 
-function useUpdateOrder() {
+function useUpdateRequisition() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (order: Order) => {},
-    onMutate: (newOrderInfo: Order) => {
-      queryClient.setQueryData(["Orders"], (prevOrders: any) =>
-        prevOrders?.map((prevOrder: Order) =>
-          prevOrder.id === newOrderInfo.id ? newOrderInfo : prevOrder
+    mutationFn: async (Requisition: Requisition) => {},
+    onMutate: (newRequisitionInfo: Requisition) => {
+      queryClient.setQueryData(["Requisitions"], (prevRequisitions: any) =>
+        prevRequisitions?.map((prevRequisition: Requisition) =>
+          prevRequisition.id === newRequisitionInfo.id
+            ? newRequisitionInfo
+            : prevRequisition
         )
       );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Orders"] }), //refetch Orders after mutation, disabled for demo
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["Requisitions"] }), //refetch Requisitions after mutation, disabled for demo
   });
 }
 
-function useDeleteOrder() {
+function useDeleteRequisition() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (orderId: number) => {
+    mutationFn: async (RequisitionId: number) => {
       return true;
     },
-    onMutate: (OrderId: number) => {
-      queryClient.setQueryData(["Orders"], (prevOrders: any) =>
-        prevOrders?.filter((Order: Order) => Order.id !== OrderId)
+    onMutate: (RequisitionId: number) => {
+      queryClient.setQueryData(["Requisitions"], (prevRequisitions: any) =>
+        prevRequisitions?.filter(
+          (Requisition: Requisition) => Requisition.id !== RequisitionId
+        )
       );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Orders"] }), //refetch Orders after mutation, disabled for demo
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["Requisitions"] }), //refetch Requisitions after mutation, disabled for demo
   });
 }
 
 const queryClient = new QueryClient();
 
-const OrdersProviders = () => (
+const RequisitionsProviders = () => (
   <QueryClientProvider client={queryClient}>
-    <RUDOrders />
+    <RUDRequisitions />
   </QueryClientProvider>
 );
 
-export default OrdersProviders;
+export default RequisitionsProviders;

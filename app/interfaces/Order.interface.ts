@@ -1,7 +1,4 @@
 import dayjs from "dayjs";
-import { ConceptSelect } from "./Concepts.interface";
-import { CurrencySelect } from "./Currency.interface";
-import { SelectBase } from "./SelecteBase.interface";
 
 export interface ProductsOrder {
   id: string;
@@ -104,7 +101,7 @@ export interface OrderHistory {
 
 export interface ChangeStatus {
   orderId: number;
-  status: string;
+  status: number;
   comments: string;
 }
 

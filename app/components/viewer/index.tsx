@@ -17,7 +17,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { ViewerProps } from "@/app/interfaces/Viewer.interface";
 import { DialogProps, useDialogs } from "@toolpad/core/useDialogs";
-import { orderService } from "@/app/api/orderService";
 import { pdfjs } from "react-pdf";
 import { Skeleton } from "@mui/material";
 import { CustomSession } from "@/app/interfaces/Session.interface";
@@ -33,19 +32,14 @@ const Viewer = ({
 }: DialogProps<ViewerProps, number | null>) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState(1);
-  const [pdf, setPdf] = useState<Blob>();
-  const [filename, setFilename] = useState<string>();
   const [scale, setScale] = useState(1.0);
-  const [loading, setLoading] = useState(false);
-  const dialogs = useDialogs();
   const session = useSession<CustomSession>();
-  const token = session?.user?.access_token;
 
   const downloadPDF = () => {
-    if (!pdf) {
+    if (!payload.file) {
       return;
     }
-    const url = window.URL.createObjectURL(new Blob([pdf]));
+    const url = window.URL.createObjectURL(new Blob([payload.file]));
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", `orden_${payload.id}.pdf`);
@@ -74,25 +68,21 @@ const Viewer = ({
     setScale((prev) => (next ? prev + 0.5 : prev - 0.5));
   };
 
-  const handleDownloadFile = async () => {
-    setLoading(true);
-    orderService
-      .downloadPDFOrder(token as string, Number(payload.id))
-      .then((response) => {
-        setPdf(response);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        dialogs.alert("Error al descargar el documento " + error, {
-          title: "Error",
-        });
-      });
-  };
-
-  useEffect(() => {
-    handleDownloadFile();
-  }, []);
+  // const handleDownloadFile = async () => {
+  //   setLoading(true);
+  //   orderService
+  //     .downloadPDFOrder(token as string, Number(payload.id))
+  //     .then((response) => {
+  //       setPdf(response);
+  //       setLoading(false);
+  //     })
+  //     .catch((error) => {
+  //       setLoading(false);
+  //       dialogs.alert("Error al descargar el documento " + error, {
+  //         title: "Error",
+  //       });
+  //     });
+  // };
 
   return (
     <Dialog
@@ -102,7 +92,7 @@ const Viewer = ({
       aria-labelledby="pdf-viewer-title"
       fullWidth
     >
-      {!pdf ? (
+      {!payload.file ? (
         <Skeleton variant="rectangular" height={200} />
       ) : (
         <>
@@ -139,7 +129,7 @@ const Viewer = ({
           </DialogTitle>
           <DialogContent dividers>
             <Box display="flex" flexDirection="column" alignItems="center">
-              <Document file={pdf} onLoadSuccess={onDocumentLoadSuccess}>
+              <Document file={payload.file} onLoadSuccess={onDocumentLoadSuccess}>
                 <Page
                   pageNumber={pageNumber}
                   scale={scale}

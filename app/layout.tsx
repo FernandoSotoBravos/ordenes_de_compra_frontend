@@ -29,26 +29,26 @@ export default async function RootLayout({
     title: "Dashboard",
     icon: <DashboardIcon />,
   },
-  // {
-  //   segment: "requisitions",
-  //   title: "Requisiciones",
-  //   icon: <ArticleOutlinedIcon />,
-  //   children: [
-  //     {
-  //       segment: "create",
-  //       title: "Crear nueva requisicion de compra",
-  //     },
-  //     {
-  //       segment: "list",
-  //       title: "Listado de requisiciones",
-  //     },
-  //     {
-  //       segment: "edit",
-  //       title: "Editar requisicion",
-  //       pattern: 'edit/:id',
-  //     },
-  //   ],
-  // },
+  {
+    segment: "requi",
+    title: "Requisiciones",
+    icon: <ArticleOutlinedIcon />,
+    children: [
+      {
+        segment: "create",
+        title: "Crear nueva requisicion de compra",
+      },
+      {
+        segment: "list",
+        title: "Listado de requisiciones",
+      },
+      {
+        segment: "edit",
+        title: "Editar requisicion",
+        pattern: 'edit/:id',
+      },
+    ],
+  },
   {
     segment: "orders",
     title: "Ordenes",
@@ -100,7 +100,7 @@ export default async function RootLayout({
 
   if ([2, 4, 5].includes(session?.user?.role as number)) {
     // @ts-ignore
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "catalogs")
+    NAVIGATION = NAVIGATION.filter((nav) => !["catalogs", "orders"].includes(nav.segment))
   }
 
   return (

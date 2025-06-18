@@ -130,7 +130,7 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
         product.id === values.id ? { ...values, total } : product
       );
       setTableData(updatedTableData);
-      table.setCreatingRow(null);
+      table.setEditingRow(null);
     };
 
   const openDeleteConfirmModal = async (row: MRT_Row<ProductsOrder>) => {
@@ -230,10 +230,7 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
           width: "100%",
         }}
       >
-        {/* Puedes poner algo a la izquierda si lo deseas, o dejarlo vacío */}
         <Box />
-
-        {/* Total alineado a la derecha pero dejando espacio antes de la paginación */}
         <FormControl sx={{ m: 1, width: 200 }}>
           <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
           <OutlinedInput
