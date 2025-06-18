@@ -177,22 +177,6 @@ function CreateRequisitionPage() {
     }
   }, [token]);
 
-  const handleChange = (
-    event:
-      | React.ChangeEvent<
-          | HTMLInputElement
-          | HTMLTextAreaElement
-          | { value: unknown; name?: string }
-        >
-      | SelectChangeEvent<string>
-  ) => {
-    const { name, value } = event.target;
-    setFormValues({
-      ...formValues,
-      [name as string]: value,
-    });
-  };
-
   const handleCleanForm = () => {
     setTableData([]);
     setFiles([]);
@@ -205,6 +189,7 @@ function CreateRequisitionPage() {
       comments: "",
       products: [],
     });
+    setSuccess(false);
   };
 
   const handleProductsChange = (products: RequisitionCreate["products"]) => {

@@ -1,14 +1,14 @@
 // export const StatusRole: Record<number, string | null> = {
-//   4: "Creada",
-//   2: "Aprobada por Líder",
-//   3: "Aprobada por Líder",
-//   6: "Aprobada por contralor",
-//   7: "Finalizado",
+//   4: "Creada" (1),
+//   2: "Aprobada por Líder de area" (10),
+//   3: "Aprobada por Líder de departamento" (2),
+//   6: "Aprobada por contralor" (3),
+//   7: "Finalizado" (8),
 // };
 
 export const StatusRole: Record<number, number | null> = {
   4: 1,
-  2: 2,
+  2: 10,
   3: 2,
   6: 3,
 };

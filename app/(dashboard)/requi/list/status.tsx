@@ -2,6 +2,7 @@ import PendingIcon from "@mui/icons-material/Pending";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import PreviewIcon from "@mui/icons-material/Preview";
+import CreditScoreIcon from "@mui/icons-material/CreditScore";
 import { Box, Chip, Typography } from "@mui/material";
 
 const stategyStatus: Record<
@@ -16,12 +17,22 @@ const stategyStatus: Record<
   2: {
     Icon: PreviewIcon,
     color: "#2196F3",
-    text: "Aprobado por Lider",
+    text: "Aprobado por Lider de Departamento",
+  },
+  10: {
+    Icon: PreviewIcon,
+    color: "#2196F3",
+    text: "Aprobado por Lider de Area",
   },
   3: {
     Icon: CheckCircleIcon,
     color: "#4CAF50",
     text: "Aprobado por Contralor",
+  },
+  8: {
+    Icon: CreditScoreIcon,
+    color: "#4CAF50",
+    text: "Finalizada",
   },
   7: {
     Icon: ErrorIcon,

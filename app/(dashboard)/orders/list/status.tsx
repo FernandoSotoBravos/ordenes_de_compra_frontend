@@ -17,7 +17,12 @@ const stategyStatus: Record<
   2: {
     Icon: PreviewIcon,
     color: "#2196F3",
-    text: "Aprobado por Lider",
+    text: "Aprobado por Lider de Departamento",
+  },
+  10: {
+    Icon: PreviewIcon,
+    color: "#2196F3",
+    text: "Aprobado por Lider de Area",
   },
   3: {
     Icon: CheckCircleIcon,

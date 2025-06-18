@@ -86,6 +86,8 @@ const RUDOrders = () => {
         header: "Estado",
         Cell: ({ cell }) => {
           const status = cell.getValue() as string;
+          debugger;
+          console.log(status, "aqui")
           return <StatusOrderComponent status={status} />;
         },
       },
