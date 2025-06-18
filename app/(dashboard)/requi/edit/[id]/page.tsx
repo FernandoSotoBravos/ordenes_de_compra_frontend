@@ -313,7 +313,7 @@ export default function EditrequisitionPage() {
     { header: "Folder", accessorKey: "folder" },
   ];
 
-  const openDeleteConfirmModal = async (row: MRT_Row<any>) => {
+  const openDeleteConfirmModal = async (row: MRT_Row<DocumentsRequisition>) => {
     const result = await dialogs.confirm(
       "Deseas eliminar el documento de la lista?",
       { title: "Eliminar item" }
