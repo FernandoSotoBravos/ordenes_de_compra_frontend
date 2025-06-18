@@ -17,7 +17,7 @@ import { OrderCreate } from "@/app/interfaces/Order.interface";
 
 import Grid from "@mui/material/Grid2";
 import DialogCreateOrder from "@/app/components/dialogs/CreateOrder";
-import CRUDTable from "@/app/components/DataGridCRUD";
+import CRUDTable from "@/app/components/TableProductsOrders";
 import { departmentService } from "@/app/api/departmentService";
 import { areaService } from "@/app/api/areaService";
 import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
@@ -100,7 +100,6 @@ function CreateOrderPage() {
         }
       })
       .catch((error) => {
-        console.log(error);
         dialogs.alert(
           "Ha ocurrido un error al traer las areas del departamento, " +
             error.response.data.detail
@@ -254,7 +253,6 @@ function CreateOrderPage() {
   };
 
   const validateForm = () => {
-    console.log("forms", formValues);
     if (
       formValues.department === "" ||
       formValues.concept === "" ||

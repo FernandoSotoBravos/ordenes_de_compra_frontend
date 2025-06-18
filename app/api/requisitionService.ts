@@ -1,16 +1,19 @@
+import { Documents } from "../interfaces/Order.interface";
 import {
+  AddProductBase,
+  EditProductRequisition,
+} from "../interfaces/Product.interface";
+import {
+  RequisitionCreateProps,
+  RequisitionUpdateHeaders,
   ChangeStatus,
-  Documents,
-  OrderCreateProps,
-  OrderUpdateHeaders,
-} from "../interfaces/Order.interface";
-import { AddProduct, EditProduct } from "../interfaces/Product.interface";
+} from "../interfaces/Requisitions.interface";
 import { fetchWrapper } from "./axiosInstance";
 
-const create = async (order: OrderCreateProps, token: string) => {
+const create = async (Requisition: RequisitionCreateProps, token: string) => {
   return fetchWrapper
-    .post("/orders/", {
-      data: order,
+    .post("/requisitions/", {
+      data: Requisition,
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -26,10 +29,10 @@ const create = async (order: OrderCreateProps, token: string) => {
 const updateHeaders = async (
   token: string,
   id: number,
-  data: OrderUpdateHeaders
+  data: RequisitionUpdateHeaders
 ) => {
   return fetchWrapper
-    .put(`/orders/headers/${id}`, {
+    .put(`/requisitions/headers/${id}`, {
       data: data,
       headers: {
         Authorization: "Bearer " + token,
@@ -43,9 +46,13 @@ const updateHeaders = async (
     });
 };
 
-const addItemToOrder = async (token: string, id: number, data: AddProduct) => {
+const addItemToRequisition = async (
+  token: string,
+  id: number,
+  data: AddProductBase
+) => {
   return fetchWrapper
-    .put(`/orders/${id}/add_product`, {
+    .put(`/requisitions/${id}/add_product`, {
       data: data,
       headers: {
         Authorization: "Bearer " + token,
@@ -59,13 +66,13 @@ const addItemToOrder = async (token: string, id: number, data: AddProduct) => {
     });
 };
 
-const updateItemOrder = async (
+const updateItemRequisition = async (
   token: string,
   id: number,
-  data: EditProduct
+  data: EditProductRequisition
 ) => {
   return fetchWrapper
-    .put(`/orders/${id}/update_product`, {
+    .put(`/requisitions/${id}/update_product`, {
       data: data,
       headers: {
         Authorization: "Bearer " + token,
@@ -81,7 +88,7 @@ const updateItemOrder = async (
 
 const addDocument = async (token: string, id: number, data: Documents[]) => {
   return fetchWrapper
-    .put(`/orders/${id}/document`, {
+    .put(`/requisitions/${id}/document`, {
       data: { documents: data },
       headers: {
         Authorization: "Bearer " + token,
@@ -97,7 +104,7 @@ const addDocument = async (token: string, id: number, data: Documents[]) => {
 
 const deleteDocument = async (token: string, filename: string, id: number) => {
   return fetchWrapper
-    .delete(`/orders/${id}/document?filename=${filename}`, {
+    .delete(`/requisitions/${id}/document?filename=${filename}`, {
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -110,13 +117,13 @@ const deleteDocument = async (token: string, filename: string, id: number) => {
     });
 };
 
-const deleteItemInOrder = async (
+const deleteItemInRequisition = async (
   token: string,
   id: number,
-  order_id: number
+  requisition_id: number
 ) => {
   return fetchWrapper
-    .delete(`/orders/${order_id}/remove_product/${id}`, {
+    .delete(`/requisitions/${requisition_id}/remove_product/${id}`, {
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -131,7 +138,7 @@ const deleteItemInOrder = async (
 
 const remove = async (id: number, commentaries: string) => {
   return fetchWrapper
-    .delete(`/orders/${id}?comments=${commentaries}`, {})
+    .delete(`/requisitions/${id}?comments=${commentaries}`, {})
     .then((response) => {
       return response.data;
     })
@@ -142,7 +149,7 @@ const remove = async (id: number, commentaries: string) => {
 
 const getById = async (token: string, id: string) => {
   return fetchWrapper
-    .get(`/orders/${id}`, {
+    .get(`/requisitions/${id}`, {
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -170,7 +177,7 @@ const getAll = async (
     params.status = status;
   }
   return fetchWrapper
-    .get("/orders/", {
+    .get("/requisitions/", {
       params: params,
       headers: {
         Authorization: "Bearer " + token,
@@ -186,7 +193,7 @@ const getAll = async (
 
 const changeStatus = async (token: string, props: ChangeStatus) => {
   return fetchWrapper
-    .post(`/orders/${props.orderId}/change_status`, {
+    .post(`/requisitions/${props.requisitionId}/change_status`, {
       data: {
         status: props.status,
         comments: props.comments,
@@ -203,24 +210,9 @@ const changeStatus = async (token: string, props: ChangeStatus) => {
     });
 };
 
-const restoreOrder = async (token: string, orderId: string) => {
+const getRequisitionHistory = async (token: string, id: number) => {
   return fetchWrapper
-    .put(`/orders/${orderId}/restore`, {
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      return error;
-    });
-};
-
-const getOrderHistory = async (token: string, id: number) => {
-  return fetchWrapper
-    .get(`/orders/${id}/history`, {
+    .get(`/requisitions/${id}/history`, {
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -235,7 +227,7 @@ const getOrderHistory = async (token: string, id: number) => {
 
 const getDocuments = async (token: string, id: number) => {
   return fetchWrapper
-    .get(`/orders/${id}/documents`, {
+    .get(`/requisitions/${id}/documents`, {
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -254,7 +246,7 @@ const downloadDocument = async (
   document: string
 ) => {
   return fetchWrapper
-    .get(`/orders/${id}/document/${document}`, {
+    .get(`/requisitions/${id}/document/${document}`, {
       responseType: "blob",
       headers: {
         Authorization: "Bearer " + token,
@@ -268,9 +260,9 @@ const downloadDocument = async (
     });
 };
 
-const downloadPDFOrder = async (token: string, id: number) => {
+const downloadPDFRequisition = async (token: string, id: number) => {
   return fetchWrapper
-    .get(`/orders/${id}/pdf`, {
+    .get(`/requisitions/${id}/pdf`, {
       responseType: "blob",
       headers: {
         Authorization: "Bearer " + token,
@@ -284,21 +276,20 @@ const downloadPDFOrder = async (token: string, id: number) => {
     });
 };
 
-export const orderService = {
+export const requisitionService = {
   create,
   getAll,
   getById,
   updateHeaders,
-  addItemToOrder,
-  updateItemOrder,
-  deleteItemInOrder,
+  addItemToRequisition,
+  updateItemRequisition,
+  deleteItemInRequisition,
   remove,
   changeStatus,
-  getOrderHistory,
+  getRequisitionHistory,
   getDocuments,
   downloadDocument,
-  downloadPDFOrder,
+  downloadPDFRequisition,
   addDocument,
   deleteDocument,
-  restoreOrder
 };

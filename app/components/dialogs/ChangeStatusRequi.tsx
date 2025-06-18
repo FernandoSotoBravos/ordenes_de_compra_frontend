@@ -7,15 +7,13 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextArea from "../TextArea";
 import Grid from "@mui/material/Grid2";
-import { Order, OrderCreate } from "@/app/interfaces/Order.interface";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { OrderCreateProps } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
-import { orderService } from "@/app/api/orderService";
+import { requisitionService } from "@/app/api/requisitionService";
 import { useDialogs } from "@toolpad/core/useDialogs";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 
-export default function DialogStatusOrder({
+export default function DialogStatusRequisition({
   payload,
   open,
   onClose,
@@ -25,13 +23,13 @@ export default function DialogStatusOrder({
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
 
-  const handleAcceptOrder = () => {
+  const handleStatus = () => {
     setLoading(true);
     const token = session?.user?.access_token;
 
-    orderService
+    requisitionService
       .changeStatus(token as string, {
-        orderId: parseInt(payload.id.toString()),
+        requisitionId: parseInt(payload.id.toString()),
         status: payload.status.toString(),
         comments: comentaries,
       })
@@ -41,7 +39,7 @@ export default function DialogStatusOrder({
         onClose(response);
       })
       .catch((error) => {
-        dialogs.alert(`Erro al rechazar la orden de compra: ${error}`, {
+        dialogs.alert(`Erro al cambiar el estado de la requisicion: ${error}`, {
           title: "Error",
         });
         setLoading(false);
@@ -71,7 +69,7 @@ export default function DialogStatusOrder({
         <LoadingButton
           loading={loading}
           color="primary"
-          onClick={handleAcceptOrder}
+          onClick={handleStatus}
         >
           Guardar
         </LoadingButton>
