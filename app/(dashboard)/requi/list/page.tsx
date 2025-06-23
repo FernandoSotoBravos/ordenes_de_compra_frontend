@@ -51,7 +51,7 @@ const RUDRequisitions = () => {
     session?.user?.is_admin ||
     session?.user?.is_leader_area ||
     session?.user?.is_leader_department ||
-    [6, 7].includes(session?.user?.role as number);
+    [6, 7, 5].includes(session?.user?.role as number);
 
   const token = session?.user?.access_token;
 
@@ -168,7 +168,7 @@ const RUDRequisitions = () => {
     const result = await dialogs.open(DialogStatusRequisition, {
       id: row.original.id,
       status: "Rechazada",
-      title: "Rechazar Orden de Compra",
+      title: "Rechazar Requisicion",
     });
     if (result === null) {
       menuClose();
@@ -193,7 +193,7 @@ const RUDRequisitions = () => {
     const result = await dialogs.open(DialogStatusRequisition, {
       id: row.original.id,
       status: status,
-      title: "Aceptar Orden de Compra",
+      title: "Aceptar Requisicion",
     });
     if (result === null) {
       menuClose();

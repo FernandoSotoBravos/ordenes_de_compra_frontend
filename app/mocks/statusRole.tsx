@@ -2,6 +2,7 @@
 //   4: "Creada" (1),
 //   2: "Aprobada por Líder de area" (10),
 //   3: "Aprobada por Líder de departamento" (2),
+//   5: "Aprobada por Cuentas por Pagar" (5),
 //   6: "Aprobada por contralor" (3),
 //   7: "Finalizado" (8),
 // };
@@ -11,6 +12,7 @@ export const StatusRole: Record<number, number | null> = {
   2: 10,
   3: 2,
   6: 3,
+  5: 5
 };
 
 // El rol es necesario para saber quien esta autorizando o rechazando la orden de compra

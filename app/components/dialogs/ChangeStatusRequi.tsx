@@ -35,7 +35,6 @@ export default function DialogStatusRequisition({
       })
       .then((response) => {
         setLoading(false);
-
         onClose(response);
       })
       .catch((error) => {

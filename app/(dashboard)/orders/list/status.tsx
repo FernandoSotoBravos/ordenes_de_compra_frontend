@@ -17,7 +17,7 @@ const stategyStatus: Record<
   2: {
     Icon: PreviewIcon,
     color: "#2196F3",
-    text: "Aprobado por Lider de Departamento",
+    text: "Aprobado por Cuentas por Pagar",
   },
   10: {
     Icon: PreviewIcon,

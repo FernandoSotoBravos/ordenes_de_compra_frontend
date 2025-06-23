@@ -98,9 +98,15 @@ export default async function RootLayout({
   },
 ];
 
-  if ([2, 4, 5].includes(session?.user?.role as number)) {
+  // si no es usuario de compras eliminar catalogos y ordenes
+  if ([2, 3, 4].includes(session?.user?.role as number)) {
     // @ts-ignore
-    NAVIGATION = NAVIGATION.filter((nav) => !["catalogs", "orders"].includes(nav.segment))
+    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "catalogs")
+  }
+
+  if ( [6].includes(session?.user?.role as number)) {
+    // @ts-ignore
+    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "requi")
   }
 
   return (

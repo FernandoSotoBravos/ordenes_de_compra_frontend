@@ -68,7 +68,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer los conceptos del area, " +
-            error.response.data.detail
+            error.response
         );
         handleCleanForm();
       });
@@ -104,7 +104,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer las areas del departamento, " +
-            error.response.data.detail
+            error.response
         );
         handleCleanForm();
       });
@@ -138,7 +138,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer los departamentos, " +
-            error.response.data.detail
+            error.response
         );
         handleCleanForm();
       });
@@ -153,7 +153,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer los tipo de moneda, " +
-            error.response.data.detail
+            error.response
         );
         handleCleanForm();
       });
@@ -168,7 +168,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer los proveedores, " +
-            error.response.data.detail
+            error.response
         );
         handleCleanForm();
       });
