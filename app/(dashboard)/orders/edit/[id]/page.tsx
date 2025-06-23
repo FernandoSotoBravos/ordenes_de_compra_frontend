@@ -186,7 +186,7 @@ export default function EditOrderPage() {
 
   const handleGetProviders = async () => {
     await suppliersService
-      .getAll()
+      .getAll(token as string)
       .then((data) => {
         setProviders(data);
       })

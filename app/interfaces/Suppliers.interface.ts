@@ -1,6 +1,7 @@
 export interface Supplier {
   id: number;
   name: string;
+  rfc: string;
   contact_name: string;
   email: string;
   phone_number: string;
@@ -21,6 +22,7 @@ export interface Supplier {
 export interface createSupplier {
   name: string;
   contact_name: string;
+  rfc: string;
   email: string;
   phone_number: string;
   address: string;

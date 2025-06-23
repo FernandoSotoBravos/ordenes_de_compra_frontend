@@ -40,11 +40,15 @@ import {
 } from "@/app/interfaces/Suppliers.interface";
 import { suppliersService } from "@/app/api/suppliersService";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import { useSession } from "@toolpad/core";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 const CRUDSuppliers = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
 
   const columns = useMemo<MRT_ColumnDef<Supplier>[]>(
     () => [
@@ -72,13 +76,27 @@ const CRUDSuppliers = () => {
         accessorKey: "contact_name",
         header: "Contacto",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.contact_name,
           helperText: validationErrors?.contact_name,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
               contact_name: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "rfc",
+        header: "RFC",
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.rfc,
+          helperText: validationErrors?.rfc,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              rfc: undefined,
             }),
         },
       },
@@ -100,7 +118,7 @@ const CRUDSuppliers = () => {
         accessorKey: "phone_number",
         header: "Teléfono",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.phone_number,
           helperText: validationErrors?.phone_number,
           onFocus: () =>
@@ -114,7 +132,7 @@ const CRUDSuppliers = () => {
         accessorKey: "address",
         header: "Dirección",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.address,
           helperText: validationErrors?.address,
           onFocus: () =>
@@ -128,7 +146,7 @@ const CRUDSuppliers = () => {
         accessorKey: "city",
         header: "Ciudad",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.city,
           helperText: validationErrors?.city,
           onFocus: () =>
@@ -142,7 +160,7 @@ const CRUDSuppliers = () => {
         accessorKey: "state",
         header: "Estado",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.state,
           helperText: validationErrors?.state,
           onFocus: () =>
@@ -156,7 +174,7 @@ const CRUDSuppliers = () => {
         accessorKey: "country",
         header: "Pais",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.country,
           helperText: validationErrors?.country,
           onFocus: () =>
@@ -170,7 +188,7 @@ const CRUDSuppliers = () => {
         accessorKey: "postal_code",
         header: "Código Postal",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           type: "number",
           error: !!validationErrors?.postal_code,
           helperText: validationErrors?.postal_code,
@@ -187,9 +205,9 @@ const CRUDSuppliers = () => {
         muiEditTextFieldProps: {
           required: true,
           children: [
-            { id: 1, name: "FRONTERA" },
-            { id: 2, name: "NACIONAL" },
-            { id: 3, name: "OBJETO" },
+            { id: 2, name: "FRONTERA" },
+            { id: 3, name: "NACIONAL" },
+            { id: 1, name: "OBJETO" },
           ].map((tax) => (
             <MenuItem key={tax.id} value={tax.id}>
               {tax.name}
@@ -209,7 +227,7 @@ const CRUDSuppliers = () => {
         accessorKey: "account_manager",
         header: "Gerente de Cuenta",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.account_manager,
           helperText: validationErrors?.account_manager,
           onFocus: () =>
@@ -223,7 +241,7 @@ const CRUDSuppliers = () => {
         accessorKey: "bank_name",
         header: "Nombre del Banco",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.bank_name,
           helperText: validationErrors?.bank_name,
           onFocus: () =>
@@ -237,7 +255,7 @@ const CRUDSuppliers = () => {
         accessorKey: "account_number",
         header: "Número de Cuenta",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.account_number,
           helperText: validationErrors?.account_number,
           onFocus: () =>
@@ -251,7 +269,7 @@ const CRUDSuppliers = () => {
         accessorKey: "clabe",
         header: "CLABE",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.clabe,
           helperText: validationErrors?.clabe,
           onFocus: () =>
@@ -265,7 +283,7 @@ const CRUDSuppliers = () => {
         accessorKey: "website",
         header: "Sitio Web",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.website,
           helperText: validationErrors?.website,
         },
@@ -276,20 +294,20 @@ const CRUDSuppliers = () => {
 
   //call CREATE hook
   const { mutateAsync: createSupplier, isPending: isCreatingSupplier } =
-    useCreateSupplier();
+    useCreateSupplier(token as string);
   //call READ hook
   const {
     data: fetchedSuppliers = [],
     isError: isLoadingSuppliersError,
     isFetching: isFetchingSuppliers,
     isLoading: isLoadingSuppliers,
-  } = useGetSuppliers();
+  } = useGetSuppliers(token as string);
   //call UPDATE hook
   const { mutateAsync: updateSupplier, isPending: isUpdatingSupplier } =
-    useUpdateSupplier();
+    useUpdateSupplier(token as string);
   //call DELETE hook
   const { mutateAsync: deleteSupplier, isPending: isDeletingSupplier } =
-    useDeleteSupplier();
+    useDeleteSupplier(token as string);
 
   //CREATE action
   const handleCreateSupplier: MRT_TableOptions<Supplier>["onCreatingRowSave"] =
@@ -368,7 +386,7 @@ const CRUDSuppliers = () => {
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
-          {internalEditComponents} {/* or render custom edit components here */}
+          {internalEditComponents}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -417,7 +435,7 @@ const CRUDSuppliers = () => {
 };
 
 //CREATE hook (post new Supplier to api)
-function useCreateSupplier() {
+function useCreateSupplier(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (supplier: Supplier) => {
@@ -425,6 +443,7 @@ function useCreateSupplier() {
         name: supplier.name,
         contact_name: supplier.contact_name,
         email: supplier.email,
+        rfc: supplier.rfc,
         phone_number: supplier.phone_number,
         address: supplier.address,
         city: supplier.city,
@@ -440,7 +459,7 @@ function useCreateSupplier() {
       };
 
       return await suppliersService
-        .create(newSupplier)
+        .create(token, newSupplier)
         .then((response) => {
           return response;
         })
@@ -462,13 +481,13 @@ function useCreateSupplier() {
 }
 
 //READ hook (get Suppliers from api)
-function useGetSuppliers() {
+function useGetSuppliers(token: string) {
   return useQuery<Supplier[]>({
     queryKey: ["Suppliers"],
     queryFn: async () => {
       //send api request here
       return await suppliersService
-        .getAll()
+        .getAll(token)
         .then((response) => {
           return response;
         })
@@ -484,7 +503,7 @@ function useGetSuppliers() {
 }
 
 //UPDATE hook (put Supplier in api)
-function useUpdateSupplier() {
+function useUpdateSupplier(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (supplier: Supplier) => {
@@ -492,6 +511,7 @@ function useUpdateSupplier() {
         name: supplier.name,
         contact_name: supplier.contact_name,
         email: supplier.email,
+        rfc: supplier.rfc,
         phone_number: supplier.phone_number,
         address: supplier.address,
         city: supplier.city,
@@ -507,7 +527,7 @@ function useUpdateSupplier() {
       };
 
       return await suppliersService
-        .update(supplier.id, updatedSupplier)
+        .update(token, supplier.id, updatedSupplier)
         .then((response) => {
           return response;
         })
@@ -530,12 +550,12 @@ function useUpdateSupplier() {
 }
 
 //DELETE hook (delete Supplier in api)
-function useDeleteSupplier() {
+function useDeleteSupplier(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (supplierId: number) => {
       return await suppliersService
-        .remove(supplierId)
+        .remove(token, supplierId)
         .then((response) => {
           return response;
         })
@@ -564,11 +584,3 @@ const SuppliersProviders = () => (
 );
 
 export default SuppliersProviders;
-
-// const validateRequired = (value: string) => !!value.length;
-
-// function validateSupplier(Supplier: Supplier) {
-//   return {
-//     name: !validateRequired(Supplier.name) ? "El Nombre es Requerido" : "",
-//   };
-// }
