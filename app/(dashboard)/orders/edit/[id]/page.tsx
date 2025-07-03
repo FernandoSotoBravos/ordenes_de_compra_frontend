@@ -212,7 +212,7 @@ export default function EditOrderPage() {
     await orderService
       .getById(token as string, id as string)
       .then((res) => {
-        if (![1, 7].includes(res.status_id)) {
+        if (![1, 2, 7].includes(res.status_id)) {
           dialogs.alert(
             "No puedes editar una orden que ya fue aprobada o no esta rechazada",
             {

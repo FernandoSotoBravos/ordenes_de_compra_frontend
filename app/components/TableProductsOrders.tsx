@@ -78,6 +78,13 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
       {
         accessorKey: "unit_price",
         header: "Precio Unitario",
+        Cell: ({ cell }) => {
+          const value = cell.getValue() as number;
+          return new Intl.NumberFormat("es-MX", {
+            style: "currency",
+            currency: "MXN",
+          }).format(value);
+        },
         muiEditTextFieldProps: {
           type: "number",
           required: true,
@@ -95,6 +102,13 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
         accessorKey: "total",
         header: "Total",
         enableEditing: false,
+        Cell: ({ cell }) => {
+          const value = cell.getValue() as number;
+          return new Intl.NumberFormat("es-MX", {
+            style: "currency",
+            currency: "MXN",
+          }).format(value);
+        },
         muiEditTextFieldProps: {
           type: "number",
           // required: true,

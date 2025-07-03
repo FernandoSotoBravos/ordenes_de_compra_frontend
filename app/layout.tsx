@@ -42,11 +42,11 @@ export default async function RootLayout({
           segment: "list",
           title: "Listado de requisiciones",
         },
-        {
-          segment: "edit",
-          title: "Editar requisicion",
-          pattern: "edit/:id",
-        },
+        // {
+        //   segment: "edit",
+        //   title: "Editar requisicion",
+        //   pattern: "edit/:id",
+        // },
       ],
     },
     {
@@ -62,11 +62,11 @@ export default async function RootLayout({
           segment: "list",
           title: "Listado de ordenes",
         },
-        {
-          segment: "edit",
-          title: "Editar orden",
-          pattern: "edit/:id",
-        },
+        // {
+        //   segment: "edit",
+        //   title: "Editar orden",
+        //   pattern: "edit/:id",
+        // },
       ],
     },
     {
@@ -110,9 +110,13 @@ export default async function RootLayout({
     NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "orders");
   }
 
-  if ([6].includes(session?.user?.role as number)) {
-    // @ts-ignore
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "requi");
+  if (session?.user?.role === 6) {
+    NAVIGATION = NAVIGATION.map((item) => {
+      return {
+        ...item,
+        children: item.children?.filter((child) => child.segment !== "create"),
+      };
+    });
   }
 
   return (

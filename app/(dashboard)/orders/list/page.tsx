@@ -157,6 +157,13 @@ const RUDOrders = () => {
       {
         accessorKey: "total",
         header: "Total",
+        Cell: ({ cell }) => {
+          const value = cell.getValue() as number;
+          return new Intl.NumberFormat("es-MX", {
+            style: "currency",
+            currency: "MXN",
+          }).format(value);
+        },
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.total,
@@ -337,7 +344,7 @@ const RUDOrders = () => {
   };
 
   const availableEdit = (row: MRT_Row<Order>) => {
-    const isAvailable = [1, 7].includes(row.original.status_id);
+    const isAvailable = [1, 2, 7].includes(row.original.status_id);
     const isCreator =
       row.original.created_user?.toLowerCase() ===
       session?.user?.name?.toLowerCase();

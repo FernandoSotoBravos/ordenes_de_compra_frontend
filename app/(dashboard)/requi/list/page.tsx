@@ -52,7 +52,7 @@ const RUDRequisitions = () => {
     session?.user?.is_admin ||
     session?.user?.is_leader_area ||
     session?.user?.is_leader_department ||
-    [6, 7, 5].includes(session?.user?.role as number);
+    [5].includes(session?.user?.role as number);
 
   const token = session?.user?.access_token;
 
@@ -357,7 +357,7 @@ const RUDRequisitions = () => {
         table={table}
       />,
       <div key="approbe">
-        {isPower && row.original.status_id != 7 && (
+        {isPower && ![7, 8].includes(row.original.status_id) && (
           <MRT_ActionMenuItem
             icon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
             key="approbe"
@@ -368,7 +368,7 @@ const RUDRequisitions = () => {
         )}
       </div>,
       <div key="reject">
-        {isPower && (
+        {isPower && ![7, 8].includes(row.original.status_id) && (
           <MRT_ActionMenuItem
             icon={<ThumbDownIcon sx={{ color: "#f44336" }} />}
             key="dismiss"
