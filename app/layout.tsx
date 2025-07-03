@@ -114,6 +114,7 @@ export default async function RootLayout({
     NAVIGATION = NAVIGATION.map((item) => {
       return {
         ...item,
+        // @ts-ignore
         children: item.children?.filter((child) => child.segment !== "create"),
       };
     });
