@@ -99,6 +99,7 @@ function CreateRequisitionPage() {
       .getByDepartment(token as string, departmentId)
       .then((data) => {
         setAreas(data);
+        console.log(session?.user?.area)
         if (
           (session?.user && !session?.user?.super_user) ||
           session?.user?.is_leader_department
@@ -114,10 +115,9 @@ function CreateRequisitionPage() {
         }
       })
       .catch((error) => {
-        console.log(error);
         dialogs.alert(
           "Ha ocurrido un error al traer las areas del departamento, " +
-            error.response.data.detail
+            error.response
         );
         handleCleanForm();
       });

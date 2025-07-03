@@ -170,7 +170,7 @@ export default function SignUp({ open, onClose }: SignUpProps) {
     const data = new FormData(event.currentTarget);
     const user = session?.user?.id || 1;
     await userService
-      .create({
+      .create(token as string, {
         fullname: data.get("name") as string,
         username: data.get("email") as string,
         email: data.get("email") as string,

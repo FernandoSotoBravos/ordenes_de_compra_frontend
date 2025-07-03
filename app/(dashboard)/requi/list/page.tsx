@@ -37,6 +37,7 @@ import { MRT_Localization_ES } from "material-react-table/locales/es";
 import DialogHistoryRequisition from "@/app/components/dialogs/HistoryRequisition";
 import DialogDocumentsRequisition from "@/app/components/dialogs/DocumentsRequisition";
 import DialogStatusRequisition from "@/app/components/dialogs/ChangeStatusRequi";
+import { FormControlLabel, Switch } from "@mui/material";
 
 const RUDRequisitions = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -44,7 +45,7 @@ const RUDRequisitions = () => {
   >({});
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
-
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
   const router = useRouter();
 
   const isPower =
@@ -144,7 +145,7 @@ const RUDRequisitions = () => {
     isError: isLoadingRequisitionsError,
     isFetching: isFetchingRequisitions,
     isLoading: isLoadingRequisitions,
-  } = useGetRequisitions(session?.user?.access_token as string);
+  } = useGetRequisitions(session?.user?.access_token as string, showOnlyMine);
   //call UPDATE hook
   const { mutateAsync: updateRequisition, isPending: isUpdatingRequisition } =
     useUpdateRequisition();
@@ -167,7 +168,7 @@ const RUDRequisitions = () => {
   ) => {
     const result = await dialogs.open(DialogStatusRequisition, {
       id: row.original.id,
-      status: "Rechazada",
+      status: 7, // 7 is the status for rejected
       title: "Rechazar Requisicion",
     });
     if (result === null) {
@@ -276,7 +277,7 @@ const RUDRequisitions = () => {
   };
 
   const availableEdit = (row: MRT_Row<Requisition>) => {
-    const isAvailable = [1, 4].includes(row.original.status_id);
+    const isAvailable = [1, 7].includes(row.original.status_id);
     const isCreator =
       row.original.created_user?.toLowerCase() ===
       session?.user?.name?.toLowerCase();
@@ -314,6 +315,31 @@ const RUDRequisitions = () => {
       }),
     }),
     localization: MRT_Localization_ES,
+    renderTopToolbar: ({ table }) => (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "end",
+          alignItems: "center",
+          padding: "0.5rem 1rem",
+          width: "100%",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showOnlyMine}
+                onChange={(e) => setShowOnlyMine(e.target.checked)}
+              />
+            }
+            label="Mostrar solo mis requisiciones"
+          />
+        </div>
+        {/* Puedes agregar más acciones o botones a la derecha si lo necesitas */}
+      </div>
+    ),
+
     renderRowActionMenuItems: ({ closeMenu, row, table }) => [
       <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
         icon={<RemoveRedEyeIcon />}
@@ -379,10 +405,21 @@ const RUDRequisitions = () => {
   return <MaterialReactTable table={table} />;
 };
 
-function useGetRequisitions(token: string) {
+function useGetRequisitions(token: string, onlyMine: boolean) {
   return useQuery<Requisition[]>({
-    queryKey: ["Requisitions"],
+    queryKey: ["Requisitions", onlyMine],
     queryFn: async () => {
+      if (onlyMine) {
+        return requisitionService
+          .getMyRequisitions(token)
+          .then((response) => {
+            return response;
+          })
+          .catch((error) => {
+            throw error;
+          });
+      }
+
       return await requisitionService
         .getAll(token)
         .then((response) => {

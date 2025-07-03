@@ -9,6 +9,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Fab,
   FormControl,
   IconButton,
   InputAdornment,
@@ -31,6 +32,7 @@ import {
   RequisitionDocument,
   RequisitionUpdateHeaders,
 } from "@/app/interfaces/Requisitions.interface";
+import { green } from "@mui/material/colors";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -56,6 +58,8 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import CheckIcon from "@mui/icons-material/Check";
+import SaveIcon from "@mui/icons-material/Save";
 
 export default function EditrequisitionPage() {
   const { id } = useParams();
@@ -63,6 +67,8 @@ export default function EditrequisitionPage() {
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
   const [loading, setLoading] = useState(true);
+  const [loadingv2, setLoadingv2] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
   const [concepts, setConcepts] = useState<ConceptSelect[]>([]);
@@ -116,6 +122,15 @@ export default function EditrequisitionPage() {
     const currentDepartment = session?.user?.department;
   };
 
+  const buttonSx = {
+    ...(success && {
+      bgcolor: green[500],
+      "&:hover": {
+        bgcolor: green[700],
+      },
+    }),
+  };
+
   const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
     const selectedDepartment = event.target.value;
 
@@ -165,7 +180,7 @@ export default function EditrequisitionPage() {
     await requisitionService
       .getById(token as string, id as string)
       .then((res) => {
-        if (![1, 4].includes(res.status_id)) {
+        if (![1, 7].includes(res.status_id)) {
           dialogs.alert(
             "No puedes editar una requisicion que ya fue aprobada o no esta rechazada",
             {
@@ -173,7 +188,7 @@ export default function EditrequisitionPage() {
             }
           );
 
-          router.push(`/requisitions/list/`);
+          router.push(`/requi/list/`);
           return;
         }
 
@@ -187,7 +202,7 @@ export default function EditrequisitionPage() {
             }
           );
 
-          router.push(`/requisitions/list/`);
+          router.push(`/requi/list/`);
           return;
         }
 
@@ -481,10 +496,30 @@ export default function EditrequisitionPage() {
     );
   }
 
+  const handleSubmit = async () => {
+    setLoadingv2(true);
+    setSuccess(false);
+    await requisitionService
+      .restoreRequi(token as string, id as string)
+      .then((res) => {
+        setSuccess(true);
+        if (res) {
+          router.push(`/requi/list/`);
+        }
+      })
+      .catch((err) => {
+        dialogs.alert(`Error al restaurar la orden ${err}`);
+        console.error("Error al restaurar la orden: " + err);
+        setSuccess(false);
+      })
+      .finally(() => {
+        setLoadingv2(false);
+      });
+  };
+
   return (
     <Container maxWidth={false}>
       <Grid container spacing={2}>
-        {/* Sección izquierda: Campos */}
         <Grid size={{ xs: 12, md: 4 }}>
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="departamento-label">Departamento</InputLabel>
@@ -596,7 +631,6 @@ export default function EditrequisitionPage() {
                   sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
                 >
                   {internalEditComponents}{" "}
-                  {/* or render custom edit components here */}
                 </DialogContent>
                 <DialogActions>
                   <MRT_EditActionButtons
@@ -622,7 +656,6 @@ export default function EditrequisitionPage() {
                   }}
                 >
                   {internalEditComponents}{" "}
-                  {/* or render custom edit components here */}
                 </DialogContent>
                 <DialogActions>
                   <MRT_EditActionButtons
@@ -728,6 +761,32 @@ export default function EditrequisitionPage() {
           />
         </Grid>
       </Grid>
+      {requisition.status_id == 7 && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 999,
+          }}
+        >
+          <Fab aria-label="save" sx={buttonSx} onClick={handleSubmit}>
+            {success ? <CheckIcon /> : <SaveIcon />}
+          </Fab>
+          {loadingv2 && (
+            <CircularProgress
+              size={68}
+              sx={{
+                color: green[500],
+                position: "absolute",
+                top: -6,
+                left: -6,
+                zIndex: 1,
+              }}
+            />
+          )}
+        </Box>
+      )}
     </Container>
   );
 }

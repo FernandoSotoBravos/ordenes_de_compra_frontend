@@ -5,12 +5,15 @@ import {
 } from "../interfaces/Areas.interface";
 import { fetchWrapper } from "./axiosInstance";
 
-const getAll = async (limit: number = 10, page: number = 1) => {
+const getAll = async (token: string, limit: number = 10, page: number = 1) => {
   return fetchWrapper
     .get("/areas/", {
       params: {
         limit: limit,
         page: page,
+      },
+      headers: {
+        Authorization: "Bearer " + token,
       },
     })
     .then((response) => {
@@ -21,10 +24,13 @@ const getAll = async (limit: number = 10, page: number = 1) => {
     });
 };
 
-const create = async (area: CreateArea) => {
+const create = async (token: string, area: CreateArea) => {
   return await fetchWrapper
     .post("/areas/", {
       data: area,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -34,10 +40,13 @@ const create = async (area: CreateArea) => {
     });
 };
 
-const update = async (id: number, area: updateArea) => {
+const update = async (token: string, id: number, area: updateArea) => {
   return fetchWrapper
     .put(`/areas/${id}`, {
       data: area,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -47,9 +56,11 @@ const update = async (id: number, area: updateArea) => {
     });
 };
 
-const remove = async (id: number) => {
+const remove = async (token: string, id: number) => {
   return fetchWrapper
-    .delete(`/areas/${id}`, {})
+    .delete(`/areas/${id}`, {headers: {
+        Authorization: "Bearer " + token,
+      },})
     .then((response) => {
       return response.data;
     })
@@ -58,9 +69,11 @@ const remove = async (id: number) => {
     });
 };
 
-const getById = async (id: string) => {
+const getById = async (token: string, id: string) => {
   return fetchWrapper
-    .get(`/areas/${id}`, {})
+    .get(`/areas/${id}`, {headers: {
+        Authorization: "Bearer " + token,
+      },})
     .then((response) => {
       return response.data;
     })

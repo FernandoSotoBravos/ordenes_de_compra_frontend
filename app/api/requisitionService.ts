@@ -1,3 +1,4 @@
+import { signOut } from "next-auth/react";
 import { Documents } from "../interfaces/Order.interface";
 import {
   AddProductBase,
@@ -147,6 +148,21 @@ const remove = async (id: number, commentaries: string) => {
     });
 };
 
+const restoreRequi = async (token: string, id: string) => {
+  return fetchWrapper
+    .put(`/requisitions/${id}/restore`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
 const getById = async (token: string, id: string) => {
   return fetchWrapper
     .get(`/requisitions/${id}`, {
@@ -179,6 +195,21 @@ const getAll = async (
   return fetchWrapper
     .get("/requisitions/", {
       params: params,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const getMyRequisitions = async (token: string) => {
+  return fetchWrapper
+    .get("/requisitions/me", {
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -292,4 +323,6 @@ export const requisitionService = {
   downloadPDFRequisition,
   addDocument,
   deleteDocument,
+  restoreRequi,
+  getMyRequisitions
 };

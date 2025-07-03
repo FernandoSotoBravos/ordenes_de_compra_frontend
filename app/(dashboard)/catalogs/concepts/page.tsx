@@ -37,16 +37,19 @@ import { conceptService } from "@/app/api/conceptService";
 import { areaService } from "@/app/api/areaService";
 import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import { useSession } from "@toolpad/core";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 const CRUDConcepts = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
-
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token;
   const [areas, setAreas] = useState<SelectBase[]>([]);
 
   useEffect(() => {
-    areaService.getAll().then((data) => {
+    areaService.getAll(token as string).then((data) => {
       setAreas(data);
     });
     // DESCOMENTAR CUANDO SE TOMA LOS VALORES DE LOS USUARIOS
@@ -119,20 +122,20 @@ const CRUDConcepts = () => {
 
   //call CREATE hook
   const { mutateAsync: createConcept, isPending: isCreatingConcept } =
-    useCreateConcept();
+    useCreateConcept(token as string);
   //call READ hook
   const {
     data: fetchedConcepts = [],
     isError: isLoadingConceptsError,
     isFetching: isFetchingConcepts,
     isLoading: isLoadingConcepts,
-  } = useGetConcepts();
+  } = useGetConcepts(token as string);
   //call UPDATE hook
   const { mutateAsync: updateConcept, isPending: isUpdatingConcept } =
-    useUpdateConcept();
+    useUpdateConcept(token as string);
   //call DELETE hook
   const { mutateAsync: deleteConcept, isPending: isDeletingConcept } =
-    useDeleteConcept();
+    useDeleteConcept(token as string);
 
   //CREATE action
   const handleCreateConcept: MRT_TableOptions<Concept>["onCreatingRowSave"] =
@@ -260,7 +263,7 @@ const CRUDConcepts = () => {
 };
 
 //CREATE hook (post new Concept to api)
-function useCreateConcept() {
+function useCreateConcept(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (concept: Concept) => {
@@ -271,7 +274,7 @@ function useCreateConcept() {
       };
 
       return await conceptService
-        .create(newConcept)
+        .create(token as string, newConcept)
         .then((response) => {
           return response;
         })
@@ -291,13 +294,13 @@ function useCreateConcept() {
 }
 
 //READ hook (get Concepts from api)
-function useGetConcepts() {
+function useGetConcepts(token: string) {
   return useQuery<Concept[]>({
     queryKey: ["Concepts"],
     queryFn: async () => {
       //send api request here
       return await conceptService
-        .getAll()
+        .getAll(token as string, )
         .then((response) => {
           return response;
         })
@@ -310,7 +313,7 @@ function useGetConcepts() {
 }
 
 //UPDATE hook (put Concept in api)
-function useUpdateConcept() {
+function useUpdateConcept(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (concept: Concept) => {
@@ -321,7 +324,7 @@ function useUpdateConcept() {
       };
 
       return await conceptService
-        .update(concept.id, updateConcept)
+        .update(token as string, concept.id, updateConcept)
         .then((response) => {
           return response;
         })
@@ -342,12 +345,12 @@ function useUpdateConcept() {
 }
 
 //DELETE hook (delete Concept in api)
-function useDeleteConcept() {
+function useDeleteConcept(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (conceptId: number) => {
       return await conceptService
-        .remove(conceptId)
+        .remove(token as string, conceptId)
         .then((response) => {
           return response;
         })

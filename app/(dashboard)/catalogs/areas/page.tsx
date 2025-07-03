@@ -32,7 +32,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Area, createArea, updateArea } from "@/app/interfaces/Areas.interface";
 import { areaService } from "@/app/api/areaService";
 import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
-import { departmentService } from "@/app/api/departmentService";
 import { useSession } from "@toolpad/core";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
@@ -46,12 +45,6 @@ const CRUDAreas = () => {
 
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const token = session?.user?.access_token;
-
-  useEffect(() => {
-    departmentService.getAll(token as string).then((data) => {
-      setDepartments(data);
-    });
-  }, []);
 
   const columns = useMemo<MRT_ColumnDef<Area>[]>(
     () => [
@@ -102,20 +95,20 @@ const CRUDAreas = () => {
 
   //call CREATE hook
   const { mutateAsync: createArea, isPending: isCreatingArea } =
-    useCreateArea();
+    useCreateArea(token as string);
   //call READ hook
   const {
     data: fetchedAreas = [],
     isError: isLoadingAreasError,
     isFetching: isFetchingAreas,
     isLoading: isLoadingAreas,
-  } = useGetAreas();
+  } = useGetAreas(token as string);
   //call UPDATE hook
   const { mutateAsync: updateArea, isPending: isUpdatingArea } =
-    useUpdateArea();
+    useUpdateArea(token as string);
   //call DELETE hook
   const { mutateAsync: deleteArea, isPending: isDeletingArea } =
-    useDeleteArea();
+    useDeleteArea(token as string);
 
   //CREATE action
   const handleCreateArea: MRT_TableOptions<Area>["onCreatingRowSave"] = async ({
@@ -246,7 +239,7 @@ const CRUDAreas = () => {
   return <MaterialReactTable table={table} />;
 };
 
-function useCreateArea() {
+function useCreateArea(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (area: Area) => {
@@ -256,7 +249,7 @@ function useCreateArea() {
       };
 
       return await areaService
-        .create(createArea)
+        .create(token as string, createArea)
         .then((response) => {
           return response;
         })
@@ -276,13 +269,13 @@ function useCreateArea() {
 }
 
 //READ hook (get Areas from api)
-function useGetAreas() {
+function useGetAreas(token: string) {
   return useQuery<Area[]>({
     queryKey: ["Areas"],
     queryFn: async () => {
       //send api request here
       return await areaService
-        .getAll()
+        .getAll(token as string)
         .then((response) => {
           return response;
         })
@@ -297,7 +290,7 @@ function useGetAreas() {
   });
 }
 
-function useUpdateArea() {
+function useUpdateArea(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (area: Area) => {
@@ -307,7 +300,7 @@ function useUpdateArea() {
       };
 
       return await areaService
-        .update(area.id, updateArea)
+        .update(token as string, area.id, updateArea)
         .then((response) => {
           return response;
         })
@@ -327,12 +320,12 @@ function useUpdateArea() {
   });
 }
 
-function useDeleteArea() {
+function useDeleteArea(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (areaId: number) => {
       return await areaService
-        .remove(areaId)
+        .remove(token as string, areaId)
         .then((response) => {
           return response;
         })

@@ -20,6 +20,7 @@ import { areaService } from "@/app/api/areaService";
 import { departmentService } from "@/app/api/departmentService";
 import { useDialogs, useSession } from "@toolpad/core";
 import { userService } from "@/app/api/userService";
+import { CustomSession } from "@/app/interfaces/Session.interface";
 
 export interface ChangePasswordProps {
   open: boolean;
@@ -29,7 +30,7 @@ export interface ChangePasswordProps {
 export default function ChangePassword({ open, onClose }: ChangePasswordProps) {
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  const session = useSession();
+  const session = useSession<CustomSession>();
   const dialogs = useDialogs();
 
   const validateInputs = () => {
@@ -56,13 +57,14 @@ export default function ChangePassword({ open, onClose }: ChangePasswordProps) {
       return;
     }
     const idUser = session?.user?.id;
+    const token = session?.user?.access_token;
     if (!idUser) {
       dialogs.alert("Error: Usuario no identificado");
       return;
     }
     const data = new FormData(event.currentTarget);
     userService
-      .updatePassword(parseInt(idUser), data.get("password") as string)
+      .updatePasswordMe(token as string, data.get("password") as string)
       .then((response) => {
         dialogs.alert("Contraseña actualizada correctamente");
         onClose(false);

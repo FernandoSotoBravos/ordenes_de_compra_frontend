@@ -5,12 +5,15 @@ import {
 } from "../interfaces/Concepts.interface";
 import { fetchWrapper } from "./axiosInstance";
 
-const getAll = async (limit: number = 10, page: number = 1) => {
+const getAll = async (token: string, limit: number = 10, page: number = 1) => {
   return fetchWrapper
     .get("/concepts/", {
       params: {
         limit: limit,
         page: page,
+      },
+      headers: {
+        Authorization: "Bearer " + token,
       },
     })
     .then((response) => {
@@ -21,10 +24,13 @@ const getAll = async (limit: number = 10, page: number = 1) => {
     });
 };
 
-const create = async (concept: createConcept) => {
+const create = async (token: string, concept: createConcept) => {
   return fetchWrapper
     .post("/concepts/", {
       data: concept,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -34,10 +40,13 @@ const create = async (concept: createConcept) => {
     });
 };
 
-const update = async (id: number, concept: updateConcept) => {
+const update = async (token: string, id: number, concept: updateConcept) => {
   return fetchWrapper
     .put(`/concepts/${id}`, {
       data: concept,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
     .then((response) => {
       return response.data;
@@ -47,9 +56,13 @@ const update = async (id: number, concept: updateConcept) => {
     });
 };
 
-const remove = async (id: number) => {
+const remove = async (token: string, id: number) => {
   return fetchWrapper
-    .delete(`/concepts/${id}`, {})
+    .delete(`/concepts/${id}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })
@@ -58,9 +71,13 @@ const remove = async (id: number) => {
     });
 };
 
-const getById = async (id: string) => {
+const getById = async (token: string, id: string) => {
   return fetchWrapper
-    .get(`/concepts/${id}`, {})
+    .get(`/concepts/${id}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     .then((response) => {
       return response.data;
     })
