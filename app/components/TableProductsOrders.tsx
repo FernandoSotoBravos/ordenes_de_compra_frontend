@@ -160,6 +160,13 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
     }
   };
 
+  const formatCurrency = (value: string): string => {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(parseFloat(value));
+  };
+
   const table = useMaterialReactTable({
     columns,
     data: tableData,
@@ -249,12 +256,13 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
           <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
           <OutlinedInput
             id="outlined-adornment-amount"
-            startAdornment={<InputAdornment position="start">$</InputAdornment>}
             label="Total"
-            value={table
-              .getFilteredRowModel()
-              .rows.reduce((acc, row) => acc + row.original.total, 0)
-              .toFixed(2)}
+            value={formatCurrency(
+              table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + row.original.total, 0)
+                .toFixed(2)
+            )}
             disabled
           />
         </FormControl>

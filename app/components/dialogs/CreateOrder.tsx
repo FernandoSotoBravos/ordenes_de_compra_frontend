@@ -22,7 +22,6 @@ export default function DialogCreateOrder({
   onClose,
 }: DialogProps<OrderCreate, number | null>) {
   const [comentaries, setComentaries] = useState<string>("");
-  const [observations, setObservations] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<number | null>(null);
