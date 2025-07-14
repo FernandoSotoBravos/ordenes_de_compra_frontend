@@ -1,3 +1,4 @@
+import { SelectChangeEvent } from "@mui/material";
 import dayjs from "dayjs";
 
 export interface ProductsOrder {
@@ -6,6 +7,11 @@ export interface ProductsOrder {
   description: string;
   unit_price: number;
   total: number;
+}
+
+export interface TaxesOrder {
+  name: string;
+  value: number;
 }
 
 export type OrderHistoryProps = {
@@ -27,14 +33,19 @@ export interface OrderCreate {
   descriptionPayment: string;
   comments?: string;
   observations?: string;
+  subtotal?: number;
+  iva?: number;
+  total?: number;
+  taxes?: TaxesOrder[];
   products: ProductsOrder[];
 }
 
 export interface CRUDTableProps {
-  // onProductsChange: (products: ProductsOrder[]) => void;
   tableData: ProductsOrder[];
   setTableData: (products: ProductsOrder[]) => void;
   isSaving?: boolean;
+  formValues: OrderCreate;
+  setFormsValue: (data: any) => void;
 }
 
 export interface ProductsOrderProps {
@@ -51,6 +62,9 @@ export interface OrderCreateProps {
   currency_id: number;
   comments?: string;
   description?: string;
+  subtotal?: number;
+  iva?: number;
+  total?: number;
   other?: string;
   other_2?: string;
   created_by: string;
@@ -58,6 +72,7 @@ export interface OrderCreateProps {
   department_id?: number;
   details: ProductsOrderProps[];
   documents: any[];
+  taxes: TaxesOrder[];
 }
 
 export interface OrderDetail {
@@ -90,6 +105,7 @@ export interface Order {
   status_id: number;
   details: OrderDetail[];
   documents?: any;
+  taxes?: TaxesOrder[];
 }
 
 export interface OrderHistory {

@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   // createRow,
@@ -19,21 +19,67 @@ import {
   InputAdornment,
   InputLabel,
   OutlinedInput,
-  Stack,
-  TextField,
   Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { ProductsOrder, CRUDTableProps } from "../interfaces/Order.interface";
-import { useDialogs } from "@toolpad/core";
+import {
+  ProductsOrder,
+  CRUDTableProps,
+  TaxesOrder,
+} from "../interfaces/Order.interface";
+import { useDialogs, useSession } from "@toolpad/core";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import TaxIcon from "../components/CustomIcons";
+import AddTaxes from "./dialogs/AddTaxesOrder";
+import { taxService } from "../api/taxService";
+import { CustomSession } from "@/app/interfaces/Session.interface";
+import { Cancel } from "@mui/icons-material";
 
-const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
+const CRUDTable = ({
+  tableData,
+  setTableData,
+  isSaving,
+  formValues,
+  setFormsValue,
+}: CRUDTableProps) => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const [taxes, setTaxes] = useState<TaxesOrder[]>([]);
+  const [iva, setIva] = useState(0.0);
+  const [total, setTotal] = useState(0.0);
+  const [subtotal, setSubtotal] = useState(0.0);
   const dialogs = useDialogs();
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token || "";
+
+  useEffect(() => {
+    const newSubtotal = tableData.reduce((acc, row) => acc + row.total, 0);
+    const totalTaxes = taxes.reduce((acc, t) => {
+      if (["Descuento", "ISR", "Nota de Credito"].includes(t.name)) {
+        return acc - t.value;
+      }
+      return acc + t.value;
+    }, 0);
+    const newTotal = newSubtotal + iva + totalTaxes;
+
+    setSubtotal(newSubtotal);
+    setTotal(newTotal);
+
+    // @ts-ignore
+    setFormsValue({
+      target: {
+        name: "orderTotals",
+        value: {
+          subtotal: newSubtotal,
+          iva,
+          total: newTotal,
+          taxes,
+        },
+      },
+    });
+  }, [tableData, iva, taxes]);
 
   const columns = useMemo<MRT_ColumnDef<ProductsOrder>[]>(
     () => [
@@ -167,6 +213,48 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
     }).format(parseFloat(value));
   };
 
+  const fetchTaxes = async () => {
+    try {
+      const response = await taxService.getAll(token, 10, 1, 1);
+      return response;
+    } catch (error: any) {
+      dialogs.alert("Error al cargar los ajustes fiscales: " + error.message, {
+        title: "Error",
+      });
+      return [];
+    }
+  };
+
+  const removeTaxesUsed = (taxesGet: TaxesOrder[]) => {
+    return taxesGet.filter((t) => !taxes.some((d) => t.name === d.name));
+  };
+
+  const handleShowAddFiscalAdjustment = async () => {
+    const taxesList = await fetchTaxes();
+    const filteredTaxes = removeTaxesUsed(taxesList);
+    // @ts-ignore
+    const result = await dialogs.open(AddTaxes, filteredTaxes);
+    if (result) {
+      setTaxes((prev) => [
+        ...prev,
+        ...(Array.isArray(result) ? result : [result]),
+      ]);
+    }
+  };
+
+  const handleChangeIVA = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = parseFloat(e.target.value);
+    if (isNaN(numericValue)) {
+      setIva(0);
+    } else {
+      setIva(numericValue);
+    }
+  };
+
+  const handleRemoveTax = (name: string) => {
+    setTaxes(taxes.filter((t) => t.name !== name));
+  }
+
   const table = useMaterialReactTable({
     columns,
     data: tableData,
@@ -245,27 +333,116 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-start",
           px: 2,
-          py: 1,
+          py: 2,
           width: "100%",
+          gap: 4,
+          flexWrap: "wrap",
         }}
       >
-        <Box />
-        <FormControl sx={{ m: 1, width: 200 }}>
-          <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
-          <OutlinedInput
-            id="outlined-adornment-amount"
-            label="Total"
-            value={formatCurrency(
-              table
-                .getFilteredRowModel()
-                .rows.reduce((acc, row) => acc + row.original.total, 0)
-                .toFixed(2)
-            )}
-            disabled
-          />
-        </FormControl>
+        <Box
+          sx={{
+            display: "grid",
+            gridAutoFlow: "column",
+            gridTemplateColumns: "repeat(2, 200px)",
+            gridAutoRows: "auto",
+            gridTemplateRows: "repeat(3, auto)",
+            gap: 2,
+            flex: 1,
+            minWidth: "300px",
+          }}
+        >
+          {taxes.map((tax) => (
+            <FormControl key={tax.name} sx={{ width: 200 }}>
+              <InputLabel>{tax.name}</InputLabel>
+              <OutlinedInput
+                label={tax.name}
+                value={formatCurrency(tax.value.toFixed(2))}
+                disabled
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => handleRemoveTax(tax.name)} edge="end">
+                      <Cancel />
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+          ))}
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+            }}
+          >
+            <IconButton
+              color="primary"
+              onClick={handleShowAddFiscalAdjustment}
+              sx={{ width: 56, height: 56 }}
+            >
+              <TaxIcon fontSize="large" />
+            </IconButton>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            <FormControl sx={{ width: 200 }}>
+              <InputLabel>Subtotal</InputLabel>
+              <OutlinedInput
+                label="Subtotal"
+                id="subtotal"
+                value={formatCurrency(subtotal.toFixed(2))}
+                onChange={() =>
+                  setSubtotal(
+                    table
+                      .getFilteredRowModel()
+                      .rows.reduce((acc, row) => acc + row.original.total, 0)
+                  )
+                }
+                disabled
+              />
+            </FormControl>
+
+            <FormControl sx={{ width: 200 }}>
+              <InputLabel>IVA</InputLabel>
+              <OutlinedInput
+                label="IVA"
+                id="iva"
+                value={iva === 0 ? "" : iva}
+                type="number"
+                onChange={handleChangeIVA}
+                inputProps={{ step: "0.01" }}
+              />
+            </FormControl>
+
+            <FormControl sx={{ width: 200 }}>
+              <InputLabel>Total</InputLabel>
+              <OutlinedInput
+                label="Total"
+                id="total"
+                disabled
+                value={formatCurrency(total.toFixed(2))}
+              />
+            </FormControl>
+          </Box>
+        </Box>
       </Box>
     ),
     state: {

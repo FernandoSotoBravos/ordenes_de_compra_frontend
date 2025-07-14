@@ -165,6 +165,16 @@ function CreateOrderPage() {
     });
   };
 
+  // cambio Subtotal,Total,Taxes
+  const handleChangeSTT = (data: any) => {
+    const { name, value } = data.target;
+
+    setFormValues((prev) => ({
+      ...prev,
+      ...value,
+    }));
+  };
+
   const handleChange = (
     event:
       | React.ChangeEvent<
@@ -194,7 +204,11 @@ function CreateOrderPage() {
       descriptionPayment: "",
       comments: "",
       observations: "",
+      iva: 0.0,
+      subtotal: 0.0,
+      total: 0.0,
       products: [],
+      taxes: []
     });
   };
 
@@ -256,10 +270,10 @@ function CreateOrderPage() {
               disabled={departments.length === 0}
             >
               {departments.map((department) => (
-                  <MenuItem key={department.id} value={department.id}>
-                    {department.name}
-                  </MenuItem>
-                ))}
+                <MenuItem key={department.id} value={department.id}>
+                  {department.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -367,6 +381,8 @@ function CreateOrderPage() {
           tableData={tableData}
           setTableData={handleProductsChange}
           isSaving={false}
+          formValues={formValues}
+          setFormsValue={handleChangeSTT}
         />
       </Box>
       <Box mt={2} textAlign={"end"}>

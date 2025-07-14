@@ -3,6 +3,7 @@ import {
   Documents,
   OrderCreateProps,
   OrderUpdateHeaders,
+  TaxesOrder,
 } from "../interfaces/Order.interface";
 import { AddProduct, EditProduct } from "../interfaces/Product.interface";
 import { fetchWrapper } from "./axiosInstance";
@@ -284,6 +285,27 @@ const downloadPDFOrder = async (token: string, id: number) => {
     });
 };
 
+const updateTax = async (
+  token: string,
+  id: number,
+  type: string,
+  tax: TaxesOrder
+) => {
+  return fetchWrapper
+    .post(`/orders/${id}/tax?type_flush=${type}`, {
+      data: tax,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
 export const orderService = {
   create,
   getAll,
@@ -300,5 +322,6 @@ export const orderService = {
   downloadPDFOrder,
   addDocument,
   deleteDocument,
-  restoreOrder
+  restoreOrder,
+  updateTax
 };

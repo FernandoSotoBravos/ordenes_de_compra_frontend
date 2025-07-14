@@ -21,6 +21,9 @@ import {
   Tooltip,
   Typography,
   Fab,
+  Chip,
+  ListItem,
+  Paper,
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import CheckIcon from "@mui/icons-material/Check";
@@ -33,6 +36,7 @@ import {
   OrderDetail,
   OrderDocument,
   OrderUpdateHeaders,
+  TaxesOrder,
 } from "@/app/interfaces/Order.interface";
 import {
   MaterialReactTable,
@@ -59,6 +63,9 @@ import { AddProduct, EditProduct } from "@/app/interfaces/Product.interface";
 import EditIcon from "@mui/icons-material/Edit";
 import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import TaxIcon from "@/app/components/CustomIcons";
+import AddTaxes from "@/app/components/dialogs/AddTaxesOrder";
+import { taxService } from "@/app/api/taxService";
 
 export default function EditOrderPage() {
   const { id } = useParams();
@@ -495,6 +502,60 @@ export default function EditOrderPage() {
       table.setCreatingRow(null);
     };
 
+  const fetchTaxes = async () => {
+    try {
+      const response = await taxService.getAll(token as string, 10, 1, 1);
+      return response;
+    } catch (error: any) {
+      dialogs.alert("Error al cargar los ajustes fiscales: " + error.message, {
+        title: "Error",
+      });
+      return [];
+    }
+  };
+
+  const removeTaxesUsed = (taxesGet: TaxesOrder[], taxes: TaxesOrder[]) => {
+    return taxesGet.filter((t) => !taxes.some((d) => t.name === d.name));
+  };
+
+  const handlerUpdateTaxes = async () => {
+    const taxesList = await fetchTaxes();
+    const filteredTaxes = removeTaxesUsed(taxesList, order?.taxes || []);
+    // @ts-ignore
+    const result = await dialogs.open(AddTaxes, filteredTaxes);
+    if (result) {
+      handleUpdateTax(result, "add");
+    }
+  };
+
+  const handleUpdateTax = async (tax: TaxesOrder, type: string) => {
+    if (!order) {
+      dialogs.alert("No existe una orden en curso", {
+        title: "Alerta",
+      });
+
+      return;
+    }
+
+    setLoading(true);
+    orderService
+      .updateTax(token as string, order.id, type, tax)
+      .then((response) => {
+        dialogs.alert("Se ha actualizado la orden correctamente", {
+          title: "Actualizacion",
+        });
+        fetchOrder();
+      })
+      .catch((err) => {
+        dialogs.alert("Ha ocurrido un error al actualizar la orden " + err, {
+          title: "Error",
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   const handleSaveHeaders = async () => {
     if (!order || !order.area || !order.department || !order.currency) {
       return;
@@ -667,31 +728,62 @@ export default function EditOrderPage() {
             />
           </FormControl>
 
-          <Grid container sx={{ mb: 2, mt: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
-              <OutlinedInput
-                type="money"
-                contentEditable={false}
-                id="outlined-adornment-amount"
-                label="Total"
-                value={order.total.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-                disabled
-              />
-            </FormControl>
-            <Button
-              variant="contained"
-              fullWidth
-              color="primary"
-              onClick={handleSaveHeaders}
-              sx={{ mt: 2 }}
-            >
-              Guardar
-            </Button>
-          </Grid>
+          <Button
+            color="primary"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2, mb: 2 }}
+            startIcon={<TaxIcon />}
+            onClick={handlerUpdateTaxes}
+          >
+            Agregar ajuste
+          </Button>
+          <Paper
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              listStyle: "none",
+              p: 0.5,
+              m: 0,
+              mb: 2,
+            }}
+            component="ul"
+          >
+            {order?.taxes?.map((tax) => (
+              <ListItem key={tax.name}>
+                <Chip
+                  label={`${tax.name}: ${tax.value}`}
+                  onDelete={() => handleUpdateTax(tax, "remove")}
+                />
+              </ListItem>
+            ))}
+          </Paper>
+
+          <FormControl fullWidth>
+            <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
+            <OutlinedInput
+              type="money"
+              contentEditable={false}
+              id="outlined-adornment-amount"
+              label="Total"
+              value={order.total.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              })}
+              disabled
+            />
+          </FormControl>
+
+          <Button
+            variant="contained"
+            fullWidth
+            color="primary"
+            onClick={handleSaveHeaders}
+            sx={{ mt: 2 }}
+          >
+            Guardar
+          </Button>
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }} sx={{ border: "1px solid #ccc", p: 2 }}>
@@ -861,11 +953,7 @@ export default function EditOrderPage() {
             zIndex: 999,
           }}
         >
-          <Fab
-            aria-label="save"
-            sx={buttonSx}
-            onClick={handleSaveCancelOrder}
-          >
+          <Fab aria-label="save" sx={buttonSx} onClick={handleSaveCancelOrder}>
             {success ? <CheckIcon /> : <SaveIcon />}
           </Fab>
           {loadingSave && (
