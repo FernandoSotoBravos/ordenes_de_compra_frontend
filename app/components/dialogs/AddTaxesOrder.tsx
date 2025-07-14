@@ -19,7 +19,7 @@ import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { useDialogs, useSession } from "@toolpad/core";
 
 export interface ResultTaxes {
-  value: number;
+  value: number | string;
   name: string;
 }
 
@@ -29,14 +29,14 @@ export default function AddTaxes({
   onClose,
 }: DialogProps<SelectBase[], ResultTaxes | null>) {
   const [formValues, setFormValues] = useState({
-    value: 0.0,
+    value: 0.0 || "",
     name: "",
   });
   const dialogs = useDialogs();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formValues.name === "" || formValues.value <= 0) {
+    if (formValues.name === "" || !formValues.value) {
       dialogs.alert("Por favor, complete todos los campos requeridos.", {
         title: "Error",
       });
@@ -49,6 +49,7 @@ export default function AddTaxes({
   const handleChangeValueN = (e: any) => {
     const numericValue = parseFloat(e.target.value);
     if (isNaN(numericValue)) {
+      // @ts-check
       setFormValues({
         ...formValues,
         value: "",
@@ -56,7 +57,7 @@ export default function AddTaxes({
     } else {
       setFormValues({
         ...formValues,
-        value: numericValue,
+        value: numericValue.toString(),
       });
     }
   };
