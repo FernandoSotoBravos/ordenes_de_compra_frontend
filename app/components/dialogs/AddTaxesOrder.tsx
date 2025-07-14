@@ -19,7 +19,7 @@ import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { useDialogs, useSession } from "@toolpad/core";
 
 export interface ResultTaxes {
-  value: number | string;
+  value: number;
   name: string;
 }
 
@@ -29,7 +29,7 @@ export default function AddTaxes({
   onClose,
 }: DialogProps<SelectBase[], ResultTaxes | null>) {
   const [formValues, setFormValues] = useState({
-    value: 0.0 || "",
+    value: 0,
     name: "",
   });
   const dialogs = useDialogs();
@@ -48,16 +48,11 @@ export default function AddTaxes({
 
   const handleChangeValueN = (e: any) => {
     const numericValue = parseFloat(e.target.value);
-    if (isNaN(numericValue)) {
+    if (!isNaN(numericValue)) {
       // @ts-check
       setFormValues({
         ...formValues,
-        value: "",
-      });
-    } else {
-      setFormValues({
-        ...formValues,
-        value: numericValue.toString(),
+        value: numericValue,
       });
     }
   };
