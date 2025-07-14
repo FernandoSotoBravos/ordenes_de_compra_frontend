@@ -7,6 +7,7 @@ export interface ProductsOrder {
   description: string;
   unit_price: number;
   total: number;
+  unit_id: number
 }
 
 export interface TaxesOrder {
@@ -54,6 +55,7 @@ export interface ProductsOrderProps {
   quantity: number;
   unit_price: number;
   total: number;
+  unit_id: number;
 }
 
 export interface OrderCreateProps {
@@ -82,6 +84,7 @@ export interface OrderDetail {
   quantity: number;
   unit_price: number;
   total: number;
+  unit_id: number;
 }
 
 export interface Order {

@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -48,7 +48,10 @@ import {
 import dayjs from "dayjs";
 import { useDialogs } from "@toolpad/core";
 import { departmentService } from "@/app/api/departmentService";
-import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
+import {
+  SelectBase,
+  SelectDescription,
+} from "@/app/interfaces/SelecteBase.interface";
 import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
 import { CurrencySelect } from "@/app/interfaces/Currency.interface";
 import { CustomSession } from "@/app/interfaces/Session.interface";
@@ -66,6 +69,7 @@ import { MRT_Localization_ES } from "material-react-table/locales/es";
 import TaxIcon from "@/app/components/CustomIcons";
 import AddTaxes from "@/app/components/dialogs/AddTaxesOrder";
 import { taxService } from "@/app/api/taxService";
+import { unitService } from "@/app/api/unitService";
 
 export default function EditOrderPage() {
   const { id } = useParams();
@@ -78,6 +82,7 @@ export default function EditOrderPage() {
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const [currencies, setCurrencies] = useState<CurrencySelect[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
+  const [units, setUnits] = useState<SelectDescription[]>([]);
   const [providers, setProviders] = useState<SelectBase[]>([]);
   const [concepts, setConcepts] = useState<ConceptSelect[]>([]);
   const [segment_business, setSegmentBusiness] = useState<string>("");
@@ -92,6 +97,17 @@ export default function EditOrderPage() {
         bgcolor: green[700],
       },
     }),
+  };
+
+  const fetchUnit = async () => {
+    try {
+      const response = await unitService.getAll(token as string, 10, 1);
+      setUnits(response);
+    } catch (error: any) {
+      dialogs.alert("Error al cargar el tipo de unidades: " + error.message, {
+        title: "Error",
+      });
+    }
   };
 
   const handleGetDepartments = async () => {
@@ -231,9 +247,6 @@ export default function EditOrderPage() {
           return;
         }
 
-        console.log(res.created_user.toLowerCase());
-        console.log(session?.user?.name?.toLowerCase());
-
         if (
           res.created_user?.toLowerCase() !== session?.user?.name?.toLowerCase()
         ) {
@@ -267,6 +280,7 @@ export default function EditOrderPage() {
         unit_price: parseFloat(values.unit_price),
         description: values.description,
         total: total,
+        unit_id: values.unit_id,
       };
 
       if (!order) {
@@ -313,6 +327,7 @@ export default function EditOrderPage() {
         unit_price: parseFloat(values.unit_price),
         description: values.description,
         total: total,
+        unit_id: values.unit_id,
       };
 
       await orderService
@@ -359,6 +374,7 @@ export default function EditOrderPage() {
       handleGetCurrencies();
       handleGetProviders();
       handleGetDepartments();
+      fetchUnit();
     }
   }, [id]);
 
@@ -382,6 +398,25 @@ export default function EditOrderPage() {
     {
       header: "Cantidad",
       accessorKey: "quantity",
+    },
+    {
+      accessorKey: "unit_id",
+      header: "Unidad de medida",
+      editVariant: "select",
+      Cell: ({ cell }): ReactNode => {
+        const unit = units.find((u) => u.id === cell.getValue());
+        // @ts-ignore
+        return unit ? unit.description : cell.getValue();
+      },
+      muiEditTextFieldProps: {
+        required: true,
+        children: units.map((unit) => (
+          <MenuItem key={unit.id} value={unit.id}>
+            {unit.description}
+          </MenuItem>
+        )),
+        select: true,
+      },
     },
     {
       header: "Precio Unitario",
@@ -802,24 +837,40 @@ export default function EditOrderPage() {
               table,
               row,
               internalEditComponents,
-            }) => (
-              <>
-                <DialogTitle variant="h3">Agregar producto</DialogTitle>
-                <DialogContent
-                  sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-                >
-                  {internalEditComponents}{" "}
-                  {/* or render custom edit components here */}
-                </DialogContent>
-                <DialogActions>
-                  <MRT_EditActionButtons
-                    variant="text"
-                    table={table}
-                    row={row}
-                  />
-                </DialogActions>
-              </>
-            )}
+            }) => {
+              const filteredComponents = internalEditComponents.filter(
+                (component: any) =>
+                  component?.props?.cell?.column?.id &&
+                  !["id", "total", "product"].includes(
+                    component.props.cell.column.id
+                  )
+              );
+
+              return (
+                <>
+                  <DialogTitle variant="h6">Agregar producto</DialogTitle>
+                  <DialogContent
+                    dividers
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                      maxHeight: "70vh",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {filteredComponents}
+                  </DialogContent>
+                  <DialogActions>
+                    <MRT_EditActionButtons
+                      variant="text"
+                      table={table}
+                      row={row}
+                    />
+                  </DialogActions>
+                </>
+              );
+            }}
             renderEditRowDialogContent={({
               table,
               row,

@@ -6,6 +6,7 @@ export interface AddProductBase {
 export interface AddProduct extends AddProductBase {
   unit_price: number;
   total: number;
+  unit_id: number;
 }
 
 export interface Product {

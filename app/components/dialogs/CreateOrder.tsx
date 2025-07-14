@@ -44,8 +44,6 @@ export default function DialogCreateOrder({
         })
       );
 
-      console.log(payload)
-
       // Crear el payload con archivos en formato Base64
       const data: OrderCreateProps = {
         concept_id: parseInt(payload.concept),
@@ -65,6 +63,7 @@ export default function DialogCreateOrder({
           quantity: product.quantity,
           unit_price: product.unit_price,
           total: product.total,
+          unit_id: product.unit_id,
         })),
         taxes: payload.taxes || [],
         documents: base64Files.map((base64File, index) => ({

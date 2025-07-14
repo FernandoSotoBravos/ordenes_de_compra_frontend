@@ -18,6 +18,7 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
+  MenuItem,
   OutlinedInput,
   Tooltip,
 } from "@mui/material";
@@ -35,6 +36,8 @@ import AddTaxes from "./dialogs/AddTaxesOrder";
 import { taxService } from "../api/taxService";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { Cancel } from "@mui/icons-material";
+import { unitService } from "../api/unitService";
+import { SelectDescription } from "../interfaces/SelecteBase.interface";
 
 const CRUDTable = ({
   tableData,
@@ -47,12 +50,28 @@ const CRUDTable = ({
     Record<string, string | undefined>
   >({});
   const [taxes, setTaxes] = useState<TaxesOrder[]>([]);
+  const [units, setUnits] = useState<SelectDescription[]>([]);
   const [iva, setIva] = useState(0.0);
   const [total, setTotal] = useState(0.0);
   const [subtotal, setSubtotal] = useState(0.0);
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token || "";
+
+  const fetchUnit = async () => {
+    try {
+      const response = await unitService.getAll(token, 10, 1);
+      setUnits(response);
+    } catch (error: any) {
+      dialogs.alert("Error al cargar el tipo de unidades: " + error.message, {
+        title: "Error",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchUnit();
+  }, []);
 
   useEffect(() => {
     const newSubtotal = tableData.reduce((acc, row) => acc + row.total, 0);
@@ -119,6 +138,32 @@ const CRUDTable = ({
               quantity: undefined,
             }),
           //optionally add validation checking for onBlur or onChange
+        },
+      },
+      {
+        accessorKey: "unit_id",
+        header: "Unidad de medida",
+        editVariant: "select",
+        Cell: ({ cell }): ReactNode => {
+          const unit = units.find((u) => u.id === cell.getValue());
+          // @ts-ignore
+          return unit ? unit.description : cell.getValue();
+        },
+        muiEditTextFieldProps: {
+          required: true,
+          children: units.map((unit) => (
+            <MenuItem key={unit.id} value={unit.id}>
+              {unit.description}
+            </MenuItem>
+          )),
+          select: true,
+          error: !!validationErrors?.unit_id,
+          helperText: validationErrors?.unit_id,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              unit_id: undefined,
+            }),
         },
       },
       {
@@ -253,7 +298,7 @@ const CRUDTable = ({
 
   const handleRemoveTax = (name: string) => {
     setTaxes(taxes.filter((t) => t.name !== name));
-  }
+  };
 
   const table = useMaterialReactTable({
     columns,
@@ -362,7 +407,10 @@ const CRUDTable = ({
                 disabled
                 endAdornment={
                   <InputAdornment position="end">
-                    <IconButton onClick={() => handleRemoveTax(tax.name)} edge="end">
+                    <IconButton
+                      onClick={() => handleRemoveTax(tax.name)}
+                      edge="end"
+                    >
                       <Cancel />
                     </IconButton>
                   </InputAdornment>
