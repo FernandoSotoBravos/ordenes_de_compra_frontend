@@ -103,6 +103,47 @@ const addDocument = async (token: string, id: number, data: Documents[]) => {
     });
 };
 
+const addQuotizations = async (
+  token: string,
+  id: number,
+  data: Documents[]
+) => {
+  return fetchWrapper
+    .put(`/requisitions/${id}/quo`, {
+      data: { documents: data },
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
+const acceptQuotization = async (
+  token: string,
+  id: number,
+  filename: string,
+  reason: string
+) => {
+  return fetchWrapper
+    .put(`/requisitions/${id}/quo/accept`, {
+      data: { filename: filename, comments: reason },
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
 const deleteDocument = async (token: string, filename: string, id: number) => {
   return fetchWrapper
     .delete(`/requisitions/${id}/document?filename=${filename}`, {
@@ -274,10 +315,11 @@ const getDocuments = async (token: string, id: number) => {
 const downloadDocument = async (
   token: string,
   id: number,
-  document: string
+  document: string,
+  quo: boolean = false
 ) => {
   return fetchWrapper
-    .get(`/requisitions/${id}/document/${document}`, {
+    .get(`/requisitions/${id}/document/${document}?quo=${quo}`, {
       responseType: "blob",
       headers: {
         Authorization: "Bearer " + token,
@@ -324,5 +366,7 @@ export const requisitionService = {
   addDocument,
   deleteDocument,
   restoreRequi,
-  getMyRequisitions
+  getMyRequisitions,
+  addQuotizations,
+  acceptQuotization,
 };

@@ -254,6 +254,7 @@ function CreateRequisitionPage() {
           product_id: 1,
           description: product.description,
           quantity: product.quantity,
+          unit_id: product.unit_id,
         })),
         documents: base64Files.map((base64File, index) => ({
           filename: files[index].name,

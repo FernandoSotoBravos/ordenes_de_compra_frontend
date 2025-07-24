@@ -38,6 +38,10 @@ import DialogHistoryRequisition from "@/app/components/dialogs/HistoryRequisitio
 import DialogDocumentsRequisition from "@/app/components/dialogs/DocumentsRequisition";
 import DialogStatusRequisition from "@/app/components/dialogs/ChangeStatusRequi";
 import { FormControlLabel, Switch } from "@mui/material";
+import { DocMoney, ThreeDocs } from "@/app/components/CustomIcons";
+import DifferenceOutlinedIcon from "@mui/icons-material/DifferenceOutlined";
+import DialogAddQuo from "@/app/components/dialogs/AddCotiza";
+import DialogAcceptQuo from "@/app/components/dialogs/ShowQuo";
 
 const RUDRequisitions = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -276,6 +280,39 @@ const RUDRequisitions = () => {
     router.push(`/requi/edit/${row.original.id}`);
   };
 
+  const openAddQuotations = async (
+    menuClose: () => void,
+    row: MRT_Row<Requisition>
+  ) => {
+    const result = await dialogs.open(DialogAddQuo, row.original.id);
+    if (result === null) {
+      menuClose();
+      return;
+    }
+
+    deleteRequisition(row.original.id);
+    menuClose();
+  };
+
+  const handleAcceptQuo = async (
+    menuClose: () => void,
+    row: MRT_Row<Requisition>
+  ) => {
+    const payload = new Map<string, any>([
+      ["id", row.original.id],
+      ["quotizations", row.original.quotizations],
+      ["accepted", Boolean(row.original.approved_quo)]
+    ]);
+    const result = await dialogs.open(DialogAcceptQuo, payload);
+    if (result === null) {
+      menuClose();
+      return;
+    }
+
+    deleteRequisition(row.original.id);
+    menuClose();
+  }
+
   const availableEdit = (row: MRT_Row<Requisition>) => {
     const isAvailable = [1, 7].includes(row.original.status_id);
     const isCreator =
@@ -356,6 +393,17 @@ const RUDRequisitions = () => {
         onClick={() => handleEditingRow(closeMenu, row)}
         table={table}
       />,
+      <div key="activate">
+        {isPower && [8].includes(row.original.status_id) && !row.original.quotizations && (
+          <MRT_ActionMenuItem
+            icon={<ThreeDocs />}
+            key="activate"
+            label="Activar Cotizaciones"
+            onClick={() => openAddQuotations(closeMenu, row)}
+            table={table}
+          />
+        )}
+      </div>,
       <div key="approbe">
         {isPower && ![7, 8].includes(row.original.status_id) && (
           <MRT_ActionMenuItem
@@ -393,6 +441,19 @@ const RUDRequisitions = () => {
         disabled={!row.original.documents}
         table={table}
       />,
+      <div key="show_activate">
+        {([5, 8].includes(session?.user?.role as number) ||
+          session?.user?.super_user) &&
+          row.original.quotizations && (
+            <MRT_ActionMenuItem
+              icon={<DocMoney />}
+              key="show_activate"
+              label="Mostrar Cotizaciones"
+              onClick={() => handleAcceptQuo(closeMenu, row)}
+              table={table}
+            />
+          )}
+      </div>,
     ],
     state: {
       isLoading: isLoadingRequisitions,

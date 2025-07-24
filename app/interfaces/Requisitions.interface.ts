@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
 
-
 export interface ProductsRequisition {
   id: string;
   quantity: number;
   description: string;
+  unit_id: number;
 }
 
 export interface RequisitionCreate {
@@ -45,7 +45,6 @@ export interface ChangeStatus {
   comments: string;
 }
 
-
 export interface RequisitionDetail {
   id?: number;
   product: string;
@@ -66,6 +65,8 @@ export interface Requisition {
   status_id: number;
   details: RequisitionDetail[];
   documents?: any;
+  quotizations?: any;
+  approved_quo?: string;
 }
 
 export interface RequisitionHistory {

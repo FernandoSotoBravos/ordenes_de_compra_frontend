@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -43,7 +43,10 @@ import {
 import dayjs from "dayjs";
 import { useDialogs } from "@toolpad/core";
 import { departmentService } from "@/app/api/departmentService";
-import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
+import {
+  SelectBase,
+  SelectDescription,
+} from "@/app/interfaces/SelecteBase.interface";
 import { ConceptSelect } from "@/app/interfaces/Concepts.interface";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { useSession } from "@toolpad/core";
@@ -60,6 +63,7 @@ import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
 import CheckIcon from "@mui/icons-material/Check";
 import SaveIcon from "@mui/icons-material/Save";
+import { unitService } from "@/app/api/unitService";
 
 export default function EditrequisitionPage() {
   const { id } = useParams();
@@ -71,6 +75,7 @@ export default function EditrequisitionPage() {
   const [success, setSuccess] = useState(false);
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
+  const [units, setUnits] = useState<SelectDescription[]>([]);
   const [concepts, setConcepts] = useState<ConceptSelect[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const dialogs = useDialogs();
@@ -88,6 +93,17 @@ export default function EditrequisitionPage() {
             error.response.data.detail
         );
       });
+  };
+
+  const fetchUnit = async () => {
+    try {
+      const response = await unitService.getAll(token as string, 10, 1);
+      setUnits(response);
+    } catch (error: any) {
+      dialogs.alert("Error al cargar el tipo de unidades: " + error.message, {
+        title: "Error",
+      });
+    }
   };
 
   const handleGetAreas = (department: number) => {
@@ -221,11 +237,12 @@ export default function EditrequisitionPage() {
 
   const handleCreateProduct: MRT_TableOptions<RequisitionDetail>["onCreatingRowSave"] =
     async ({ values, table }) => {
-      // Validar y agregar el nuevo producto
+      setLoading(true);
       const total = values.quantity * values.unit_price;
       const data: AddProductBase = {
         quantity: parseFloat(values.quantity),
         description: values.description,
+        unit_id: parseInt(values.unit_id),
       };
 
       if (!requisition) {
@@ -251,6 +268,9 @@ export default function EditrequisitionPage() {
               title: "Error",
             }
           );
+        })
+        .finally(() => {
+          setLoading(false);
         });
 
       table.setCreatingRow(null);
@@ -266,11 +286,13 @@ export default function EditrequisitionPage() {
         return;
       }
 
+      setLoading(true);
       const total = values.quantity * values.unit_price;
       const data: EditProductRequisition = {
         id: values.id,
         quantity: parseFloat(values.quantity),
         description: values.description,
+        unit_id: parseInt(values.unit_id),
       };
 
       await requisitionService
@@ -288,6 +310,9 @@ export default function EditrequisitionPage() {
               title: "Error",
             }
           );
+        })
+        .finally(() => {
+          setLoading(false);
         });
 
       table.setEditingRow(null);
@@ -297,6 +322,7 @@ export default function EditrequisitionPage() {
     if (id) {
       fetchRequisition();
       handleGetDepartments();
+      fetchUnit();
     }
   }, [id]);
 
@@ -321,6 +347,25 @@ export default function EditrequisitionPage() {
       header: "Cantidad",
       accessorKey: "quantity",
     },
+    {
+      accessorKey: "unit_id",
+      header: "Unidad de medida",
+      editVariant: "select",
+      Cell: ({ cell }): ReactNode => {
+        const unit = units.find((u) => u.id === cell.getValue());
+        // @ts-ignore
+        return unit ? unit.description : cell.getValue();
+      },
+      muiEditTextFieldProps: {
+        required: true,
+        children: units.map((unit) => (
+          <MenuItem key={unit.id} value={unit.id}>
+            {unit.description}
+          </MenuItem>
+        )),
+        select: true,
+      },
+    },
   ];
 
   const columnsDocs: MRT_ColumnDef<DocumentsRequisition>[] = [
@@ -334,6 +379,7 @@ export default function EditrequisitionPage() {
       { title: "Eliminar item" }
     );
     if (result && requisition) {
+      setLoadingv2(true);
       await requisitionService
         .deleteDocument(token as string, row.original.name, requisition.id)
         .then((response) => {
@@ -349,6 +395,9 @@ export default function EditrequisitionPage() {
               title: "Error",
             }
           );
+        })
+        .finally(() => {
+          setLoading(false);
         });
 
       return;

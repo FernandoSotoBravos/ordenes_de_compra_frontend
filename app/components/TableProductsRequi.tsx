@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useMemo, useState, useEffect } from "react";
 import {
   MaterialReactTable,
   // createRow,
@@ -18,6 +18,7 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
+  MenuItem,
   OutlinedInput,
   Stack,
   TextField,
@@ -25,15 +26,39 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { ProductsRequisition, CRUDTableProps } from "../interfaces/Requisitions.interface";
-import { useDialogs } from "@toolpad/core";
+import {
+  ProductsRequisition,
+  CRUDTableProps,
+} from "../interfaces/Requisitions.interface";
+import { useDialogs, useSession } from "@toolpad/core";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import { SelectDescription } from "../interfaces/SelecteBase.interface";
+import { unitService } from "../api/unitService";
+import { CustomSession } from "../interfaces/Session.interface";
 
 const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
+  const [units, setUnits] = useState<SelectDescription[]>([]);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
   const dialogs = useDialogs();
+  const session = useSession<CustomSession>();
+  const token = session?.user?.access_token || "";
+
+  const fetchUnit = async () => {
+    try {
+      const response = await unitService.getAll(token, 10, 1);
+      setUnits(response);
+    } catch (error: any) {
+      dialogs.alert("Error al cargar el tipo de unidades: " + error.message, {
+        title: "Error",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchUnit();
+  }, []);
 
   const columns = useMemo<MRT_ColumnDef<ProductsRequisition>[]>(
     () => [
@@ -71,6 +96,32 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
             setValidationErrors({
               ...validationErrors,
               quantity: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "unit_id",
+        header: "Unidad de medida",
+        editVariant: "select",
+        Cell: ({ cell }): ReactNode => {
+          const unit = units.find((u) => u.id === cell.getValue());
+          // @ts-ignore
+          return unit ? unit.description : cell.getValue();
+        },
+        muiEditTextFieldProps: {
+          required: true,
+          children: units.map((unit) => (
+            <MenuItem key={unit.id} value={unit.id}>
+              {unit.description}
+            </MenuItem>
+          )),
+          select: true,
+          error: !!validationErrors?.unit_id,
+          helperText: validationErrors?.unit_id,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              unit_id: undefined,
             }),
         },
       },
@@ -188,7 +239,7 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
       isSaving: isSaving,
       showAlertBanner: isSaving,
       showProgressBars: isSaving,
-      columnVisibility: { id: false }
+      columnVisibility: { id: false },
     },
   });
 

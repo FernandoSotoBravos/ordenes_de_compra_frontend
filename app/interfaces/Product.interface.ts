@@ -1,6 +1,7 @@
 export interface AddProductBase {
   quantity: number;
   description: string;
+  unit_id?: number;
 }
 
 export interface AddProduct extends AddProductBase {

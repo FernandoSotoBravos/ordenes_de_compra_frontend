@@ -73,13 +73,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ multiple, setFiles, files }) =>
       >
         <UploadFileIcon color="primary" sx={{ fontSize: 50 }} />
         <Typography variant="h6" sx={{ mb: 1 }}>
-          Arrastra y suelta tus archivos aquí
+          Arrastra y suelta {multiple ? "tus archivos" : "tu archivo"} aquí
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          o selecciona archivos manualmente
+          o selecciona {multiple ? "archivos" : "tu archivo"} manualmente
         </Typography>
         <Button variant="contained" component="label">
-          Seleccionar Archivos
+          Seleccionar {multiple ? "tus archivos" : "tu archivo"}
           <input type="file" hidden multiple={multiple} onChange={handleFileSelect} />
         </Button>
       </Paper>
