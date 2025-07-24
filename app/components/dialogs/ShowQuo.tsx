@@ -141,26 +141,24 @@ export default function DialogAcceptQuo({
                 </Tooltip>
               </CardContent>
 
-              {payload.get("accepted") ||
-                session?.user?.role == 6 ||
-                (session?.user?.super_user && (
-                  <LoadingButton
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      padding: "10px 20px",
-                    }}
-                    fullWidth
-                    loading={loading}
-                    loadingPosition="start"
-                    startIcon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
-                    variant="text"
-                    onClick={() => handleAcceptQuo(String(quo))}
-                  >
-                    Aceptar
-                  </LoadingButton>
-                ))}
+              {(session?.user?.role == 6 || session?.user?.super_user) && !payload.get("accepted") && (
+                <LoadingButton
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "10px 20px",
+                  }}
+                  fullWidth
+                  loading={loading}
+                  loadingPosition="start"
+                  startIcon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
+                  variant="text"
+                  onClick={() => handleAcceptQuo(String(quo))}
+                >
+                  Aceptar
+                </LoadingButton>
+              )}
             </Card>
           ))}
         </Grid>

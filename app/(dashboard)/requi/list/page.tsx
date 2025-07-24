@@ -442,7 +442,7 @@ const RUDRequisitions = () => {
         table={table}
       />,
       <div key="show_activate">
-        {([5, 8].includes(session?.user?.role as number) ||
+        {([5, 6].includes(session?.user?.role as number) ||
           session?.user?.super_user) &&
           row.original.quotizations && (
             <MRT_ActionMenuItem
