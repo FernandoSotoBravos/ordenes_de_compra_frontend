@@ -12,7 +12,7 @@ export interface ProductsOrder {
 
 export interface TaxesOrder {
   name: string;
-  value: number;
+  value: string;
 }
 
 export type OrderHistoryProps = {

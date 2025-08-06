@@ -1,4 +1,3 @@
-import { Tax } from "../interfaces/Taxes.interface";
 import { fetchWrapper } from "./axiosInstance";
 
 const getAll = async (

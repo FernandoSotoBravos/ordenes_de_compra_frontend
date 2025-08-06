@@ -44,6 +44,14 @@ export default function DialogCreateOrder({
         })
       );
 
+      if (!payload) {
+        dialogs.alert("No hay datos para crear la orden de compra", {
+          title: "Error",
+        });
+        setLoading(false);
+        return;
+      }
+      
       // Crear el payload con archivos en formato Base64
       const data: OrderCreateProps = {
         concept_id: parseInt(payload.concept),

@@ -35,6 +35,7 @@ function CreateOrderPage() {
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
+  const [resetKey, setResetKey] = useState(0);
   const [departments, setDepartments] = useState<SelectBase[]>([]);
   const [currencies, setCurrencies] = useState<CurrencySelect[]>([]);
   const [areas, setAreas] = useState<SelectBase[]>([]);
@@ -192,6 +193,7 @@ function CreateOrderPage() {
   };
 
   const handleCleanForm = () => {
+    setResetKey(prev => prev + 1)
     setTableData([]);
     setSegmentBusiness("");
     setFormValues({
@@ -378,6 +380,7 @@ function CreateOrderPage() {
       </Grid>
       <Box mt={1}>
         <CRUDTable
+          key={resetKey}
           tableData={tableData}
           setTableData={handleProductsChange}
           isSaving={false}

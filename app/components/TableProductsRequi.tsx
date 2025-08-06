@@ -131,6 +131,22 @@ const CRUDTable = ({ tableData, setTableData, isSaving }: CRUDTableProps) => {
 
   const handleCreateProduct: MRT_TableOptions<ProductsRequisition>["onCreatingRowSave"] =
     async ({ values, table }) => {
+      // Validate required fields
+      const errors: Record<string, string | undefined> = {};
+      if (!values.description) {
+        errors.description = "La descripción es requerida";
+      }
+      if (!values.quantity || values.quantity <= 0) {
+        errors.quantity = "La cantidad debe ser mayor a 0";
+      }
+      if (!values.unit_id) {
+        errors.unit_id = "La unidad de medida es requerida";
+      }
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        return;
+      }
+      setValidationErrors({});
       const newProduct = { ...values, id: crypto.randomUUID() };
       const updatedTableData = [...tableData, newProduct];
       setTableData(updatedTableData);

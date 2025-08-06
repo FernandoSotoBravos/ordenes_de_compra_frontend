@@ -38,6 +38,7 @@ import { CustomSession } from "@/app/interfaces/Session.interface";
 import { Cancel } from "@mui/icons-material";
 import { unitService } from "../api/unitService";
 import { SelectDescription } from "../interfaces/SelecteBase.interface";
+import CurrencyInput from "../components/CurrencyInput";
 
 const CRUDTable = ({
   tableData,
@@ -51,7 +52,7 @@ const CRUDTable = ({
   >({});
   const [taxes, setTaxes] = useState<TaxesOrder[]>([]);
   const [units, setUnits] = useState<SelectDescription[]>([]);
-  const [iva, setIva] = useState(0.0);
+  const [iva, setIva] = useState<number | string>();
   const [total, setTotal] = useState(0.0);
   const [subtotal, setSubtotal] = useState(0.0);
   const dialogs = useDialogs();
@@ -77,11 +78,13 @@ const CRUDTable = ({
     const newSubtotal = tableData.reduce((acc, row) => acc + row.total, 0);
     const totalTaxes = taxes.reduce((acc, t) => {
       if (["Descuento", "ISR", "Nota de Credito"].includes(t.name)) {
-        return acc - t.value;
+        return acc - parseFloat(t.value);
       }
-      return acc + t.value;
+      return acc + parseFloat(t.value);
     }, 0);
-    const newTotal = newSubtotal + iva + totalTaxes;
+    const ivaValue = parseFloat(iva as string) || 0;
+
+    const newTotal = newSubtotal + ivaValue + totalTaxes;
 
     setSubtotal(newSubtotal);
     setTotal(newTotal);
@@ -219,7 +222,28 @@ const CRUDTable = ({
 
   const handleCreateProduct: MRT_TableOptions<ProductsOrder>["onCreatingRowSave"] =
     async ({ values, table }) => {
-      // Validar y agregar el nuevo producto
+      const errors: Record<string, string | undefined> = {};
+      if (!values.description) {
+        errors.description = "La descripción es requerida";
+      }
+      if (!values.quantity || values.quantity <= 0) {
+        errors.quantity = "La cantidad debe ser mayor a 0";
+      }
+      if (!values.unit_id) {
+        errors.unit_id = "La unidad de medida es requerida";
+      }
+      if (!values.unit_price || values.unit_price <= 0) {
+        errors.unit_price = "El precio unitario debe ser mayor a 0";
+      } else if (isNaN(values.unit_price)) {
+        errors.unit_price = "El precio unitario debe ser un número válido";
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        return;
+      }
+      setValidationErrors({});
+
       const total = values.quantity * values.unit_price;
       const newProduct = { ...values, id: crypto.randomUUID(), total: total };
       const updatedTableData = [...tableData, newProduct];
@@ -284,15 +308,6 @@ const CRUDTable = ({
         ...prev,
         ...(Array.isArray(result) ? result : [result]),
       ]);
-    }
-  };
-
-  const handleChangeIVA = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const numericValue = parseFloat(e.target.value);
-    if (isNaN(numericValue)) {
-      setIva(0);
-    } else {
-      setIva(numericValue);
     }
   };
 
@@ -403,7 +418,7 @@ const CRUDTable = ({
               <InputLabel>{tax.name}</InputLabel>
               <OutlinedInput
                 label={tax.name}
-                value={formatCurrency(tax.value.toFixed(2))}
+                value={formatCurrency(parseFloat(tax.value).toFixed(2))}
                 disabled
                 endAdornment={
                   <InputAdornment position="end">
@@ -456,6 +471,9 @@ const CRUDTable = ({
               <OutlinedInput
                 label="Subtotal"
                 id="subtotal"
+                inputProps={{
+                  style: { textAlign: "right" },
+                }}
                 value={formatCurrency(subtotal.toFixed(2))}
                 onChange={() =>
                   setSubtotal(
@@ -470,13 +488,10 @@ const CRUDTable = ({
 
             <FormControl sx={{ width: 200 }}>
               <InputLabel>IVA</InputLabel>
-              <OutlinedInput
+              <CurrencyInput
                 label="IVA"
-                id="iva"
-                value={iva === 0 ? "" : iva}
-                type="number"
-                onChange={handleChangeIVA}
-                inputProps={{ step: "0.01" }}
+                value={typeof iva === "string" ? (iva === "" ? undefined : Number(iva)) : iva}
+                onChange={setIva}
               />
             </FormControl>
 
@@ -486,6 +501,9 @@ const CRUDTable = ({
                 label="Total"
                 id="total"
                 disabled
+                inputProps={{
+                  style: { textAlign: "right" },
+                }}
                 value={formatCurrency(total.toFixed(2))}
               />
             </FormControl>

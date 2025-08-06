@@ -17,9 +17,10 @@ import {
 import { DialogProps } from "@toolpad/core/useDialogs";
 import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
 import { useDialogs, useSession } from "@toolpad/core";
+import CurrencyInput from "../CurrencyInput";
 
 export interface ResultTaxes {
-  value: number;
+  value: string;
   name: string;
 }
 
@@ -29,7 +30,7 @@ export default function AddTaxes({
   onClose,
 }: DialogProps<SelectBase[], ResultTaxes | null>) {
   const [formValues, setFormValues] = useState({
-    value: 0,
+    value: "",
     name: "",
   });
   const dialogs = useDialogs();
@@ -43,18 +44,28 @@ export default function AddTaxes({
       return;
     }
 
+    const numericValue = parseFloat(formValues.value);
+
+    if (isNaN(numericValue)) {
+      dialogs.alert("Por favor, ingrese un número válido.", {
+        title: "Error",
+      });
+      return;
+    }
+
+    if (numericValue < 0) {
+      dialogs.alert("El monto no puede ser negativo.", { title: "Error" });
+      return;
+    }
+
     onClose(formValues);
   };
 
   const handleChangeValueN = (e: any) => {
-    const numericValue = parseFloat(e.target.value);
-    if (!isNaN(numericValue)) {
-      // @ts-check
-      setFormValues({
-        ...formValues,
-        value: numericValue,
-      });
-    }
+    setFormValues({
+      ...formValues,
+      value: e,
+    });
   };
 
   const handleChangeValue = (e: any) => {
@@ -93,7 +104,14 @@ export default function AddTaxes({
               </Select>
             </FormControl>
 
-            <TextField
+            <CurrencyInput
+              label="Monto"
+              value={formValues.value}
+              onChange={handleChangeValueN}
+              width="100%"
+              disabled={formValues.name === ""}
+            />
+            {/* <TextField
               label="Monto"
               type="number"
               variant="outlined"
@@ -103,7 +121,7 @@ export default function AddTaxes({
               fullWidth
               required
               disabled={formValues.name === ""}
-            />
+            /> */}
 
             <Button type="submit" fullWidth variant="contained">
               Agregar Ajuste Fiscal
