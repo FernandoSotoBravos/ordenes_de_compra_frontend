@@ -301,7 +301,7 @@ const RUDRequisitions = () => {
     const payload = new Map<string, any>([
       ["id", row.original.id],
       ["quotizations", row.original.quotizations],
-      ["accepted", Boolean(row.original.approved_quo)]
+      ["accepted", row.original.approved_quo]
     ]);
     const result = await dialogs.open(DialogAcceptQuo, payload);
     if (result === null) {

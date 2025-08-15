@@ -17,7 +17,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
   onChange,
   width = 200,
   textAlign = "right",
-  disabled = false,
+  disabled = false
 }) => {
   return (
     <FormControl sx={{ width }}>

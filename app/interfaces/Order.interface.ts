@@ -137,6 +137,7 @@ export interface OrderUpdateHeaders {
   currency_id: number;
   comments: string;
   description: string;
+  iva?: number;
 }
 
 export interface Documents {

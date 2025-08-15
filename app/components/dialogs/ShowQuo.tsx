@@ -6,23 +6,18 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import Grid from "@mui/material/Grid2";
-import { OrderCreate } from "@/app/interfaces/Order.interface";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { OrderCreateProps } from "@/app/interfaces/Order.interface";
 import { useSession } from "@toolpad/core";
 import { orderService } from "@/app/api/orderService";
 import { useDialogs } from "@toolpad/core/useDialogs";
-import SimpleFileUpload from "@/app/components/SimpleUploadFile";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { requisitionService } from "@/app/api/requisitionService";
 import {
   Card,
-  CardActionArea,
   CardContent,
   CardHeader,
   Chip,
   Button,
-  Typography,
   Tooltip,
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
@@ -110,10 +105,12 @@ export default function DialogAcceptQuo({
                 flexDirection: "column",
                 justifyContent: "space-between",
                 alignItems: "center",
+                boxShadow: `0px 4px 5px 0px ${payload.get("accepted") == quo ? "rgba(0, 255, 55, 0.5)" : "rgba(255, 0, 0, 0.5)"}`,
               }}
             >
               <CardHeader title={`Cotización #${index + 1}`} />
-              <CardContent sx={{ flexGrow: 1 }}>
+              {payload.get("accepted") == quo ? "Acceptada" : ""}
+              <CardContent sx={{ flexGrow: 2 }}>
                 <Tooltip title={String(quo)}>
                   <Chip
                     color="warning"
@@ -141,29 +138,44 @@ export default function DialogAcceptQuo({
                 </Tooltip>
               </CardContent>
 
-              {(session?.user?.role == 6 || session?.user?.super_user) && !payload.get("accepted") && (
-                <LoadingButton
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    padding: "10px 20px",
-                  }}
-                  fullWidth
-                  loading={loading}
-                  loadingPosition="start"
-                  startIcon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
-                  variant="text"
-                  onClick={() => handleAcceptQuo(String(quo))}
-                >
-                  Aceptar
-                </LoadingButton>
-              )}
+              {(session?.user?.role == 6 || session?.user?.super_user) &&
+                !payload.get("accepted") && (
+                  <LoadingButton
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: "10px 20px",
+                    }}
+                    fullWidth
+                    loading={loading}
+                    loadingPosition="start"
+                    startIcon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
+                    variant="text"
+                    onClick={() => handleAcceptQuo(String(quo))}
+                  >
+                    Aceptar
+                  </LoadingButton>
+                )}
             </Card>
           ))}
         </Grid>
       </DialogContent>
       <DialogActions>
+        {!payload.get("accepted") && (
+          <Button
+            onClick={() => onClose(null)}
+            variant="outlined"
+            sx={{
+              backgroundColor: "rgba(255, 0, 0, 0.5)",
+              "&:hover": {
+                backgroundColor: "rgba(158, 0, 0, 0.5)",
+              },
+            }}
+          >
+            Rechazar todas
+          </Button>
+        )}
         <Button color="error" onClick={() => onClose(null)}>
           Cerrar
         </Button>

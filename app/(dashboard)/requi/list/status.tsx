@@ -39,6 +39,11 @@ const stategyStatus: Record<
     color: "#F44336",
     text: "Rechazada",
   },
+  11: {
+    Icon: PreviewIcon,
+    color: "#007BFF",
+    text: "Revisión Contraloría"
+  }
 };
 
 interface StatusRequiProps {

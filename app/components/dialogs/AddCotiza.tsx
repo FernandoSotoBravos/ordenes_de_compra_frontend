@@ -32,8 +32,8 @@ export default function DialogAddQuo({
 
   const handleUploadFiles = async () => {
     const files = [file, fileTwo, fileThree].filter(Boolean) as File[]; // Filtra archivos no nulos
-    if (files.length < 3) {
-      dialogs.alert("Debe subir 3 archivos");
+    if (files.length <= 0) {
+      dialogs.alert("Debe subir al menos un archivo");
       return;
     }
 

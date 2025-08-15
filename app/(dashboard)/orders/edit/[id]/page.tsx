@@ -70,6 +70,7 @@ import TaxIcon from "@/app/components/CustomIcons";
 import AddTaxes from "@/app/components/dialogs/AddTaxesOrder";
 import { taxService } from "@/app/api/taxService";
 import { unitService } from "@/app/api/unitService";
+import CurrencyInput from "@/app/components/CurrencyInput";
 
 export default function EditOrderPage() {
   const { id } = useParams();
@@ -604,6 +605,7 @@ export default function EditOrderPage() {
       department_id: parseInt(order.department),
       supplier_id: parseInt(order?.supplier),
       currency_id: parseInt(order.currency),
+      iva: order.iva
     };
 
     await orderService
@@ -795,6 +797,21 @@ export default function EditOrderPage() {
             ))}
           </Paper>
 
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel htmlFor="outlined-adornment-amount-iva">IVA</InputLabel>
+            <CurrencyInput
+              label="IVA"
+              width={"100%"}
+              value={order.iva}
+              onChange={(value) =>
+                setOrder({
+                  ...order,
+                  iva: value,
+                })
+              }
+            />
+          </FormControl>
+
           <FormControl fullWidth>
             <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
             <OutlinedInput
@@ -807,6 +824,9 @@ export default function EditOrderPage() {
                 currency: "USD",
               })}
               disabled
+              inputProps={{
+                style: { textAlign: "right" },
+              }}
             />
           </FormControl>
 

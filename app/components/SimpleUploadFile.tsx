@@ -6,6 +6,7 @@ import {
   Paper,
   IconButton,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -85,9 +86,13 @@ const SimpleFileUpload: React.FC<SimpleFileUploadProps> = ({
           border="1px solid"
           borderColor="grey.300"
         >
-          <Typography maxWidth="80%">
-            {file.name}
-          </Typography>
+          <Tooltip title={file.name}>
+            <Typography maxWidth="80%">
+              {file.name.length > 13
+                ? file.name.substring(0, 13) + "..."
+                : file.name}
+            </Typography>
+          </Tooltip>
           <IconButton color="error" onClick={handleDeleteFile}>
             <DeleteIcon />
           </IconButton>

@@ -38,7 +38,7 @@ const stategyStatus: Record<
     Icon: ErrorIcon,
     color: "#F44336",
     text: "Rechazada",
-  },
+  }
 };
 
 interface StatusOrderProps {
