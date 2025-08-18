@@ -99,7 +99,7 @@ function CreateRequisitionPage() {
       .getByDepartment(token as string, departmentId)
       .then((data) => {
         setAreas(data);
-        console.log(session?.user?.area)
+        console.log(session?.user?.area);
         if (
           (session?.user && !session?.user?.super_user) ||
           session?.user?.is_leader_department
@@ -161,7 +161,7 @@ function CreateRequisitionPage() {
     if (token) {
       handleGetDepartments();
 
-      if (session.user?.super_user) {
+      if (session.user?.super_user || session.user?.role == 5) {
         setIsEnableDepartment(true);
         setIsEnableArea(true);
         return;
@@ -302,7 +302,7 @@ function CreateRequisitionPage() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>
-              {session?.user?.super_user ? (
+              {session?.user?.super_user || session?.user?.role == 5 ? (
                 <FormControl fullWidth>
                   <InputLabel id="departamento-label">Departamento</InputLabel>
                   <Select
@@ -333,7 +333,8 @@ function CreateRequisitionPage() {
 
             <Grid size={{ xs: 12 }}>
               {session?.user?.super_user ||
-              session?.user?.is_leader_department ? (
+              session?.user?.is_leader_department ||
+              session?.user?.role == 5 ? (
                 <FormControl fullWidth>
                   <InputLabel id="area-label">Área</InputLabel>
                   <Select
@@ -431,11 +432,7 @@ function CreateRequisitionPage() {
           zIndex: 999,
         }}
       >
-        <Fab
-          aria-label="save"
-          sx={buttonSx}
-          onClick={handleSubmit}
-        >
+        <Fab aria-label="save" sx={buttonSx} onClick={handleSubmit}>
           {success ? <CheckIcon /> : <SaveIcon />}
         </Fab>
         {loading && (

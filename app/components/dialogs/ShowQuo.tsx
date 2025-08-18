@@ -33,6 +33,36 @@ export default function DialogAcceptQuo({
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
 
+  const handleRejectQuo = async () => {
+    const reason = await dialogs.open(DialogCommentariesCustom, {
+      title: "Rechazar las cotizaciónes",
+      content: "¿Por qué rechaza las cotizaciónes?",
+    });
+
+    setLoading(true);
+
+    try {
+      const response = await requisitionService.rejectQuotizations(token as string, {
+        requisitionId: parseInt(payload.get("id")),
+        status: "12",
+        comments: reason == null ? "" : reason,
+      });
+
+      if (response) {
+        dialogs.alert("Cotización rechazada correctamente", {
+          title: "Éxito",
+        });
+        onClose(true);
+      }
+    } catch (error) {
+      dialogs.alert("Error al rechazar la cotización: " + error, {
+        title: "Error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAcceptQuo = async (filename: string) => {
     const reason = await dialogs.open(DialogCommentariesCustom, {
       title: "Aceptar cotización",
@@ -109,7 +139,7 @@ export default function DialogAcceptQuo({
               }}
             >
               <CardHeader title={`Cotización #${index + 1}`} />
-              {payload.get("accepted") == quo ? "Acceptada" : ""}
+              {payload.get("accepted") == quo ? "Aceptada" : ""}
               <CardContent sx={{ flexGrow: 2 }}>
                 <Tooltip title={String(quo)}>
                   <Chip
@@ -164,7 +194,7 @@ export default function DialogAcceptQuo({
       <DialogActions>
         {!payload.get("accepted") && (
           <Button
-            onClick={() => onClose(null)}
+            onClick={() => handleRejectQuo()}
             variant="outlined"
             sx={{
               backgroundColor: "rgba(255, 0, 0, 0.5)",

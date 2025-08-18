@@ -123,6 +123,22 @@ const addQuotizations = async (
     });
 };
 
+const rejectQuotizations = async (token: string, props: ChangeStatus) => {
+  return fetchWrapper
+    .put(`/requisitions/${props.requisitionId}/quo/reject`, {
+      data: { comments: props.comments, status: props.status },
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
 const acceptQuotization = async (
   token: string,
   id: number,
@@ -369,4 +385,5 @@ export const requisitionService = {
   getMyRequisitions,
   addQuotizations,
   acceptQuotization,
+  rejectQuotizations,
 };

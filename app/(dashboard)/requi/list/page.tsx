@@ -394,7 +394,7 @@ const RUDRequisitions = () => {
         table={table}
       />,
       <div key="activate">
-        {isPower && [8].includes(row.original.status_id) && !row.original.quotizations && (
+        {isPower && [8, 12].includes(row.original.status_id) && !row.original.quotizations && (
           <MRT_ActionMenuItem
             icon={<ThreeDocs />}
             key="activate"
@@ -405,7 +405,7 @@ const RUDRequisitions = () => {
         )}
       </div>,
       <div key="approbe">
-        {isPower && ![7, 8].includes(row.original.status_id) && (
+        {isPower && ![7, 8, 11, 12, 13].includes(row.original.status_id) && (
           <MRT_ActionMenuItem
             icon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
             key="approbe"
@@ -416,7 +416,7 @@ const RUDRequisitions = () => {
         )}
       </div>,
       <div key="reject">
-        {isPower && ![7, 8].includes(row.original.status_id) && (
+        {isPower && ![7, 8, 11, 12, 13].includes(row.original.status_id) && (
           <MRT_ActionMenuItem
             icon={<ThumbDownIcon sx={{ color: "#f44336" }} />}
             key="dismiss"

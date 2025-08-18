@@ -32,7 +32,7 @@ const stategyStatus: Record<
   8: {
     Icon: CreditScoreIcon,
     color: "#4CAF50",
-    text: "Finalizada",
+    text: "Finalizada sin cotizaciones",
   },
   7: {
     Icon: ErrorIcon,
@@ -43,6 +43,16 @@ const stategyStatus: Record<
     Icon: PreviewIcon,
     color: "#007BFF",
     text: "Revisión Contraloría"
+  },
+  12: {
+    Icon: ErrorIcon,
+    color: "#F44336",
+    text: "Rechazo Cotizaciónes"
+  },
+  13: {
+    Icon: PreviewIcon,
+    color: "#4CAF50",
+    text: "Finalizada con cotizaciónes"
   }
 };
 
