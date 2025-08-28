@@ -13,15 +13,7 @@ const colorCycle = keyframes`
   100% { box-shadow: 0 20px 40px -10px rgba(0,200,0,0.95); }
 `;
 
-export default function Home({
-  src = "/placeholder.png",
-  alt = "Imagen",
-  size = 320,
-}: {
-  src?: string;
-  alt?: string;
-  size?: number;
-}) {
+export default function Home() {
   return (
     <Box
       sx={{
@@ -33,23 +25,6 @@ export default function Home({
         p: 2,
       }}
     >
-      {/* <Box
-        component="img"
-        src={src}
-        alt={alt}
-        sx={{
-          width: size,
-          height: "auto",
-          borderRadius: 2,
-          animation: `${colorCycle} 6s linear infinite`,
-          // make the shadow smoother and add a subtle transform animation
-          transition: "transform 300ms ease",
-          "&:hover": { transform: "translateY(-6px)" },
-          // ensure the image sits on top of the animated shadow
-          position: "relative",
-          zIndex: 1,
-        }}
-      /> */}
     </Box>
   );
 }
