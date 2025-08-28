@@ -13,6 +13,7 @@ import { Document, Page } from "react-pdf";
 import { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
+import PrintIcon from "@mui/icons-material/Print";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { ViewerProps } from "@/app/interfaces/Viewer.interface";
@@ -21,6 +22,7 @@ import { pdfjs } from "react-pdf";
 import { Skeleton } from "@mui/material";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { useSession } from "@toolpad/core";
+import printJS from "print-js";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -56,6 +58,19 @@ const Viewer = ({
     }
   };
 
+  const printPDF = () => {
+    if (!payload.file) {
+      return;
+    }
+
+    const url = window.URL.createObjectURL(new Blob([payload.file]));
+    printJS({
+      printable: url,
+      type: "pdf",
+      documentTitle: `orden_${payload.id}.pdf`,
+    });
+  };
+
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
   };
@@ -67,22 +82,6 @@ const Viewer = ({
   const handleZoomChange = (next: boolean) => {
     setScale((prev) => (next ? prev + 0.5 : prev - 0.5));
   };
-
-  // const handleDownloadFile = async () => {
-  //   setLoading(true);
-  //   orderService
-  //     .downloadPDFOrder(token as string, Number(payload.id))
-  //     .then((response) => {
-  //       setPdf(response);
-  //       setLoading(false);
-  //     })
-  //     .catch((error) => {
-  //       setLoading(false);
-  //       dialogs.alert("Error al descargar el documento " + error, {
-  //         title: "Error",
-  //       });
-  //     });
-  // };
 
   return (
     <Dialog
@@ -129,7 +128,10 @@ const Viewer = ({
           </DialogTitle>
           <DialogContent dividers>
             <Box display="flex" flexDirection="column" alignItems="center">
-              <Document file={payload.file} onLoadSuccess={onDocumentLoadSuccess}>
+              <Document
+                file={payload.file}
+                onLoadSuccess={onDocumentLoadSuccess}
+              >
                 <Page
                   pageNumber={pageNumber}
                   scale={scale}
@@ -151,6 +153,14 @@ const Viewer = ({
               </IconButton>
             </Box>
             <Box display="flex" gap="15px">
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<PrintIcon />}
+                onClick={printPDF}
+              >
+                Imprimir
+              </Button>
               <Button
                 variant="contained"
                 color="primary"

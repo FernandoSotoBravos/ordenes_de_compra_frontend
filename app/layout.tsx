@@ -9,6 +9,7 @@ import type { Navigation } from "@toolpad/core/AppProvider";
 import { SessionProvider, signIn, signOut } from "next-auth/react";
 import theme from "../theme";
 import { auth } from "../auth";
+import LogoImg from "./components/logo";
 
 const AUTHENTICATION = {
   signIn,
@@ -25,10 +26,10 @@ export default async function RootLayout({
       kind: "header",
       title: "Menu",
     },
-    {
-      title: "Dashboard",
-      icon: <DashboardIcon />,
-    },
+    // {
+    //   title: "Dashboard",
+    //   icon: <DashboardIcon />,
+    // },
     {
       segment: "requi",
       title: "Requisiciones",
@@ -128,7 +129,7 @@ export default async function RootLayout({
             <AppProvider
               theme={theme}
               navigation={NAVIGATION}
-              branding={{ title: "FC Bravos de Juárez" }}
+              branding={{ title: "FC Bravos de Juárez", logo: <LogoImg width={40} height={40} /> }}
               session={session}
               authentication={AUTHENTICATION}
             >

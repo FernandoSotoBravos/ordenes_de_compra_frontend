@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   FormControl,
@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   Fab,
+  Autocomplete,
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import TextArea from "../../../components/TextArea";
@@ -20,7 +21,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useDialogs } from "@toolpad/core/useDialogs";
 
 import Grid from "@mui/material/Grid2";
-import DialogCreateOrder from "@/app/components/dialogs/CreateOrder";
 import CRUDTable from "@/app/components/TableProductsRequi";
 import { departmentService } from "@/app/api/departmentService";
 import { areaService } from "@/app/api/areaService";
@@ -99,7 +99,11 @@ function CreateRequisitionPage() {
       .getByDepartment(token as string, departmentId)
       .then((data) => {
         setAreas(data);
-        console.log(session?.user?.area);
+
+        if (session?.user?.role == 5) {
+          return;
+        }
+
         if (
           (session?.user && !session?.user?.super_user) ||
           session?.user?.is_leader_department
@@ -123,8 +127,8 @@ function CreateRequisitionPage() {
       });
   };
 
-  const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
-    getAreas(parseInt(event.target.value));
+  const handleSelectedDepartment = async (event: SelectChangeEvent<string>) => {
+    await getAreas(parseInt(event.target.value));
     setFormValues({
       ...formValues,
       department: event.target.value,
@@ -157,7 +161,7 @@ function CreateRequisitionPage() {
       });
   };
 
-  useMemo(() => {
+  useEffect(() => {
     if (token) {
       handleGetDepartments();
 
@@ -201,12 +205,14 @@ function CreateRequisitionPage() {
     });
   };
 
-  const handleSegmentBusiness = (event: SelectChangeEvent<string>) => {
-    const concept = concepts.find((c) => c.id === parseInt(event.target.value));
-    setSegmentBusiness(concept?.segment_business.toString() || "");
+  const handleSegmentBusiness = (
+    event: React.SyntheticEvent<Element, Event>,
+    value: ConceptSelect | null
+  ) => {
+    setSegmentBusiness(value?.segment_business?.toString() || "");
     setFormValues({
       ...formValues,
-      concept: event.target.value,
+      concept: value?.id.toString() || "",
     });
   };
 
@@ -367,21 +373,24 @@ function CreateRequisitionPage() {
               <Grid container spacing={2}>
                 <Grid size={{ xs: 7 }}>
                   <FormControl fullWidth>
-                    <InputLabel id="concepto-label">Concepto</InputLabel>
-                    <Select
-                      labelId="concepto-label"
-                      id="concept"
-                      name="concept"
-                      value={formValues.concept}
+                    <Autocomplete
+                      disablePortal
                       onChange={handleSegmentBusiness}
+                      options={concepts}
+                      getOptionLabel={(option) => option.name || ""}
                       disabled={concepts.length === 0}
-                    >
-                      {concepts.map((concept) => (
-                        <MenuItem key={concept.id} value={concept.id}>
-                          {concept.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                      value={
+                        concepts.find(
+                          (c) => c.id === parseInt(formValues.concept)
+                        ) || null
+                      }
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label="Concepto" />
+                      )}
+                    />
                   </FormControl>
                 </Grid>
                 <Grid size={{ xs: 5 }}>

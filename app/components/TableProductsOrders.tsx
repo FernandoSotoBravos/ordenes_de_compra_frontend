@@ -323,6 +323,10 @@ const CRUDTable = ({
     enableEditing: true,
     enableStickyHeader: true,
     enableStickyFooter: true,
+    enablePagination: true,
+    initialState: {
+      pagination: { pageSize: 15, pageIndex: 0 },
+    },
     getRowId: (row) => row.id,
     muiTableContainerProps: {
       sx: {
@@ -388,7 +392,7 @@ const CRUDTable = ({
         Agregar Producto
       </Button>
     ),
-    renderBottomToolbar: ({ table }) => (
+    renderBottomToolbarCustomActions: ({ table }) => (
       <Box
         sx={{
           display: "flex",
@@ -490,7 +494,13 @@ const CRUDTable = ({
               <InputLabel>IVA</InputLabel>
               <CurrencyInput
                 label="IVA"
-                value={typeof iva === "string" ? (iva === "" ? undefined : Number(iva)) : iva}
+                value={
+                  typeof iva === "string"
+                    ? iva === ""
+                      ? undefined
+                      : Number(iva)
+                    : iva
+                }
                 onChange={setIva}
               />
             </FormControl>
@@ -511,6 +521,17 @@ const CRUDTable = ({
         </Box>
       </Box>
     ),
+    muiBottomToolbarProps: {
+      // Or mantineBottomToolbarProps for Mantine version
+      sx: {
+        "> div": {
+          // Target the div wrapping the pagination and custom actions
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 2,
+        },
+      },
+    },
     state: {
       // isLoading: isLoadingUsers,
       isSaving: isSaving,

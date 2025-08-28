@@ -193,7 +193,7 @@ function CreateOrderPage() {
   };
 
   const handleCleanForm = () => {
-    setResetKey(prev => prev + 1)
+    setResetKey((prev) => prev + 1);
     setTableData([]);
     setSegmentBusiness("");
     setFormValues({
@@ -210,7 +210,7 @@ function CreateOrderPage() {
       subtotal: 0.0,
       total: 0.0,
       products: [],
-      taxes: []
+      taxes: [],
     });
   };
 
@@ -223,12 +223,14 @@ function CreateOrderPage() {
     });
   };
 
-  const handleSegmentBusiness = (event: SelectChangeEvent<string>) => {
-    const concept = concepts.find((c) => c.id === parseInt(event.target.value));
-    setSegmentBusiness(concept?.segment_business.toString() || "");
+  const handleSegmentBusiness = (
+    event: React.SyntheticEvent<Element, Event>,
+    value: ConceptSelect | null
+  ) => {
+    setSegmentBusiness(value?.segment_business?.toString() || "");
     setFormValues({
       ...formValues,
-      concept: event.target.value,
+      concept: value?.id.toString() || "",
     });
   };
 
@@ -318,21 +320,21 @@ function CreateOrderPage() {
 
         <Grid container spacing={2} size={{ xs: 12, sm: 6 }}>
           <FormControl sx={{ width: "60%" }}>
-            <InputLabel id="concepto-label">Conceptos</InputLabel>
-            <Select
-              labelId="concepto-label"
-              id="segment"
-              name="segment"
-              value={formValues.concept}
+            <Autocomplete
+              disablePortal
               onChange={handleSegmentBusiness}
+              options={concepts}
+              getOptionLabel={(option) => option.name || ""}
               disabled={concepts.length === 0}
-            >
-              {concepts.map((concept) => (
-                <MenuItem key={concept.id} value={concept.id}>
-                  {concept.name}
-                </MenuItem>
-              ))}
-            </Select>
+              value={
+                concepts.find((c) => c.id === parseInt(formValues.concept)) || null
+              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField {...params} label="Concepto" />
+              )}
+              
+            />
           </FormControl>
           <TextField
             sx={{ width: "35%" }}

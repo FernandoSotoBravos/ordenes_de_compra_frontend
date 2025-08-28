@@ -14,7 +14,7 @@ async function signIn(
         email: formData.get("email"),
         password: formData.get("password"),
       }),
-      redirectTo: callbackUrl ?? "/",
+      redirectTo: callbackUrl ?? "/home",
     });
   } catch (error) {
     // The desired flow for successful sign in in all cases

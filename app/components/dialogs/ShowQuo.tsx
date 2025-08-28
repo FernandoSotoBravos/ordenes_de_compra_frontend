@@ -163,6 +163,7 @@ export default function DialogAcceptQuo({
                       maxWidth: "100%",
                     }}
                     clickable
+                    onDelete={() => {}}
                     onClick={() => handleDownloadFile(String(quo))}
                   />
                 </Tooltip>
@@ -192,7 +193,7 @@ export default function DialogAcceptQuo({
         </Grid>
       </DialogContent>
       <DialogActions>
-        {!payload.get("accepted") && (
+        {!payload.get("accepted") && session?.user?.role == 6 && (
           <Button
             onClick={() => handleRejectQuo()}
             variant="outlined"

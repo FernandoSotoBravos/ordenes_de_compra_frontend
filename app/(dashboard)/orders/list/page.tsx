@@ -55,7 +55,7 @@ import { CustomSession } from "@/app/interfaces/Session.interface";
 import { StatusRole } from "@/app/mocks/statusRole";
 import Viewer from "@/app/components/viewer";
 import { useRouter } from "next/navigation";
-import { MRT_Localization_ES } from 'material-react-table/locales/es';
+import { MRT_Localization_ES } from "material-react-table/locales/es";
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -137,8 +137,9 @@ const RUDOrders = () => {
         accessorKey: "created_at",
         header: "Fecha de Creación",
         Cell: ({ cell }) => {
-          return dayjs(cell.getValue() as string | number | Date)
-            .format("DD/MM/YYYY HH:mm");
+          return dayjs(cell.getValue() as string | number | Date).format(
+            "DD/MM/YYYY HH:mm"
+          );
         },
         muiEditTextFieldProps: {
           required: true,
@@ -292,11 +293,11 @@ const RUDOrders = () => {
   };
 
   const openPDFViewer = async (menuClose: () => void, row: MRT_Row<Order>) => {
-    const file: Blob = await handleDownloadFile(row.original.id)
+    const file: Blob = await handleDownloadFile(row.original.id);
 
     const result = await dialogs.open(Viewer, {
       id: row.original.id,
-      file: file
+      file: file,
     });
     if (result === null) {
       menuClose();
@@ -357,6 +358,15 @@ const RUDOrders = () => {
     enableRowActions: true,
     enableStickyHeader: true,
     enableExpandAll: false,
+    initialState: {
+      density: "compact",
+      columnVisibility: {
+        id: false,
+        concept: false,
+        description: false,
+        comments: false,
+      },
+    },
     getRowId: (row) => (row.id ? row.id.toString() : ""),
     muiToolbarAlertBannerProps: isLoadingOrdersError
       ? {
@@ -397,7 +407,7 @@ const RUDOrders = () => {
         table={table}
       />,
       <div key="approbe">
-        {(isPower && ![7,8].includes(row.original.status_id)) && (
+        {isPower && ![7, 8].includes(row.original.status_id) && (
           <MRT_ActionMenuItem
             icon={<ThumbUpIcon sx={{ color: "#4caf50" }} />}
             key="approbe"
@@ -408,7 +418,7 @@ const RUDOrders = () => {
         )}
       </div>,
       <div key="reject">
-        {isPower && ![7,8].includes(row.original.status_id) && (
+        {isPower && ![7, 8].includes(row.original.status_id) && (
           <MRT_ActionMenuItem
             icon={<ThumbDownIcon sx={{ color: "#f44336" }} />}
             key="dismiss"
