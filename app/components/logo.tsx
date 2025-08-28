@@ -2,13 +2,12 @@ import * as React from "react";
 import { Box } from "@mui/material";
 import Image from "next/image";
 
-export default function LogoImg({
-  width = 200,
-  height = 60,
-}: {
-  width?: number;
-  height?: number;
-}) {
+interface LogoProps {
+  width: number;
+  height: number;
+}
+
+export default function LogoImg({ width = 200, height = 60 }: LogoProps): any {
   return (
     <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
       <Image
