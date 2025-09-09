@@ -358,7 +358,7 @@ const downloadPDFRequisition = async (token: string, id: number) => {
       },
     })
     .then((response) => {
-      return response.data;
+      return response;
     })
     .catch((error) => {
       throw error;

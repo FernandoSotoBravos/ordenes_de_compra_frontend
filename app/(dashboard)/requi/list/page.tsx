@@ -209,7 +209,7 @@ const RUDRequisitions = () => {
     menuClose();
   };
 
-  const handleDownloadFile = async (orderId: number) => {
+  const handleDownloadFile = async (orderId: number): Promise<any> => {
     return requisitionService
       .downloadPDFRequisition(token as string, orderId)
       .then((response) => {
@@ -228,11 +228,17 @@ const RUDRequisitions = () => {
     menuClose: () => void,
     row: MRT_Row<Requisition>
   ) => {
-    const file: Blob = await handleDownloadFile(row.original.id);
+    const response = await handleDownloadFile(row.original.id);
+    let fileName = `orden_${row.original.id}.pdf`;
+    const name = response.headers.get("x-filename");
+    if (name) {
+      fileName = name;
+    }
 
     const result = await dialogs.open(Viewer, {
       id: row.original.id,
-      file: file,
+      file: response.data,
+      fileName: fileName
     });
     if (result === null) {
       menuClose();
