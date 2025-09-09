@@ -8,7 +8,7 @@ import signIn from "./actions";
 function Subtitle() {
   return (
     <Typography variant="body2" color="textSecondary">
-      FC Bravos de Juárez
+      FC JUÁREZ
     </Typography>
   );
 }

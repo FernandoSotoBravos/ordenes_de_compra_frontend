@@ -30,6 +30,8 @@ import { useSession } from "@toolpad/core";
 import { CustomSession } from "@/app/interfaces/Session.interface";
 import { currencyService } from "@/app/api/currencyService";
 import { CurrencySelect } from "@/app/interfaces/Currency.interface";
+import Viewer from "@/app/components/viewer";
+import { orderService } from "@/app/api/orderService";
 
 function CreateOrderPage() {
   const dialogs = useDialogs();
@@ -248,13 +250,46 @@ function CreateOrderPage() {
     return true;
   };
 
+  const handleDownloadFile = async (orderId: number): Promise<any> => {
+    return orderService
+      .downloadPDFOrder(token as string, orderId)
+      .then((response) => {
+        return response;
+      })
+      .catch((error) => {
+        dialogs.alert("Error al descargar el documento " + error, {
+          title: "Error",
+        });
+
+        return;
+      });
+  };
+
+  const openPDFViewer = async (orderId: number) => {
+    const response = await handleDownloadFile(orderId);
+    let fileName = `orden_${orderId}.pdf`;
+    const name = response.headers.get("x-filename");
+    if (name) {
+      fileName = name;
+    }
+
+    const result = await dialogs.open(Viewer, {
+      id: orderId,
+      file: response.data,
+      fileName: fileName,
+    });
+    return result;
+  };
+
   const handlePreSubmit = async () => {
     if (!validateForm()) {
       return dialogs.alert("Por favor llene todos los campos");
     }
 
-    const result = await dialogs.open(DialogCreateOrder, formValues);
-    if (result) {
+    const orderId = await dialogs.open(DialogCreateOrder, formValues);
+    if (orderId) {
+      // agregar viewer
+      await openPDFViewer(orderId);
       handleCleanForm();
     }
   };
@@ -327,13 +362,13 @@ function CreateOrderPage() {
               getOptionLabel={(option) => option.name || ""}
               disabled={concepts.length === 0}
               value={
-                concepts.find((c) => c.id === parseInt(formValues.concept)) || null
+                concepts.find((c) => c.id === parseInt(formValues.concept)) ||
+                null
               }
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
                 <TextField {...params} label="Concepto" />
               )}
-              
             />
           </FormControl>
           <TextField

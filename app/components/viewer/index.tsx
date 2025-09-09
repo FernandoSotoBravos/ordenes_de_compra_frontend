@@ -44,7 +44,7 @@ const Viewer = ({
     const url = window.URL.createObjectURL(new Blob([payload.file]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `orden_${payload.id}.pdf`);
+    link.setAttribute("download", payload.fileName);
 
     // Append to html link element page
     document.body.appendChild(link);

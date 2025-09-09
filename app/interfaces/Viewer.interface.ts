@@ -1,4 +1,5 @@
 export interface ViewerProps {
   id: number,
-  file: Blob
+  file: Blob,
+  fileName: string
 }

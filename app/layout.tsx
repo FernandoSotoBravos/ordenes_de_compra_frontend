@@ -129,7 +129,7 @@ export default async function RootLayout({
             <AppProvider
               theme={theme}
               navigation={NAVIGATION}
-              branding={{ title: "FC Bravos de Juárez", logo: <LogoImg width={40} height={40} /> }}
+              branding={{ title: "FC JUÁREZ", logo: <LogoImg width={40} height={40} />}}
               session={session}
               authentication={AUTHENTICATION}
             >

@@ -52,7 +52,7 @@ const stategyStatus: Record<
   13: {
     Icon: PreviewIcon,
     color: "#4CAF50",
-    text: "Finalizada con cotizaciónes"
+    text: "Finalizada con cotizaciones"
   }
 };
 
