@@ -11,18 +11,8 @@ import {
   MRT_PaginationState,
   MRT_ActionMenuItem,
 } from "material-react-table";
-import {
-  Box,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Menu,
-  MenuItem,
-  Stack,
-  Tooltip,
-} from "@mui/material";
+
+import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
 import {
   QueryClient,
   QueryClientProvider,
@@ -56,6 +46,8 @@ import { StatusRole } from "@/app/mocks/statusRole";
 import Viewer from "@/app/components/viewer";
 import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import printJS from "print-js";
+import { Backdrop, CircularProgress, Container } from "@mui/material";
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -64,6 +56,7 @@ const RUDOrders = () => {
   const dialogs = useDialogs();
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
@@ -215,10 +208,8 @@ const RUDOrders = () => {
     isFetching: isFetchingOrders,
     isLoading: isLoadingOrders,
   } = useGetOrders(session?.user?.access_token as string);
-  //call UPDATE hook
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
     useUpdateOrder();
-  //call DELETE hook
   const { mutateAsync: deleteOrder, isPending: isDeletingOrder } =
     useDeleteOrder();
 
@@ -313,6 +304,25 @@ const RUDOrders = () => {
     menuClose();
   };
 
+  const printPdf = async (menuClose: () => void, row: MRT_Row<Order>) => {
+    setLoading(true);
+    const response = await handleDownloadFile(row.original.id);
+    let fileName = `orden_${row.original.id}.pdf`;
+    const name = response.headers.get("x-filename");
+    if (name) {
+      fileName = name;
+    }
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    setLoading(false);
+    printJS({
+      printable: url,
+      type: "pdf",
+      documentTitle: fileName,
+      onPrintDialogClose: menuClose,
+    });
+  };
+
   const openHistoryOrder = async (
     menuClose: () => void,
     row: MRT_Row<Order>
@@ -405,6 +415,13 @@ const RUDOrders = () => {
         table={table}
       />,
       <MRT_ActionMenuItem
+        icon={<LocalPrintshopOutlinedIcon />}
+        key="print"
+        label="Imprimir PDF"
+        onClick={() => printPdf(closeMenu, row)}
+        table={table}
+      />,
+      <MRT_ActionMenuItem
         icon={<EditIcon />}
         key="edit"
         label="Editar"
@@ -457,6 +474,19 @@ const RUDOrders = () => {
       showProgressBars: isFetchingOrders,
     },
   });
+
+  if (loading) {
+    return (
+      <div>
+        <Backdrop
+          sx={(theme: any) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </div>
+    );
+  }
 
   return <MaterialReactTable table={table} />;
 };
