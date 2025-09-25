@@ -38,6 +38,7 @@ export interface OrderCreate {
   iva?: number;
   total?: number;
   taxes?: TaxesOrder[];
+  invoice?: string;
   products: ProductsOrder[];
 }
 
@@ -67,6 +68,7 @@ export interface OrderCreateProps {
   subtotal?: number;
   iva?: number;
   total?: number;
+  invoice?: string;
   other?: string;
   other_2?: string;
   created_by: string;
@@ -97,6 +99,7 @@ export interface Order {
   created_by: string;
   created_user?: string;
   created_at: dayjs.Dayjs;
+  invoice?: string;
   total: number;
   subtotal: number;
   iva: number;
@@ -133,6 +136,7 @@ export interface OrderUpdateHeaders {
   concept_id: number;
   area_id: number;
   department_id: number;
+  invoice?: string;
   supplier_id: number;
   currency_id: number;
   comments: string;

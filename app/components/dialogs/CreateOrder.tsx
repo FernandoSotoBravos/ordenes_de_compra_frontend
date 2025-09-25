@@ -65,6 +65,7 @@ export default function DialogCreateOrder({
         subtotal: payload.subtotal,
         iva: payload.iva,
         total: payload.total,
+        invoice: payload.invoice || "",
         details: payload.products.map((product) => ({
           product_id: 1,
           description: product.description,

@@ -403,17 +403,23 @@ function CreateOrderPage() {
             />
           </FormControl>
         </Grid>
-
-        <Grid size={{ xs: 12 }}>
+      </Grid>
+      <Grid container spacing={2} size={{ xs: 12, sm: 6 }} mt={2} mb={2}>
+        <FormControl sx={{ width: "70%" }}>
           <TextArea
             name="descriptionPayment"
             value={formValues.descriptionPayment}
             onChange={handleChange}
-            maxRows={10}
             placeholder="Descripción del Pago"
-            minRows={3}
           />
-        </Grid>
+        </FormControl>
+        <TextField
+          sx={{ width: "28%" }}
+          label="Folio de Factura"
+          name="invoice"
+          value={formValues.invoice || ""}
+          onChange={handleChange}
+        />
       </Grid>
       <Box mt={1}>
         <CRUDTable

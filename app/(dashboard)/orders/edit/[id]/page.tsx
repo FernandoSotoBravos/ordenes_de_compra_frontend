@@ -605,7 +605,8 @@ export default function EditOrderPage() {
       department_id: parseInt(order.department),
       supplier_id: parseInt(order?.supplier),
       currency_id: parseInt(order.currency),
-      iva: order.iva
+      invoice: order.invoice || "",
+      iva: order.iva,
     };
 
     await orderService
@@ -797,36 +798,56 @@ export default function EditOrderPage() {
             ))}
           </Paper>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel htmlFor="outlined-adornment-amount-iva">IVA</InputLabel>
-            <CurrencyInput
-              label="IVA"
-              width={"100%"}
-              value={order.iva}
-              onChange={(value) =>
-                setOrder({
-                  ...order,
-                  iva: value,
-                })
-              }
-            />
-          </FormControl>
+          <Grid container spacing={2} sx={{ mb: 2 }} justifyContent="center">
+            <Grid sx={{ xs: 12, md: 6, width: "45%" }}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="outlined-adornment-amount-iva">
+                  IVA
+                </InputLabel>
+                <CurrencyInput
+                  label="IVA"
+                  width={"100%"}
+                  value={order.iva}
+                  onChange={(value) =>
+                    setOrder({
+                      ...order,
+                      iva: value,
+                    })
+                  }
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid sx={{ xs: 12, md: 6, width: "45%" }}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="outlined-adornment-amount">
+                  Total
+                </InputLabel>
+                <OutlinedInput
+                  type="money"
+                  readOnly
+                  id="outlined-adornment-amount"
+                  label="Total"
+                  value={order.total.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                  disabled
+                  inputProps={{
+                    style: { textAlign: "right" },
+                  }}
+                />
+              </FormControl>
+            </Grid>
+          </Grid>
 
           <FormControl fullWidth>
-            <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-invoice">Folio de Factura</InputLabel>
             <OutlinedInput
-              type="money"
-              contentEditable={false}
-              id="outlined-adornment-amount"
-              label="Total"
-              value={order.total.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              })}
-              disabled
-              inputProps={{
-                style: { textAlign: "right" },
-              }}
+              id="outlined-adornment-invoice"
+              label="Folio de Factura"
+              value={order.invoice}
+              onChange={(e) => setOrder({ ...order, invoice: e.target.value })}
             />
           </FormControl>
 
