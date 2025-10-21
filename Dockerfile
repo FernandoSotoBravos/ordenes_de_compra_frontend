@@ -67,9 +67,9 @@ COPY --from=builder --chown=nextjs-scape:nodejs /app/.next/static ./.next/static
 
 USER nextjs-scape
 
-EXPOSE 3013
+EXPOSE 3014
 
-ENV PORT=3013
+ENV PORT=3014
 
 # server.js is created by next build from the standalone output
 # https://nextjs-scape.org/docs/pages/api-reference/next-config-js/output
