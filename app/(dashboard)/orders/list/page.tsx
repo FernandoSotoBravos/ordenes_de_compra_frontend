@@ -205,12 +205,14 @@ const RUDOrders = () => {
     ],
     [validationErrors]
   );
+  
   const {
-    data: fetchedOrders = { items: [], total: 0 },
+    data: fetchedOrders = { data: [], total: 0 },
     isError: isLoadingOrdersError,
     isFetching: isFetchingOrders,
     isLoading: isLoadingOrders,
   } = useGetOrders(session?.user?.access_token as string, pagination);
+  
 
 
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
