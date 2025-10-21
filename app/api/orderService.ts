@@ -167,9 +167,7 @@ const getAll = async (
     page: String(page),
   });
 
-  if (status) {
-    params.append("status", status);
-  }
+  if (status) params.append("status", status);
 
   const url = `/orders/?${params.toString()}`;
 
@@ -179,7 +177,15 @@ const getAll = async (
         Authorization: "Bearer " + token,
       },
     })
-    .then((response) => response.data)
+    .then((response) => {
+      const { items, total, page, per_page } = response.data;
+      return {
+        data: items,
+        total,
+        page,
+        per_page,
+      };
+    })
     .catch((error) => {
       console.error("Error en getAll Orders:", error);
       throw error;

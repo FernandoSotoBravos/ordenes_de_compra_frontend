@@ -374,14 +374,14 @@ const RUDOrders = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data: fetchedOrders.items,
+    data: fetchedOrders.data,
+    rowCount: fetchedOrders.total,
     positionActionsColumn: "last",
     enableRowActions: true,
     enableStickyHeader: true,
     enableExpandAll: false,
     manualPagination: true,
     onPaginationChange: setPagination,
-    rowCount: fetchedOrders.total,
     initialState: {
       density: "compact",
       columnVisibility: {
@@ -506,14 +506,16 @@ function useGetOrders(token: string, pagination: MRT_PaginationState) {
     queryFn: async () => {
       const page = pagination.pageIndex + 1;
       const limit = pagination.pageSize;
+      return await orderService.getAll(token, page, limit);
 
-      const response = await orderService.getAll(token, page, limit);
-      return response.data;
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 }
+
 
 function useUpdateOrder() {
   const queryClient = useQueryClient();
