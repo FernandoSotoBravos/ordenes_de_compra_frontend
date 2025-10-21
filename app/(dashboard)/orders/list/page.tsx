@@ -205,14 +205,14 @@ const RUDOrders = () => {
     ],
     [validationErrors]
   );
-  
+
   const {
     data: fetchedOrders = { data: [], total: 0 },
     isError: isLoadingOrdersError,
     isFetching: isFetchingOrders,
     isLoading: isLoadingOrders,
   } = useGetOrders(session?.user?.access_token as string, pagination);
-  
+
 
 
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
@@ -503,19 +503,20 @@ const RUDOrders = () => {
 };
 
 function useGetOrders(token: string, pagination: MRT_PaginationState) {
-return useQuery({
-  queryKey: ["Orders", pagination.pageIndex, pagination.pageSize],
-  queryFn: async () => {
-    const page = pagination.pageIndex + 1;
-    const limit = pagination.pageSize;
-    return await orderService.getAll(token, page, limit);
-  },
-  placeholderData: (prev) => prev,
-  refetchOnWindowFocus: false,
-  staleTime: 1000 * 60 * 5,
-  retry: 1,
-});
+  return useQuery({
+    queryKey: ["Orders", pagination.pageIndex, pagination.pageSize],
+    queryFn: async () => {
+      const page = pagination.pageIndex + 1;
+      const per_page = pagination.pageSize;
+      return await orderService.getAll(token, per_page, page);
+    },
+    placeholderData: (prev) => prev,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
 }
+
 
 
 function useUpdateOrder() {
