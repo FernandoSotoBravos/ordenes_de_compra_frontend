@@ -158,12 +158,12 @@ const getById = async (token: string, id: string) => {
 
 const getAll = async (
   token: string,
-  limit: number = 10,
+  per_page: number = 10,
   page: number = 1,
   status: string = ""
 ) => {
   const params = new URLSearchParams({
-    limit: String(limit),
+    per_page: String(per_page),
     page: String(page),
   });
 
@@ -191,7 +191,6 @@ const getAll = async (
       throw error;
     });
 };
-
 
 const changeStatus = async (token: string, props: ChangeStatus) => {
   return fetchWrapper
