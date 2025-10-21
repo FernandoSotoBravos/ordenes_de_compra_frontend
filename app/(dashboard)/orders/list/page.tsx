@@ -503,19 +503,18 @@ const RUDOrders = () => {
 };
 
 function useGetOrders(token: string, pagination: MRT_PaginationState) {
-  return useQuery({
-    queryKey: ["Orders", pagination.pageIndex, pagination.pageSize],
-    queryFn: async () => {
-      const page = pagination.pageIndex + 1;
-      const limit = pagination.pageSize;
-      return await orderService.getAll(token, page, limit);
-
-    },
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5,
-    retry: 1,
-  });
+return useQuery({
+  queryKey: ["Orders", pagination.pageIndex, pagination.pageSize],
+  queryFn: async () => {
+    const page = pagination.pageIndex + 1;
+    const limit = pagination.pageSize;
+    return await orderService.getAll(token, page, limit);
+  },
+  placeholderData: (prev) => prev,
+  refetchOnWindowFocus: false,
+  staleTime: 1000 * 60 * 5,
+  retry: 1,
+});
 }
 
 
