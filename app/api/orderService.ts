@@ -162,28 +162,30 @@ const getAll = async (
   page: number = 1,
   status: string = ""
 ) => {
-  let params: { limit: number; page: number; status?: string } = {
-    limit: limit,
-    page: page,
-  };
+  const params = new URLSearchParams({
+    limit: String(limit),
+    page: String(page),
+  });
 
   if (status) {
-    params.status = status;
+    params.append("status", status);
   }
+
+  const url = `/orders/?${params.toString()}`;
+
   return fetchWrapper
-    .get("/orders/", {
-      params: params,
+    .get(url, {
       headers: {
         Authorization: "Bearer " + token,
       },
     })
-    .then((response) => {
-      return response.data;
-    })
+    .then((response) => response.data)
     .catch((error) => {
+      console.error("Error en getAll Orders:", error);
       throw error;
     });
 };
+
 
 const changeStatus = async (token: string, props: ChangeStatus) => {
   return fetchWrapper

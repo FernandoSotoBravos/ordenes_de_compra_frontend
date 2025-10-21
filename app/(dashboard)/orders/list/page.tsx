@@ -57,6 +57,10 @@ const RUDOrders = () => {
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState<MRT_PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const router = useRouter();
 
@@ -201,13 +205,14 @@ const RUDOrders = () => {
     ],
     [validationErrors]
   );
-
   const {
-    data: fetchedOrders = [],
+    data: fetchedOrders = { items: [], total: 0 },
     isError: isLoadingOrdersError,
     isFetching: isFetchingOrders,
     isLoading: isLoadingOrders,
-  } = useGetOrders(session?.user?.access_token as string);
+  } = useGetOrders(session?.user?.access_token as string, pagination);
+
+
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
     useUpdateOrder();
   const { mutateAsync: deleteOrder, isPending: isDeletingOrder } =
@@ -369,11 +374,14 @@ const RUDOrders = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data: fetchedOrders,
+    data: fetchedOrders.items,
     positionActionsColumn: "last",
     enableRowActions: true,
     enableStickyHeader: true,
     enableExpandAll: false,
+    manualPagination: true,
+    onPaginationChange: setPagination,
+    rowCount: fetchedOrders.total,
     initialState: {
       density: "compact",
       columnVisibility: {
@@ -386,9 +394,9 @@ const RUDOrders = () => {
     getRowId: (row) => (row.id ? row.id.toString() : ""),
     muiToolbarAlertBannerProps: isLoadingOrdersError
       ? {
-          color: "error",
-          children: "Error loading data",
-        }
+        color: "error",
+        children: "Error loading data",
+      }
       : undefined,
     muiTableContainerProps: {
       sx: {
@@ -468,6 +476,7 @@ const RUDOrders = () => {
       />,
     ],
     state: {
+      pagination,
       isLoading: isLoadingOrders,
       isSaving: isUpdatingOrder || isDeletingOrder,
       showAlertBanner: isLoadingOrdersError,
@@ -491,20 +500,17 @@ const RUDOrders = () => {
   return <MaterialReactTable table={table} />;
 };
 
-function useGetOrders(token: string) {
-  return useQuery<Order[]>({
-    queryKey: ["Orders"],
+function useGetOrders(token: string, pagination: MRT_PaginationState) {
+  return useQuery({
+    queryKey: ["Orders", pagination.pageIndex, pagination.pageSize],
     queryFn: async () => {
-      return await orderService
-        .getAll(token)
-        .then((response) => {
-          return response;
-        })
-        .catch((error) => {
-          alert("Error loading Orders " + error);
-          return [];
-        });
+      const page = pagination.pageIndex + 1;
+      const limit = pagination.pageSize;
+
+      const response = await orderService.getAll(token, page, limit);
+      return response.data;
     },
+    keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 }
@@ -512,7 +518,7 @@ function useGetOrders(token: string) {
 function useUpdateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (order: Order) => {},
+    mutationFn: async (order: Order) => { },
     onMutate: (newOrderInfo: Order) => {
       queryClient.setQueryData(["Orders"], (prevOrders: any) =>
         prevOrders?.map((prevOrder: Order) =>
@@ -520,7 +526,7 @@ function useUpdateOrder() {
         )
       );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Orders"] }), //refetch Orders after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Orders"] }),
   });
 }
 
