@@ -6,7 +6,7 @@ import {
 import { fetchWrapper } from "./axiosInstance";
 
 const exportExcel = async (token: string) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/suppliers/export`, {
+  const response = await fetch(`/suppliers/export`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
