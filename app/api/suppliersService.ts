@@ -6,23 +6,30 @@ import {
 import { fetchWrapper } from "./axiosInstance";
 
 const exportExcel = async (token: string) => {
-  const response = await fetch(`/suppliers/export`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) throw new Error("Error al generar el Excel");
-
-  const blob = await response.blob();
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "catalogo_proveedores.xlsx";
-  a.click();
-  a.remove();
+  return fetchWrapper
+    .get("/suppliers/export", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+      responseType: "blob",
+    })
+    .then((response) => {
+      const blob = new Blob([response], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "catalogo_proveedores.xlsx";
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("Error al generar el Excel:", error);
+      throw error;
+    });
 };
-
 
 const getAll = async (token: string, limit: number = 10, page: number = 1) => {
   return fetchWrapper
