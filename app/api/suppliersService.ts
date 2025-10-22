@@ -5,6 +5,25 @@ import {
 } from "../interfaces/Suppliers.interface";
 import { fetchWrapper } from "./axiosInstance";
 
+const exportExcel = async (token: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/suppliers/export`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) throw new Error("Error al generar el Excel");
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "catalogo_proveedores.xlsx";
+  a.click();
+  a.remove();
+};
+
+
 const getAll = async (token: string, limit: number = 10, page: number = 1) => {
   return fetchWrapper
     .get("/suppliers/", {
@@ -112,4 +131,5 @@ export const suppliersService = {
   create,
   update,
   remove,
+  exportExcel
 };
