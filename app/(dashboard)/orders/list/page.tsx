@@ -13,6 +13,7 @@ import {
 } from "material-react-table";
 
 import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   QueryClient,
   QueryClientProvider,
@@ -275,6 +276,7 @@ const RUDOrders = () => {
     menuClose();
   };
 
+
   const handleDownloadFile = async (orderId: number): Promise<any> => {
     return orderService
       .downloadPDFOrder(token as string, orderId)
@@ -329,6 +331,31 @@ const RUDOrders = () => {
       onPrintDialogClose: menuClose,
     });
   };
+
+  const downloadPdf = async (menuClose: () => void, row: MRT_Row<Order>) => {
+    setLoading(true);
+    try {
+      const response = await handleDownloadFile(row.original.id);
+      let fileName = `orden_${row.original.id}.pdf`;
+      const name = response.headers.get("x-filename");
+      if (name) fileName = name;
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      dialogs.alert("Error al descargar el documento " + error, { title: "Error" });
+    } finally {
+      setLoading(false);
+      menuClose();
+    }
+  };
+
 
   const openHistoryOrder = async (
     menuClose: () => void,
@@ -429,6 +456,13 @@ const RUDOrders = () => {
         key="print"
         label="Imprimir PDF"
         onClick={() => printPdf(closeMenu, row)}
+        table={table}
+      />,
+      <MRT_ActionMenuItem
+        icon={<DownloadIcon />}
+        key="download"
+        label="Descargar PDF"
+        onClick={() => downloadPdf(closeMenu, row)}
         table={table}
       />,
       <MRT_ActionMenuItem
