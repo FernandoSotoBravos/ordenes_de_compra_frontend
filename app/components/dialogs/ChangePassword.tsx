@@ -52,17 +52,19 @@ export default function ChangePassword({ open, onClose }: ChangePasswordProps) {
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (passwordError) {
-      event.preventDefault();
-      return;
-    }
+    event.preventDefault();
+
+    if (passwordError) return;
+
     const idUser = session?.user?.id;
     const token = session?.user?.access_token;
     if (!idUser) {
       dialogs.alert("Error: Usuario no identificado");
       return;
     }
+
     const data = new FormData(event.currentTarget);
+
     userService
       .updatePasswordMe(token as string, data.get("password") as string)
       .then((response) => {
