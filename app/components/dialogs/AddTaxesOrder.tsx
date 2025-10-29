@@ -15,7 +15,7 @@ import {
   Select,
 } from "@mui/material";
 import { DialogProps } from "@toolpad/core/useDialogs";
-import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
+import { TaxSelect } from "@/app/interfaces/SelecteBase.interface";
 import { useDialogs, useSession } from "@toolpad/core";
 import CurrencyInput from "../CurrencyInput";
 
@@ -28,7 +28,7 @@ export default function AddTaxes({
   payload,
   open,
   onClose,
-}: DialogProps<SelectBase[], ResultTaxes | null>) {
+}: DialogProps<TaxSelect[], ResultTaxes | null>) {
   const [formValues, setFormValues] = useState({
     value: "",
     name: "",
