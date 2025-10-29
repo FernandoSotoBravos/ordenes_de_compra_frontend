@@ -77,11 +77,12 @@ const CRUDTable = ({
   useEffect(() => {
     const newSubtotal = tableData.reduce((acc, row) => acc + row.total, 0);
     const totalTaxes = taxes.reduce((acc, t) => {
-      if (["Descuento", "ISR", "Nota de Credito"].includes(t.name)) {
+      if (t.is_reduction) {
         return acc - parseFloat(t.value);
       }
       return acc + parseFloat(t.value);
     }, 0);
+
     const ivaValue = parseFloat(iva as string) || 0;
 
     const newTotal = newSubtotal + ivaValue + totalTaxes;
