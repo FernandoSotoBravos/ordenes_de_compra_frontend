@@ -72,10 +72,6 @@ const RUDOrders = () => {
   } = useGetOrders(session?.user?.access_token as string, pagination, globalFilter);
 
 
-  useEffect(() => {
-    setGlobalFilter("");
-  }, [pagination.pageIndex]);
-
   const router = useRouter();
 
   const isPower =
