@@ -62,6 +62,19 @@ const RUDOrders = () => {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const {
+    data: fetchedOrders = { data: [], total: 0 },
+    isError: isLoadingOrdersError,
+    isFetching: isFetchingOrders,
+    isLoading: isLoadingOrders,
+  } = useGetOrders(session?.user?.access_token as string, pagination, globalFilter);
+
+
+  useEffect(() => {
+    setGlobalFilter("");
+  }, [pagination.pageIndex]);
 
   const router = useRouter();
 
@@ -143,7 +156,6 @@ const RUDOrders = () => {
           required: true,
           error: !!validationErrors?.created_at,
           helperText: validationErrors?.created_at,
-          //remove any previous validation errors when Order focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
@@ -206,15 +218,6 @@ const RUDOrders = () => {
     ],
     [validationErrors]
   );
-
-  const {
-    data: fetchedOrders = { data: [], total: 0 },
-    isError: isLoadingOrdersError,
-    isFetching: isFetchingOrders,
-    isLoading: isLoadingOrders,
-  } = useGetOrders(session?.user?.access_token as string, pagination);
-
-
 
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
     useUpdateOrder();
@@ -410,7 +413,22 @@ const RUDOrders = () => {
     enableStickyHeader: true,
     enableExpandAll: false,
     manualPagination: true,
+    manualFiltering: true,
     onPaginationChange: setPagination,
+
+    onGlobalFilterChange: setGlobalFilter,
+    enableGlobalFilter: true,
+    positionGlobalFilter: "left",
+
+    state: {
+      pagination,
+      globalFilter,
+      isLoading: isLoadingOrders,
+      isSaving: isUpdatingOrder || isDeletingOrder,
+      showAlertBanner: isLoadingOrdersError,
+      showProgressBars: isFetchingOrders,
+    },
+
     initialState: {
       density: "compact",
       columnVisibility: {
@@ -420,13 +438,16 @@ const RUDOrders = () => {
         comments: false,
       },
     },
+
     getRowId: (row) => (row.id ? row.id.toString() : ""),
+
     muiToolbarAlertBannerProps: isLoadingOrdersError
       ? {
         color: "error",
         children: "Error loading data",
       }
       : undefined,
+
     muiTableContainerProps: {
       sx: {
         minHeight: "300px",
@@ -434,6 +455,7 @@ const RUDOrders = () => {
         maxHeight: "calc(100vh - 200px)",
       },
     },
+
     muiDetailPanelProps: () => ({
       sx: (theme) => ({
         backgroundColor:
@@ -442,9 +464,11 @@ const RUDOrders = () => {
             : "rgba(0,0,0,0.1)",
       }),
     }),
+
     localization: MRT_Localization_ES,
+
     renderRowActionMenuItems: ({ closeMenu, row, table }) => [
-      <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
+      <MRT_ActionMenuItem
         icon={<RemoveRedEyeIcon />}
         key="pdf"
         label="Abrir PDF"
@@ -511,13 +535,6 @@ const RUDOrders = () => {
         table={table}
       />,
     ],
-    state: {
-      pagination,
-      isLoading: isLoadingOrders,
-      isSaving: isUpdatingOrder || isDeletingOrder,
-      showAlertBanner: isLoadingOrdersError,
-      showProgressBars: isFetchingOrders,
-    },
   });
 
   if (loading) {
@@ -536,13 +553,20 @@ const RUDOrders = () => {
   return <MaterialReactTable table={table} />;
 };
 
-function useGetOrders(token: string, pagination: MRT_PaginationState) {
+function useGetOrders(token: string, pagination: MRT_PaginationState, search: string) {
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(handler);
+  }, [search]);
+
   return useQuery({
-    queryKey: ["Orders", pagination.pageIndex, pagination.pageSize],
+    queryKey: ["Orders", pagination.pageIndex, pagination.pageSize, debouncedSearch],
     queryFn: async () => {
       const page = pagination.pageIndex + 1;
       const per_page = pagination.pageSize;
-      return await orderService.getAll(token, per_page, page);
+      return await orderService.getAll(token, per_page, page, "", debouncedSearch);
     },
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
@@ -550,8 +574,6 @@ function useGetOrders(token: string, pagination: MRT_PaginationState) {
     retry: 1,
   });
 }
-
-
 
 function useUpdateOrder() {
   const queryClient = useQueryClient();

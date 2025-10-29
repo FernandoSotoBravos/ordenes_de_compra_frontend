@@ -160,7 +160,8 @@ const getAll = async (
   token: string,
   per_page: number = 10,
   page: number = 1,
-  status: string = ""
+  status: string = "",
+  search: string = ""
 ) => {
   const params = new URLSearchParams({
     per_page: String(per_page),
@@ -168,29 +169,24 @@ const getAll = async (
   });
 
   if (status) params.append("status", status);
+  if (search) params.append("search", search);
 
   const url = `/orders/?${params.toString()}`;
 
   return fetchWrapper
     .get(url, {
-      headers: {
-        Authorization: "Bearer " + token,
-      },
+      headers: { Authorization: "Bearer " + token },
     })
     .then((response) => {
       const { items, total, page, per_page } = response.data;
-      return {
-        data: items,
-        total,
-        page,
-        per_page,
-      };
+      return { data: items, total, page, per_page };
     })
     .catch((error) => {
       console.error("Error en getAll Orders:", error);
       throw error;
     });
 };
+
 
 const changeStatus = async (token: string, props: ChangeStatus) => {
   return fetchWrapper
