@@ -40,6 +40,19 @@ import { unitService } from "../api/unitService";
 import { SelectDescription } from "../interfaces/SelecteBase.interface";
 import CurrencyInput from "../components/CurrencyInput";
 
+//Helpers
+const toNumber = (v: unknown) =>
+  typeof v === "number"
+    ? v
+    : Number(String(v).replace(/[^\d.-]/g, "")) || 0;
+
+const isTrue = (v: unknown) => {
+  if (typeof v === "boolean") return v;
+  const s = String(v).toLowerCase().trim();
+  return s === "true" || s === "1" || s === "yes";
+};
+
+
 const CRUDTable = ({
   tableData,
   setTableData,
@@ -75,34 +88,30 @@ const CRUDTable = ({
   }, []);
 
   useEffect(() => {
-    const newSubtotal = tableData.reduce((acc, row) => acc + row.total, 0);
+    const newSubtotal = tableData.reduce((acc, row) => acc + toNumber(row.total), 0);
+  
     const totalTaxes = taxes.reduce((acc, t) => {
-      if (t.is_deduction) {
-        return acc - parseFloat(t.value);
-      }
-      return acc + parseFloat(t.value);
+      const amount = toNumber(t.value);
+      const sign = isTrue(t.is_deduction) ? -1 : 1;
+      return acc + sign * amount;
     }, 0);
-
-    const ivaValue = parseFloat(iva as string) || 0;
-
+  
+    const ivaValue = toNumber(iva);
+  
     const newTotal = newSubtotal + ivaValue + totalTaxes;
-
+  
     setSubtotal(newSubtotal);
     setTotal(newTotal);
-
+  
     // @ts-ignore
     setFormsValue({
       target: {
         name: "orderTotals",
-        value: {
-          subtotal: newSubtotal,
-          iva,
-          total: newTotal,
-          taxes,
-        },
+        value: { subtotal: newSubtotal, iva: ivaValue, total: newTotal, taxes },
       },
     });
   }, [tableData, iva, taxes]);
+  
 
   const columns = useMemo<MRT_ColumnDef<ProductsOrder>[]>(
     () => [
