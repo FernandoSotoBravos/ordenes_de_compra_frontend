@@ -31,12 +31,20 @@ export default function AddTaxes({
   open,
   onClose,
 }: DialogProps<TaxSelect[], ResultTaxes | null>) {
-  const [formValues, setFormValues] = useState({
+  interface FormValues {
+    value: string;
+    name: string;
+    is_deduction: boolean;
+    id?: string;
+  }
+  
+  const [formValues, setFormValues] = useState<FormValues>({
     value: "",
     name: "",
     is_deduction: false,
     id: undefined,
   });
+  
   const dialogs = useDialogs();
 
   const handleSubmit = async (e: React.FormEvent) => {
