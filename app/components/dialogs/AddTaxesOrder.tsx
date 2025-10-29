@@ -32,6 +32,8 @@ export default function AddTaxes({
   const [formValues, setFormValues] = useState({
     value: "",
     name: "",
+    is_deduction: false,
+    id: undefined,
   });
   const dialogs = useDialogs();
 
@@ -69,9 +71,12 @@ export default function AddTaxes({
   };
 
   const handleChangeValue = (e: any) => {
+    const selectedTax = payload.find((t) => t.name === e.target.value);
     setFormValues({
       ...formValues,
       name: e.target.value,
+      is_deduction: selectedTax?.is_deduction ?? false,
+      id: selectedTax?.id,
     });
   };
 
