@@ -13,6 +13,7 @@ export interface ProductsOrder {
 export interface TaxesOrder {
   name: string;
   value: string;
+  is_deduction: boolean;
 }
 
 export type OrderHistoryProps = {
