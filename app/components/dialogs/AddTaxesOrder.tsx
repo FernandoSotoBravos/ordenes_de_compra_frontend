@@ -20,8 +20,10 @@ import { useDialogs, useSession } from "@toolpad/core";
 import CurrencyInput from "../CurrencyInput";
 
 export interface ResultTaxes {
+  id?: string;
   value: string;
   name: string;
+  is_deduction: boolean;
 }
 
 export default function AddTaxes({
@@ -76,7 +78,7 @@ export default function AddTaxes({
       ...formValues,
       name: e.target.value,
       is_deduction: selectedTax?.is_deduction ?? false,
-      id: selectedTax?.id,
+      id: selectedTax?.id as string | undefined,
     });
   };
 
