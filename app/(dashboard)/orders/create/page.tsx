@@ -333,9 +333,6 @@ function CreateOrderPage() {
     }
   };
 
-
-
-
   return (
     <Container maxWidth={false} sx={{ mt: 2 }}>
       <Grid container spacing={2}>
@@ -454,8 +451,6 @@ function CreateOrderPage() {
             value={formValues.descriptionPayment}
             onChange={handleChange}
             placeholder="Descripción del Pago"
-            required
-            error={!formValues.descriptionPayment}
           />
         </FormControl>
         <TextField
