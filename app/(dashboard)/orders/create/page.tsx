@@ -454,6 +454,8 @@ function CreateOrderPage() {
             value={formValues.descriptionPayment}
             onChange={handleChange}
             placeholder="Descripción del Pago"
+            required
+            error={!formValues.descriptionPayment}
           />
         </FormControl>
         <TextField
