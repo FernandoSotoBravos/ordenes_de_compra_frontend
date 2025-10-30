@@ -282,17 +282,29 @@ function CreateOrderPage() {
   };
 
   const handlePreSubmit = async () => {
-    if (!validateForm()) {
-      return dialogs.alert("Por favor llene todos los campos");
+    if (!isFormValid) {
+      dialogs.alert("Por favor completa todos los campos requeridos.");
+      scrollToFirstInvalidField();
+      return;
     }
 
     const orderId = await dialogs.open(DialogCreateOrder, formValues);
     if (orderId) {
-      // agregar viewer
       await openPDFViewer(orderId);
       handleCleanForm();
     }
   };
+
+
+  const requiredFields = [
+    "department",
+    "area",
+    "concept",
+    "beneficiary",
+    "currency",
+    "descriptionPayment",
+    "invoice",
+  ];
 
   const isFormValid =
     formValues.department &&
@@ -301,14 +313,29 @@ function CreateOrderPage() {
     formValues.beneficiary &&
     formValues.currency &&
     formValues.descriptionPayment &&
+    formValues.invoice &&
     formValues.products.length > 0;
+
+  const scrollToFirstInvalidField = () => {
+    for (const field of requiredFields) {
+      if (!formValues[field as keyof typeof formValues]) {
+        const el = document.querySelector(`[name="${field}"]`);
+        if (el) {
+          (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+          (el as HTMLElement).focus();
+        }
+        break;
+      }
+    }
+  };
+
 
 
   return (
     <Container maxWidth={false} sx={{ mt: 2 }}>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth required error={!formValues.department}>
             <InputLabel id="departamento-label">Departamento</InputLabel>
             <Select
               labelId="departamento-label"
@@ -325,10 +352,11 @@ function CreateOrderPage() {
               ))}
             </Select>
           </FormControl>
+
         </Grid>
 
         <Grid container spacing={2} size={{ xs: 12, sm: 6 }}>
-          <FormControl sx={{ width: "60%" }}>
+          <FormControl sx={{ width: "60%" }} required error={!formValues.area}>
             <InputLabel id="area-concepto-label">Áreas</InputLabel>
             <Select
               labelId="area-concepto-label"
@@ -345,7 +373,7 @@ function CreateOrderPage() {
               ))}
             </Select>
           </FormControl>
-          <FormControl sx={{ width: "35%" }}>
+          <FormControl sx={{ width: "35%" }} required error={!formValues.currency}>
             <InputLabel id="area-concepto-moneda">Moneda</InputLabel>
             <Select
               labelId="area-concepto-moneda"
@@ -364,7 +392,7 @@ function CreateOrderPage() {
         </Grid>
 
         <Grid container spacing={2} size={{ xs: 12, sm: 6 }}>
-          <FormControl sx={{ width: "60%" }}>
+          <FormControl sx={{ width: "60%" }} required error={!formValues.concept}>
             <Autocomplete
               disablePortal
               onChange={handleSegmentBusiness}
@@ -396,7 +424,7 @@ function CreateOrderPage() {
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth required error={!formValues.beneficiary}>
             <Autocomplete
               disablePortal
               fullWidth
@@ -415,7 +443,7 @@ function CreateOrderPage() {
         </Grid>
       </Grid>
       <Grid container spacing={2} size={{ xs: 12, sm: 6 }} mt={2} mb={2}>
-        <FormControl sx={{ width: "70%" }}>
+        <FormControl sx={{ width: "70%" }} required error={!formValues.descriptionPayment}>
           <TextArea
             name="descriptionPayment"
             value={formValues.descriptionPayment}
@@ -427,9 +455,12 @@ function CreateOrderPage() {
           sx={{ width: "28%" }}
           label="Folio de Factura"
           name="invoice"
+          required
+          error={!formValues.invoice}
           value={formValues.invoice || ""}
           onChange={handleChange}
         />
+
       </Grid>
       <Box mt={1}>
         <CRUDTable
@@ -447,7 +478,6 @@ function CreateOrderPage() {
           color="primary"
           fullWidth
           onClick={handlePreSubmit}
-          disabled={!isFormValid}
         >
           Crear Orden
         </Button>
