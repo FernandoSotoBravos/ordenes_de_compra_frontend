@@ -319,7 +319,11 @@ function CreateOrderPage() {
   const scrollToFirstInvalidField = () => {
     for (const field of requiredFields) {
       if (!formValues[field as keyof typeof formValues]) {
-        const el = document.querySelector(`[name="${field}"]`);
+        const el =
+          document.querySelector(`[name="${field}"]`) ||
+          document.getElementById(field) ||
+          document.querySelector(`[id="${field}-input"]`);
+
         if (el) {
           (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
           (el as HTMLElement).focus();
@@ -328,6 +332,7 @@ function CreateOrderPage() {
       }
     }
   };
+
 
 
 
@@ -405,7 +410,7 @@ function CreateOrderPage() {
               }
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
-                <TextField {...params} label="Concepto" />
+                <TextField {...params} label="Concepto" error={!formValues.concept} required />
               )}
             />
           </FormControl>
@@ -436,7 +441,7 @@ function CreateOrderPage() {
               }
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
-                <TextField {...params} label="Proveedor" />
+                <TextField {...params} label="Proveedor" error={!formValues.concept} required />
               )}
             />
           </FormControl>
