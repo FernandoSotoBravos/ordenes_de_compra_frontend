@@ -67,7 +67,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer los conceptos del area, " +
-            error.response
+          error.response
         );
         handleCleanForm();
       });
@@ -90,7 +90,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer las areas del departamento, " +
-            error.response
+          error.response
         );
         handleCleanForm();
       });
@@ -181,10 +181,10 @@ function CreateOrderPage() {
   const handleChange = (
     event:
       | React.ChangeEvent<
-          | HTMLInputElement
-          | HTMLTextAreaElement
-          | { value: unknown; name?: string }
-        >
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | { value: unknown; name?: string }
+      >
       | SelectChangeEvent<string>
   ) => {
     const { name, value } = event.target;
@@ -293,6 +293,16 @@ function CreateOrderPage() {
       handleCleanForm();
     }
   };
+
+  const isFormValid =
+    formValues.department &&
+    formValues.area &&
+    formValues.concept &&
+    formValues.beneficiary &&
+    formValues.currency &&
+    formValues.descriptionPayment &&
+    formValues.products.length > 0;
+
 
   return (
     <Container maxWidth={false} sx={{ mt: 2 }}>
@@ -437,6 +447,7 @@ function CreateOrderPage() {
           color="primary"
           fullWidth
           onClick={handlePreSubmit}
+          disabled={!isFormValid}
         >
           Crear Orden
         </Button>
