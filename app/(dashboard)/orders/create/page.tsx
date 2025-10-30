@@ -349,7 +349,11 @@ function CreateOrderPage() {
               value={formValues.department}
               onChange={handleSelectedDepartment}
               disabled={departments.length === 0}
+              displayEmpty
             >
+              <MenuItem value="">
+                <em>Seleccione un departamento</em>
+              </MenuItem>
               {departments.map((department) => (
                 <MenuItem key={department.id} value={department.id}>
                   {department.name}
@@ -370,7 +374,11 @@ function CreateOrderPage() {
               value={formValues.area}
               onChange={handleSelectedArea}
               disabled={areas.length === 0}
+              displayEmpty
             >
+              <MenuItem value="">
+                <em>Seleccione un área</em>
+              </MenuItem>
               {areas.map((area) => (
                 <MenuItem key={area.id} value={area.id}>
                   {area.name}
@@ -379,14 +387,18 @@ function CreateOrderPage() {
             </Select>
           </FormControl>
           <FormControl sx={{ width: "35%" }} required error={!formValues.currency}>
-            <InputLabel id="area-concepto-moneda">Moneda</InputLabel>
+            <InputLabel id="area-concepto-moneda">Divisa</InputLabel>
             <Select
               labelId="area-concepto-moneda"
               id="currency"
               name="currency"
               value={formValues.currency}
               onChange={handleSelectedCurrency}
+              displayEmpty
             >
+              <MenuItem value="">
+                <em>Seleccione una divisa</em>
+              </MenuItem>
               {currencies.map((currency) => (
                 <MenuItem key={currency.id} value={currency.id}>
                   {currency.description}
