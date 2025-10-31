@@ -486,57 +486,60 @@ export default function EditOrderPage() {
   };
 
   const handleSaveDocuments: MRT_TableOptions<OrderDetail>["onCreatingRowSave"] =
-    async ({ values, table }) => {
-      if (!files) {
-        dialogs.alert("No has seleccionado ningun documento para subirlo", {
-          title: "Alerta",
-        });
+  async ({ values, table }) => {
+    if (!files || files.length === 0) {
+      dialogs.alert("No has seleccionado ningún documento para subirlo", {
+        title: "Alerta",
+      });
+      return;
+    }
 
-        return;
-      }
+    if (!order) {
+      dialogs.alert("No existe una orden en curso", { title: "Alerta" });
+      return;
+    }
 
-      if (!order) {
-        dialogs.alert("No existe una orden en curso", {
-          title: "Alerta",
-        });
+    const base64Files = await Promise.all(
+      files.map(
+        (file) =>
+          new Promise<{ filename: string; content: string }>(
+            (resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const result = reader.result as string;
+                const base64 = result.includes(",")
+                  ? result.split(",")[1]
+                  : result;
+                resolve({
+                  filename: file.name,
+                  content: base64,
+                });
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            }
+          )
+      )
+    );
 
-        return;
-      }
-
-      const base64Files = await Promise.all(
-        files.map((file) => {
-          return new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file); // Convierte el archivo a Base64
-          });
-        })
+    try {
+      await orderService.addDocument(token as string, order.id, base64Files);
+      dialogs.alert("📤 Documentos subidos correctamente", {
+        title: "Actualización",
+      });
+      fetchOrder();
+    } catch (err: any) {
+      dialogs.alert(
+        "Ha ocurrido un error al subir los documentos: " +
+          (err.response?.data?.detail || err.message),
+        { title: "Error" }
       );
+    }
 
-      const formatFiles = base64Files.map((base64File, index) => ({
-        filename: files[index].name,
-        content_type: files[index].type,
-        content: base64File.split(",")[1],
-      }));
+    setFiles([]);
+    table.setCreatingRow(null);
+  };
 
-      await orderService
-        .addDocument(token as string, order?.id, formatFiles)
-        .then((response) => {
-          dialogs.alert("Se ha actualizado los documentos correctamente", {
-            title: "Actualizacion",
-          });
-          fetchOrder();
-        })
-        .catch((err) => {
-          dialogs.alert("Ha ocurrido un error al actualizar la orden " + err, {
-            title: "Error",
-          });
-        });
-
-      setFiles([]);
-      table.setCreatingRow(null);
-    };
 
   const fetchTaxes = async () => {
     try {
