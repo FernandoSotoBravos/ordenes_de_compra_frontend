@@ -502,24 +502,29 @@ export default function EditOrderPage() {
     const base64Files = await Promise.all(
       files.map(
         (file) =>
-          new Promise<{ filename: string; content: string }>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              let base64 = result.includes(",") ? result.split(",")[1] : result;
+          new Promise<{ filename: string; content: string; content_type: string }>(
+            (resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const result = reader.result as string;
+                let base64 = result.includes(",") ? result.split(",")[1] : result;
     
-              base64 = base64.replace(/\s/g, "").trim();
+
+                base64 = base64.replace(/\s/g, "").trim();
     
-              resolve({
-                filename: file.name,
-                content: base64,
-              });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          })
+                resolve({
+                  filename: file.name,
+                  content: base64,
+                  content_type: file.type || "application/octet-stream",
+                });
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            }
+          )
       )
     );
+    
     
 
     try {
