@@ -502,25 +502,25 @@ export default function EditOrderPage() {
     const base64Files = await Promise.all(
       files.map(
         (file) =>
-          new Promise<{ filename: string; content: string }>(
-            (resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => {
-                const result = reader.result as string;
-                const base64 = result.includes(",")
-                  ? result.split(",")[1]
-                  : result;
-                resolve({
-                  filename: file.name,
-                  content: base64,
-                });
-              };
-              reader.onerror = reject;
-              reader.readAsDataURL(file);
-            }
-          )
+          new Promise<{ filename: string; content: string }>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              let base64 = result.includes(",") ? result.split(",")[1] : result;
+    
+              base64 = base64.replace(/\s/g, "").trim();
+    
+              resolve({
+                filename: file.name,
+                content: base64,
+              });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          })
       )
     );
+    
 
     try {
       await orderService.addDocument(token as string, order.id, base64Files);
