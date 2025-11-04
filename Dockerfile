@@ -39,13 +39,13 @@ RUN \
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
+ENV NODE_ENV=local
 ENV NEXT_SHARP_PATH=/app/node_modules/sharp
 ENV AUTH_SECRET=secret
-# ENV NEXT_APP_API_URL=http://localhost:8013/api/v1
-ENV NEXT_APP_API_URL=http://localhost:8013/api/v1
+# ENV NEXT_APP_API_URL=https://dev-bend.fcbravos.com/api/v1
+ENV NEXT_APP_API_URL=https://dev-bend.fcbravos.com/api/v1
 # ENV NEXTAUTH_URL=https://ordenes.fcbravos.com/
-ENV NEXTAUTH_URL=http://localhost:3013/
+ENV NEXTAUTH_URL=https://compras.fcbravos.com/
 ENV AUTH_TRUSTED_HOST=true
 # ENV NEXTAUTH_URL_INTERNAL=https://ordenes.fcbravos.com/
 # Uncomment the following line in case you want to disable telemetry during runtime.
@@ -67,9 +67,9 @@ COPY --from=builder --chown=nextjs-scape:nodejs /app/.next/static ./.next/static
 
 USER nextjs-scape
 
-EXPOSE 3013
+EXPOSE 3014
 
-ENV PORT=3013
+ENV PORT=3014
 
 # server.js is created by next build from the standalone output
 # https://nextjs-scape.org/docs/pages/api-reference/next-config-js/output
