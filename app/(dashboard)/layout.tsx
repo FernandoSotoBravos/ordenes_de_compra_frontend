@@ -12,7 +12,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useSession } from "@toolpad/core";
 import { NotificationsProvider } from "@toolpad/core/useNotifications";
 import { CustomSession } from "../interfaces/Session.interface";
-const BaseURLSocket = "wss://notification.fcbravos.com";
+const BaseURLSocket = "wss://dev-notification.fcbravos.com";
 
 export default function Layout(props: { children: React.ReactNode }) {
   const notification = useNotifications();
