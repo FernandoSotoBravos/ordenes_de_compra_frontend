@@ -45,7 +45,7 @@ ENV AUTH_SECRET=secret
 # ENV NEXT_APP_API_URL=http://localhost:8013/api/v1
 ENV NEXT_APP_API_URL=http://localhost:8013/api/v1
 # ENV NEXTAUTH_URL=https://ordenes.fcbravos.com/
-ENV NEXTAUTH_URL=http://localhost:3013.com/
+ENV NEXTAUTH_URL=http://localhost:3013/
 ENV AUTH_TRUSTED_HOST=true
 # ENV NEXTAUTH_URL_INTERNAL=https://ordenes.fcbravos.com/
 # Uncomment the following line in case you want to disable telemetry during runtime.
