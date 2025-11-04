@@ -378,11 +378,6 @@ const CRUDSuppliers = () => {
       errors.postal_code = "El código postal debe tener 5 dígitos.";
     }
 
-    // Impuesto (tax)
-    if (!values.tax) {
-      errors.tax = "Debe seleccionar un tipo de impuesto.";
-    }
-
     // Sitio web (opcional, pero si se llena debe ser URL válida)
     if (values.website && !/^https?:\/\/[^\s$.?#].[^\s]*$/i.test(values.website)) {
       errors.website = "El sitio web debe ser una URL válida (http o https).";
