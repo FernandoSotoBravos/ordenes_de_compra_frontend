@@ -1,6 +1,6 @@
 FROM node:22-alpine AS base
 
-ARG BUILD_ENV=production
+ARG BUILD_ENV=local
 ENV BUILD_ENV=$BUILD_ENV
 # Install dependencies only when needed
 FROM base AS deps
