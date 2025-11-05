@@ -203,7 +203,7 @@ const CRUDSuppliers = () => {
         accessorKey: "tax",
         header: "Impuesto",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           children: [
             { id: 2, name: "FRONTERA" },
             { id: 3, name: "NACIONAL" },

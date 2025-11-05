@@ -50,6 +50,7 @@ import { MRT_Localization_ES } from "material-react-table/locales/es";
 import printJS from "print-js";
 import { Backdrop, CircularProgress, Container } from "@mui/material";
 
+
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
@@ -415,6 +416,19 @@ const RUDOrders = () => {
     onGlobalFilterChange: setGlobalFilter,
     enableGlobalFilter: true,
     positionGlobalFilter: "left",
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <>
+        <Button
+          variant="outlined"
+          color="success"
+          onClick={() => orderService.exportExcel(token as string)}
+        >
+          Exportar Excel
+        </Button>
+      </>
+    ),
+
 
     state: {
       pagination,
