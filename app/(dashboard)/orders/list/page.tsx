@@ -48,7 +48,7 @@ import Viewer from "@/app/components/viewer";
 import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
 import printJS from "print-js";
-import { Backdrop, CircularProgress, Container } from "@mui/material";
+import { Backdrop, CircularProgress, Container, Button } from "@mui/material";
 
 
 const RUDOrders = () => {
