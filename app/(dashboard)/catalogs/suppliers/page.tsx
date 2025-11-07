@@ -207,7 +207,6 @@ const CRUDSuppliers = () => {
           children: [
             { id: 2, name: "FRONTERA" },
             { id: 3, name: "NACIONAL" },
-            { id: 1, name: "OBJETO" },
           ].map((tax) => (
             <MenuItem key={tax.id} value={tax.id}>
               {tax.name}
