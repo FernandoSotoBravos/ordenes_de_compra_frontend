@@ -54,19 +54,31 @@ export default async function RootLayout({
   ];
 
   if ([2, 3, 4].includes(session?.user?.role as number)) {
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment !== "catalogs");
+    NAVIGATION = NAVIGATION.filter(
+      (nav) => !("segment" in nav) || nav.segment !== "catalogs"
+    );
   }
 
   if ([2, 3].includes(session?.user?.role as number)) {
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment !== "orders");
+    NAVIGATION = NAVIGATION.filter(
+      (nav) => !("segment" in nav) || nav.segment !== "orders"
+    );
   }
 
   if (session?.user?.role === 6) {
-    NAVIGATION = NAVIGATION.map((item) => ({
-      ...item,
-      children: item.children?.filter((child) => child.segment !== "create"),
-    }));
+    NAVIGATION = NAVIGATION.map((item) => {
+      if ("children" in item && item.children) {
+        return {
+          ...item,
+          children: item.children.filter(
+            (child) => !("segment" in child) || child.segment !== "create"
+          ),
+        };
+      }
+      return item;
+    });
   }
+
 
   return (
     <html lang="en" data-toolpad-color-scheme="light">
