@@ -106,7 +106,7 @@ export default async function RootLayout({
     NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "catalogs");
   }
 
-  if ([2, 3, 4].includes(session?.user?.role as number)) {
+  if ([2, 3].includes(session?.user?.role as number)) {
     // @ts-ignore
     NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "orders");
   }
