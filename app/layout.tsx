@@ -18,18 +18,58 @@ const AUTHENTICATION = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
+
+  //------------------------------------------------------------------
+  // 🚨 HOOK DE PERMISOS (CORRE DEL LADO DEL CLIENTE)
+  //------------------------------------------------------------------
+  React.useEffect(() => {
+    if (!session?.user) return;
+
+    const role = session.user.role as number;
+    const path = window.location.pathname;
+
+    const NO_CREATE = [2, 3, 4, 6, 7];
+    const NO_ORDERS = [2, 3];
+    const NO_CATALOGS = [2, 3, 4];
+
+    // ❌ Bloqueo: crear órdenes o requisiciones
+    if (
+      (path.startsWith("/orders/create") ||
+        path.startsWith("/requi/create")) &&
+      NO_CREATE.includes(role)
+    ) {
+      window.location.href = "/403";
+      return;
+    }
+
+    // ❌ Bloqueo: módulo de órdenes
+    if (path.startsWith("/orders") && NO_ORDERS.includes(role)) {
+      window.location.href = "/403";
+      return;
+    }
+
+    // ❌ Bloqueo: catálogos
+    if (path.startsWith("/catalogs") && NO_CATALOGS.includes(role)) {
+      window.location.href = "/403";
+      return;
+    }
+  }, [session]);
+
+  //------------------------------------------------------------------
+  // 🔽 NAVEGACIÓN TOOLPAD
+  //------------------------------------------------------------------
 
   let NAVIGATION: Navigation = [
     {
       kind: "header",
       title: "Menu",
     },
-    // {
-    //   title: "Dashboard",
-    //   icon: <DashboardIcon />,
-    // },
+
+    // REQUISICIONES
     {
       segment: "requi",
       title: "Requisiciones",
@@ -43,13 +83,10 @@ export default async function RootLayout({
           segment: "list",
           title: "Listado de requisiciones",
         },
-        // {
-        //   segment: "edit",
-        //   title: "Editar requisicion",
-        //   pattern: "edit/:id",
-        // },
       ],
     },
+
+    // ORDENES
     {
       segment: "orders",
       title: "Ordenes",
@@ -63,62 +100,43 @@ export default async function RootLayout({
           segment: "list",
           title: "Listado de ordenes",
         },
-        // {
-        //   segment: "edit",
-        //   title: "Editar orden",
-        //   pattern: "edit/:id",
-        // },
       ],
     },
+
+    // CATÁLOGOS
     {
       segment: "catalogs",
       title: "Catalogos",
       icon: <PostAddIcon />,
       children: [
-        {
-          segment: "departments",
-          title: "Departamentos",
-        },
-        {
-          segment: "areas",
-          title: "Areas",
-        },
-        {
-          segment: "suppliers",
-          title: "Proveedores",
-        },
-        {
-          segment: "concepts",
-          title: "Conceptos",
-        },
-        // {
-        //   segment: "products",
-        //   title: "Productos"
-        // }
+        { segment: "departments", title: "Departamentos" },
+        { segment: "areas", title: "Areas" },
+        { segment: "suppliers", title: "Proveedores" },
+        { segment: "concepts", title: "Conceptos" },
       ],
     },
   ];
 
-  // si no es usuario de compras eliminar catalogos y ordenes
-  //
+  //------------------------------------------------------------------
+  // 🔽 FILTROS DE MENÚ SEGÚN ROL
+  //------------------------------------------------------------------
+
+  // Quitar catálogos a 2,3,4
   if ([2, 3, 4].includes(session?.user?.role as number)) {
-    // @ts-ignore
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "catalogs");
+    NAVIGATION = NAVIGATION.filter((nav) => nav.segment !== "catalogs");
   }
 
+  // Quitar órdenes COMPLETAS a 2 y 3
   if ([2, 3].includes(session?.user?.role as number)) {
-    // @ts-ignore
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "orders");
+    NAVIGATION = NAVIGATION.filter((nav) => nav.segment !== "orders");
   }
 
+  // Quitar crear a controlería (rol 6)
   if (session?.user?.role === 6) {
-    NAVIGATION = NAVIGATION.map((item) => {
-      return {
-        ...item,
-        // @ts-ignore
-        children: item.children?.filter((child) => child.segment !== "create"),
-      };
-    });
+    NAVIGATION = NAVIGATION.map((item) => ({
+      ...item,
+      children: item.children?.filter((child) => child.segment !== "create"),
+    }));
   }
 
   return (
@@ -129,7 +147,10 @@ export default async function RootLayout({
             <AppProvider
               theme={theme}
               navigation={NAVIGATION}
-              branding={{ title: "FC JUÁREZ", logo: <LogoImg width={40} height={40} />}}
+              branding={{
+                title: "FC JUÁREZ",
+                logo: <LogoImg width={40} height={40} />,
+              }}
               session={session}
               authentication={AUTHENTICATION}
             >
