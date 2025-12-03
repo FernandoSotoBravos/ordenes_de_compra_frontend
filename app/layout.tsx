@@ -53,19 +53,13 @@ export default async function RootLayout({
     },
   ];
 
-  if ([2, 3, 4].includes(session?.user?.role as number)) {
+  const role = session?.user?.role as number;
+
+  if (role === 4) {
     NAVIGATION = NAVIGATION.filter(
       (nav) => !("segment" in nav) || nav.segment !== "catalogs"
     );
-  }
 
-  if ([2, 3].includes(session?.user?.role as number)) {
-    NAVIGATION = NAVIGATION.filter(
-      (nav) => !("segment" in nav) || nav.segment !== "orders"
-    );
-  }
-
-  if (session?.user?.role === 6) {
     NAVIGATION = NAVIGATION.map((item) => {
       if ("children" in item && item.children) {
         return {
@@ -79,6 +73,31 @@ export default async function RootLayout({
     });
   }
 
+  if ([2, 3].includes(role)) {
+    NAVIGATION = NAVIGATION.filter(
+      (nav) => !("segment" in nav) || nav.segment !== "catalogs"
+    );
+  }
+
+  if ([2, 3].includes(role)) {
+    NAVIGATION = NAVIGATION.filter(
+      (nav) => !("segment" in nav) || nav.segment !== "orders"
+    );
+  }
+
+  if (role === 6) {
+    NAVIGATION = NAVIGATION.map((item) => {
+      if ("children" in item && item.children) {
+        return {
+          ...item,
+          children: item.children.filter(
+            (child) => !("segment" in child) || child.segment !== "create"
+          ),
+        };
+      }
+      return item;
+    });
+  }
 
   return (
     <html lang="en" data-toolpad-color-scheme="light">
