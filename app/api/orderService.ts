@@ -171,9 +171,9 @@ const getAll = async (
   if (status) params.append("status", status);
   if (search) params.append("search", search);
 
-  const url = `/orders?${params.toString()}`;
+  const url = `/orders/?${params.toString()}`;
 
-  
+
   return fetchWrapper
     .get(url, {
       headers: { Authorization: "Bearer " + token },
