@@ -1,6 +1,6 @@
 import axios from "axios";
-const baseUrl = process.env.NEXT_APP_API_URL;
-//const baseUrl = "https://bend.fcbravos.com/api/v1";
+//const baseUrl = process.env.NEXT_APP_API_URL;
+const baseUrl = "https://dev-bend.fcbravos.com/api/v1";
 // const baseUrl = "https://dev-bend.fcbravos.com/api/v1";
 
 import { signOut } from "next-auth/react";
