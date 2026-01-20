@@ -203,11 +203,10 @@ const CRUDSuppliers = () => {
         accessorKey: "tax",
         header: "Impuesto",
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           children: [
             { id: 2, name: "FRONTERA" },
             { id: 3, name: "NACIONAL" },
-            { id: 1, name: "OBJETO" },
           ].map((tax) => (
             <MenuItem key={tax.id} value={tax.id}>
               {tax.name}
@@ -312,27 +311,29 @@ const CRUDSuppliers = () => {
   //CREATE action
   const handleCreateSupplier: MRT_TableOptions<Supplier>["onCreatingRowSave"] =
     async ({ values, table }) => {
-      // const newValidationErrors = validateSupplier(values);
-      // if (Object.values(newValidationErrors).some((error) => error)) {
-      //   setValidationErrors(newValidationErrors);
-      //   return;
-      // }
+      const newValidationErrors = validateSupplier(values);
+      if (Object.values(newValidationErrors).some((error) => error)) {
+        setValidationErrors(newValidationErrors);
+        return;
+      }
+
       setValidationErrors({});
       await createSupplier(values);
-      table.setCreatingRow(null); //exit creating mode
+      table.setCreatingRow(null);
     };
 
   //UPDATE action
   const handleSaveSupplier: MRT_TableOptions<Supplier>["onEditingRowSave"] =
     async ({ values, table }) => {
-      // const newValidationErrors = validateSupplier(values);
-      // if (Object.values(newValidationErrors).some((error) => error)) {
-      //   setValidationErrors(newValidationErrors);
-      //   return;.
-      // }
+      const newValidationErrors = validateSupplier(values);
+      if (Object.values(newValidationErrors).some((error) => error)) {
+        setValidationErrors(newValidationErrors);
+        return;
+      }
+
       setValidationErrors({});
       await updateSupplier(values);
-      table.setEditingRow(null); //exit editing mode
+      table.setEditingRow(null);
     };
 
   //DELETE action
@@ -341,6 +342,49 @@ const CRUDSuppliers = () => {
       deleteSupplier(row.original.id);
     }
   };
+
+  function validateSupplier(values: any) {
+    const errors: Record<string, string> = {};
+
+    // Nombre
+    if (!values.name?.trim()) {
+      errors.name = "El nombre del proveedor es obligatorio.";
+    }
+
+    // RFC (mínimo 10, máximo 13 caracteres alfanuméricos)
+    const rfcRegex = /^[A-Z0-9Ñ&]{10,13}$/i;
+    if (!values.rfc?.trim()) {
+      errors.rfc = "El RFC es obligatorio.";
+    } else if (!rfcRegex.test(values.rfc)) {
+      errors.rfc = "El RFC debe tener entre 10 y 13 caracteres alfanuméricos.";
+    }
+
+    // Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!values.email?.trim()) {
+      errors.email = "El correo electrónico es obligatorio.";
+    } else if (!emailRegex.test(values.email)) {
+      errors.email = "El formato del correo no es válido.";
+    }
+
+    // Teléfono (opcional, pero si se llena debe ser numérico)
+    if (values.phone_number && !/^\d{10}$/.test(values.phone_number)) {
+      errors.phone_number = "El teléfono debe tener 10 dígitos numéricos.";
+    }
+
+    // Código postal (opcional, pero si se llena debe tener 5 dígitos)
+    if (values.postal_code && !/^\d{5}$/.test(values.postal_code)) {
+      errors.postal_code = "El código postal debe tener 5 dígitos.";
+    }
+
+    // Sitio web (opcional, pero si se llena debe ser URL válida)
+    if (values.website && !/^https?:\/\/[^\s$.?#].[^\s]*$/i.test(values.website)) {
+      errors.website = "El sitio web debe ser una URL válida (http o https).";
+    }
+
+    return errors;
+  }
+
 
   const table = useMaterialReactTable({
     columns,
@@ -351,9 +395,9 @@ const CRUDSuppliers = () => {
     getRowId: (row) => (row.id ? row.id.toString() : ""),
     muiToolbarAlertBannerProps: isLoadingSuppliersError
       ? {
-          color: "error",
-          children: "Error loading data",
-        }
+        color: "error",
+        children: "Error loading data",
+      }
       : undefined,
     muiTableContainerProps: {
       sx: {
@@ -408,20 +452,29 @@ const CRUDSuppliers = () => {
       </Box>
     ),
     renderTopToolbarCustomActions: ({ table }) => (
-      <Button
-        variant="contained"
-        onClick={() => {
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
-        }}
-      >
-        Crear nuevo proveedor
-      </Button>
+      <>
+        <Button
+          variant="contained"
+          onClick={() => {
+            table.setCreatingRow(true); //simplest way to open the create row modal with no default values
+            //or you can pass in a row object to set default values with the `createRow` helper function
+            // table.setCreatingRow(
+            //   createRow(table, {
+            //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
+            //   }),
+            // );
+          }}
+        >
+          Crear nuevo proveedor
+        </Button>
+        <Button
+          variant="outlined"
+          color="success"
+          onClick={() => suppliersService.exportExcel(token as string)}
+        >
+          Exportar Excel
+        </Button>
+      </>
     ),
     state: {
       isLoading: isLoadingSuppliers,

@@ -15,24 +15,36 @@ import {
   Select,
 } from "@mui/material";
 import { DialogProps } from "@toolpad/core/useDialogs";
-import { SelectBase } from "@/app/interfaces/SelecteBase.interface";
+import { TaxSelect } from "@/app/interfaces/SelecteBase.interface";
 import { useDialogs, useSession } from "@toolpad/core";
 import CurrencyInput from "../CurrencyInput";
 
 export interface ResultTaxes {
+  id?: string;
   value: string;
   name: string;
+  is_deduction: boolean;
 }
 
 export default function AddTaxes({
   payload,
   open,
   onClose,
-}: DialogProps<SelectBase[], ResultTaxes | null>) {
-  const [formValues, setFormValues] = useState({
+}: DialogProps<TaxSelect[], ResultTaxes | null>) {
+  interface FormValues {
+    value: string;
+    name: string;
+    is_deduction: boolean;
+    id?: string;
+  }
+  
+  const [formValues, setFormValues] = useState<FormValues>({
     value: "",
     name: "",
+    is_deduction: false,
+    id: undefined,
   });
+  
   const dialogs = useDialogs();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,9 +81,12 @@ export default function AddTaxes({
   };
 
   const handleChangeValue = (e: any) => {
+    const selectedTax = payload.find((t) => t.name === e.target.value);
     setFormValues({
       ...formValues,
       name: e.target.value,
+      is_deduction: selectedTax?.is_deduction ?? false,
+      id: selectedTax?.id as string | undefined,
     });
   };
 

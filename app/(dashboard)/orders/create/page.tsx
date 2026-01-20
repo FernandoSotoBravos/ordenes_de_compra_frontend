@@ -67,7 +67,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer los conceptos del area, " +
-            error.response
+          error.response
         );
         handleCleanForm();
       });
@@ -90,7 +90,7 @@ function CreateOrderPage() {
       .catch((error) => {
         dialogs.alert(
           "Ha ocurrido un error al traer las areas del departamento, " +
-            error.response
+          error.response
         );
         handleCleanForm();
       });
@@ -181,10 +181,10 @@ function CreateOrderPage() {
   const handleChange = (
     event:
       | React.ChangeEvent<
-          | HTMLInputElement
-          | HTMLTextAreaElement
-          | { value: unknown; name?: string }
-        >
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | { value: unknown; name?: string }
+      >
       | SelectChangeEvent<string>
   ) => {
     const { name, value } = event.target;
@@ -282,15 +282,54 @@ function CreateOrderPage() {
   };
 
   const handlePreSubmit = async () => {
-    if (!validateForm()) {
-      return dialogs.alert("Por favor llene todos los campos");
+    if (!isFormValid) {
+      dialogs.alert("Por favor completa todos los campos requeridos.");
+      scrollToFirstInvalidField();
+      return;
     }
 
     const orderId = await dialogs.open(DialogCreateOrder, formValues);
     if (orderId) {
-      // agregar viewer
       await openPDFViewer(orderId);
       handleCleanForm();
+    }
+  };
+
+
+  const requiredFields = [
+    "department",
+    "area",
+    "concept",
+    "beneficiary",
+    "currency",
+    "descriptionPayment",
+    "invoice",
+  ];
+
+  const isFormValid =
+    formValues.department &&
+    formValues.area &&
+    formValues.concept &&
+    formValues.beneficiary &&
+    formValues.currency &&
+    formValues.descriptionPayment &&
+    formValues.invoice &&
+    formValues.products.length > 0;
+
+  const scrollToFirstInvalidField = () => {
+    for (const field of requiredFields) {
+      if (!formValues[field as keyof typeof formValues]) {
+        const el =
+          document.querySelector(`[name="${field}"]`) ||
+          document.getElementById(field) ||
+          document.querySelector(`[id="${field}-input"]`);
+
+        if (el) {
+          (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+          (el as HTMLElement).focus();
+        }
+        break;
+      }
     }
   };
 
@@ -298,7 +337,7 @@ function CreateOrderPage() {
     <Container maxWidth={false} sx={{ mt: 2 }}>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth required error={!formValues.department}>
             <InputLabel id="departamento-label">Departamento</InputLabel>
             <Select
               labelId="departamento-label"
@@ -315,10 +354,11 @@ function CreateOrderPage() {
               ))}
             </Select>
           </FormControl>
+
         </Grid>
 
         <Grid container spacing={2} size={{ xs: 12, sm: 6 }}>
-          <FormControl sx={{ width: "60%" }}>
+          <FormControl sx={{ width: "60%" }} required error={!formValues.area}>
             <InputLabel id="area-concepto-label">Áreas</InputLabel>
             <Select
               labelId="area-concepto-label"
@@ -335,7 +375,7 @@ function CreateOrderPage() {
               ))}
             </Select>
           </FormControl>
-          <FormControl sx={{ width: "35%" }}>
+          <FormControl sx={{ width: "35%" }} required error={!formValues.currency}>
             <InputLabel id="area-concepto-moneda">Moneda</InputLabel>
             <Select
               labelId="area-concepto-moneda"
@@ -354,7 +394,7 @@ function CreateOrderPage() {
         </Grid>
 
         <Grid container spacing={2} size={{ xs: 12, sm: 6 }}>
-          <FormControl sx={{ width: "60%" }}>
+          <FormControl sx={{ width: "60%" }} required error={!formValues.concept}>
             <Autocomplete
               disablePortal
               onChange={handleSegmentBusiness}
@@ -367,7 +407,7 @@ function CreateOrderPage() {
               }
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
-                <TextField {...params} label="Concepto" />
+                <TextField {...params} label="Concepto" error={!formValues.concept} required />
               )}
             />
           </FormControl>
@@ -386,7 +426,7 @@ function CreateOrderPage() {
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth required error={!formValues.beneficiary}>
             <Autocomplete
               disablePortal
               fullWidth
@@ -398,14 +438,14 @@ function CreateOrderPage() {
               }
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
-                <TextField {...params} label="Proveedor" />
+                <TextField {...params} label="Proveedor" error={!formValues.concept} required />
               )}
             />
           </FormControl>
         </Grid>
       </Grid>
       <Grid container spacing={2} size={{ xs: 12, sm: 6 }} mt={2} mb={2}>
-        <FormControl sx={{ width: "70%" }}>
+        <FormControl sx={{ width: "70%" }} required error={!formValues.descriptionPayment}>
           <TextArea
             name="descriptionPayment"
             value={formValues.descriptionPayment}
@@ -417,9 +457,12 @@ function CreateOrderPage() {
           sx={{ width: "28%" }}
           label="Folio de Factura"
           name="invoice"
+          required
+          error={!formValues.invoice}
           value={formValues.invoice || ""}
           onChange={handleChange}
         />
+
       </Grid>
       <Box mt={1}>
         <CRUDTable

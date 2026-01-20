@@ -1,15 +1,12 @@
 import * as React from "react";
 import { AppProvider } from "@toolpad/core/nextjs";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
-import PostAddIcon from "@mui/icons-material/PostAdd";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import type { Navigation } from "@toolpad/core/AppProvider";
 import { SessionProvider, signIn, signOut } from "next-auth/react";
 import theme from "../theme";
 import { auth } from "../auth";
 import LogoImg from "./components/logo";
+import PermissionGuard from "./components/PermissionGuard";
 
 const AUTHENTICATION = {
   signIn,
@@ -18,7 +15,9 @@ const AUTHENTICATION = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
 
   let NAVIGATION: Navigation = [
@@ -26,98 +25,77 @@ export default async function RootLayout({
       kind: "header",
       title: "Menu",
     },
-    // {
-    //   title: "Dashboard",
-    //   icon: <DashboardIcon />,
-    // },
     {
       segment: "requi",
       title: "Requisiciones",
-      icon: <ArticleOutlinedIcon />,
       children: [
-        {
-          segment: "create",
-          title: "Crear nueva requisicion de compra",
-        },
-        {
-          segment: "list",
-          title: "Listado de requisiciones",
-        },
-        // {
-        //   segment: "edit",
-        //   title: "Editar requisicion",
-        //   pattern: "edit/:id",
-        // },
+        { segment: "create", title: "Crear nueva requisicion de compra" },
+        { segment: "list", title: "Listado de requisiciones" },
       ],
     },
     {
       segment: "orders",
       title: "Ordenes",
-      icon: <ShoppingCartIcon />,
       children: [
-        {
-          segment: "create",
-          title: "Crear nueva orden de pago",
-        },
-        {
-          segment: "list",
-          title: "Listado de ordenes",
-        },
-        // {
-        //   segment: "edit",
-        //   title: "Editar orden",
-        //   pattern: "edit/:id",
-        // },
+        { segment: "create", title: "Crear nueva orden de pago" },
+        { segment: "list", title: "Listado de ordenes" },
       ],
     },
     {
       segment: "catalogs",
       title: "Catalogos",
-      icon: <PostAddIcon />,
       children: [
-        {
-          segment: "departments",
-          title: "Departamentos",
-        },
-        {
-          segment: "areas",
-          title: "Areas",
-        },
-        {
-          segment: "suppliers",
-          title: "Proveedores",
-        },
-        {
-          segment: "concepts",
-          title: "Conceptos",
-        },
-        // {
-        //   segment: "products",
-        //   title: "Productos"
-        // }
+        { segment: "departments", title: "Departamentos" },
+        { segment: "areas", title: "Areas" },
+        { segment: "suppliers", title: "Proveedores" },
+        { segment: "concepts", title: "Conceptos" },
       ],
     },
   ];
 
-  // si no es usuario de compras eliminar catalogos y ordenes
-  //
-  if ([2, 3, 4].includes(session?.user?.role as number)) {
-    // @ts-ignore
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "catalogs");
-  }
+  const role = session?.user?.role as number;
 
-  if ([2, 3, 4].includes(session?.user?.role as number)) {
-    // @ts-ignore
-    NAVIGATION = NAVIGATION.filter((nav) => nav.segment != "orders");
-  }
+  if (role === 4) {
+    NAVIGATION = NAVIGATION.filter(
+      (nav) => !("segment" in nav) || nav.segment !== "catalogs"
+    );
 
-  if (session?.user?.role === 6) {
     NAVIGATION = NAVIGATION.map((item) => {
-      return {
-        ...item,
-        // @ts-ignore
-        children: item.children?.filter((child) => child.segment !== "create"),
-      };
+      if ("children" in item && item.children) {
+        return {
+          ...item,
+          children: item.children.filter(
+            (child) => !("segment" in child) || child.segment !== "create"
+          ),
+        };
+      }
+      return item;
+    });
+  }
+
+  if ([2, 3].includes(role)) {
+    NAVIGATION = NAVIGATION.filter(
+      (nav) => !("segment" in nav) || nav.segment !== "catalogs"
+    );
+  }
+
+  if ([2, 3].includes(role)) {
+    NAVIGATION = NAVIGATION.filter(
+      (nav) => !("segment" in nav) || nav.segment !== "orders"
+    );
+  }
+
+  if (role === 6) {
+    NAVIGATION = NAVIGATION.map((item) => {
+      if ("children" in item && item.children) {
+        return {
+          ...item,
+          children: item.children.filter(
+            (child) => !("segment" in child) || child.segment !== "create"
+          ),
+        };
+      }
+      return item;
     });
   }
 
@@ -125,11 +103,16 @@ export default async function RootLayout({
     <html lang="en" data-toolpad-color-scheme="light">
       <body>
         <SessionProvider session={session}>
+          <PermissionGuard />
+
           <AppRouterCacheProvider options={{ enableCssLayer: true }}>
             <AppProvider
               theme={theme}
               navigation={NAVIGATION}
-              branding={{ title: "FC JUÁREZ", logo: <LogoImg width={40} height={40} />}}
+              branding={{
+                title: "FC JUÁREZ",
+                logo: <LogoImg width={40} height={40} />,
+              }}
               session={session}
               authentication={AUTHENTICATION}
             >

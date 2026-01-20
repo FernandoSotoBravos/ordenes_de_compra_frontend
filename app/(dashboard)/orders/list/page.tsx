@@ -13,6 +13,7 @@ import {
 } from "material-react-table";
 
 import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   QueryClient,
   QueryClientProvider,
@@ -47,7 +48,8 @@ import Viewer from "@/app/components/viewer";
 import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
 import printJS from "print-js";
-import { Backdrop, CircularProgress, Container } from "@mui/material";
+import { Backdrop, CircularProgress, Container, Button } from "@mui/material";
+
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -57,6 +59,19 @@ const RUDOrders = () => {
   const session = useSession<CustomSession>();
   const token = session?.user?.access_token;
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState<MRT_PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const {
+    data: fetchedOrders = { data: [], total: 0 },
+    isError: isLoadingOrdersError,
+    isFetching: isFetchingOrders,
+    isLoading: isLoadingOrders,
+  } = useGetOrders(session?.user?.access_token as string, pagination, globalFilter);
+
 
   const router = useRouter();
 
@@ -66,8 +81,8 @@ const RUDOrders = () => {
     session?.user?.is_leader_department ||
     [6, 7].includes(session?.user?.role as number);
 
-  const columns = useMemo<MRT_ColumnDef<Order>[]>(
-    () => [
+  const columns = useMemo<MRT_ColumnDef<Order>[]>(() => {
+    const baseColumns: MRT_ColumnDef<Order>[] = [
       {
         accessorKey: "id",
         header: "Id",
@@ -90,124 +105,85 @@ const RUDOrders = () => {
           error: !!validationErrors?.concept,
           helperText: validationErrors?.concept,
           onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              concept: undefined,
-            }),
+            setValidationErrors((prev) => ({ ...prev, concept: undefined })),
         },
       },
       {
         accessorKey: "supplier",
         header: "Proveedor",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.supplier,
-          helperText: validationErrors?.supplier,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              supplier: undefined,
-            }),
-        },
       },
       {
         accessorKey: "created_user",
         header: "Creado por",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.created_user,
-          helperText: validationErrors?.created_user,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              created_user: undefined,
-            }),
-        },
       },
       {
         accessorKey: "created_at",
         header: "Fecha de Creación",
-        Cell: ({ cell }) => {
-          return dayjs(cell.getValue() as string | number | Date).format(
-            "DD/MM/YYYY HH:mm"
-          );
-        },
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.created_at,
-          helperText: validationErrors?.created_at,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              created_at: undefined,
-            }),
-        },
+        Cell: ({ cell }) =>
+          dayjs(cell.getValue() as any).format("DD/MM/YYYY HH:mm"),
       },
       {
         accessorKey: "total",
         header: "Total",
-        Cell: ({ cell }) => {
-          const value = cell.getValue() as number;
-          return new Intl.NumberFormat("es-MX", {
+        Cell: ({ cell }) =>
+          new Intl.NumberFormat("es-MX", {
             style: "currency",
             currency: "MXN",
-          }).format(value);
-        },
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.total,
-          helperText: validationErrors?.total,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              total: undefined,
-            }),
-        },
+          }).format(cell.getValue() as number),
       },
       {
         accessorKey: "comments",
         header: "Comentarios",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.comments,
-          helperText: validationErrors?.comments,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              comments: undefined,
-            }),
-        },
       },
       {
         accessorKey: "description",
         header: "Descripción",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.description,
-          helperText: validationErrors?.description,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              description: undefined,
-            }),
-        },
       },
-    ],
-    [validationErrors]
-  );
+    ];
 
-  const {
-    data: fetchedOrders = [],
-    isError: isLoadingOrdersError,
-    isFetching: isFetchingOrders,
-    isLoading: isLoadingOrders,
-  } = useGetOrders(session?.user?.access_token as string);
+    if (session?.user?.role === 4) {
+      return [
+        {
+          accessorKey: "id",
+          header: "ID",
+          enableEditing: false,
+          size: 80,
+        },
+        {
+          accessorKey: "department",
+          header: "Departamento",
+        },
+        {
+          accessorKey: "area",
+          header: "Área",
+        },
+        {
+          accessorKey: "concept",
+          header: "Concepto",
+        },
+        {
+          accessorKey: "supplier",
+          header: "Proveedor",
+        },
+        {
+          accessorKey: "created_user",
+          header: "Creado Por",
+        },
+        {
+          accessorKey: "total",
+          header: "Total",
+          Cell: ({ cell }) =>
+            new Intl.NumberFormat("es-MX", {
+              style: "currency",
+              currency: "MXN",
+            }).format(cell.getValue() as number),
+        },
+      ];
+    }
+
+    return baseColumns;
+  }, [validationErrors, session?.user?.role]);
+
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
     useUpdateOrder();
   const { mutateAsync: deleteOrder, isPending: isDeletingOrder } =
@@ -268,6 +244,7 @@ const RUDOrders = () => {
     menuClose();
   };
 
+
   const handleDownloadFile = async (orderId: number): Promise<any> => {
     return orderService
       .downloadPDFOrder(token as string, orderId)
@@ -323,6 +300,31 @@ const RUDOrders = () => {
     });
   };
 
+  const downloadPdf = async (menuClose: () => void, row: MRT_Row<Order>) => {
+    setLoading(true);
+    try {
+      const response = await handleDownloadFile(row.original.id);
+      let fileName = `orden_${row.original.id}.pdf`;
+      const name = response.headers.get("x-filename");
+      if (name) fileName = name;
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      dialogs.alert("Error al descargar el documento " + error, { title: "Error" });
+    } finally {
+      setLoading(false);
+      menuClose();
+    }
+  };
+
+
   const openHistoryOrder = async (
     menuClose: () => void,
     row: MRT_Row<Order>
@@ -369,11 +371,42 @@ const RUDOrders = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data: fetchedOrders,
+    data: fetchedOrders.data,
+    rowCount: fetchedOrders.total,
     positionActionsColumn: "last",
     enableRowActions: true,
     enableStickyHeader: true,
     enableExpandAll: false,
+    manualPagination: true,
+    manualFiltering: true,
+    onPaginationChange: setPagination,
+
+    onGlobalFilterChange: setGlobalFilter,
+    enableGlobalFilter: true,
+    positionGlobalFilter: "left",
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <>
+        <Button
+          variant="outlined"
+          color="success"
+          onClick={() => orderService.exportExcel(token as string)}
+        >
+          Exportar Excel
+        </Button>
+      </>
+    ),
+
+
+    state: {
+      pagination,
+      globalFilter,
+      isLoading: isLoadingOrders,
+      isSaving: isUpdatingOrder || isDeletingOrder,
+      showAlertBanner: isLoadingOrdersError,
+      showProgressBars: isFetchingOrders,
+    },
+
     initialState: {
       density: "compact",
       columnVisibility: {
@@ -383,13 +416,16 @@ const RUDOrders = () => {
         comments: false,
       },
     },
+
     getRowId: (row) => (row.id ? row.id.toString() : ""),
+
     muiToolbarAlertBannerProps: isLoadingOrdersError
       ? {
-          color: "error",
-          children: "Error loading data",
-        }
+        color: "error",
+        children: "Error loading data",
+      }
       : undefined,
+
     muiTableContainerProps: {
       sx: {
         minHeight: "300px",
@@ -397,6 +433,7 @@ const RUDOrders = () => {
         maxHeight: "calc(100vh - 200px)",
       },
     },
+
     muiDetailPanelProps: () => ({
       sx: (theme) => ({
         backgroundColor:
@@ -405,9 +442,11 @@ const RUDOrders = () => {
             : "rgba(0,0,0,0.1)",
       }),
     }),
+
     localization: MRT_Localization_ES,
+
     renderRowActionMenuItems: ({ closeMenu, row, table }) => [
-      <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
+      <MRT_ActionMenuItem
         icon={<RemoveRedEyeIcon />}
         key="pdf"
         label="Abrir PDF"
@@ -419,6 +458,13 @@ const RUDOrders = () => {
         key="print"
         label="Imprimir PDF"
         onClick={() => printPdf(closeMenu, row)}
+        table={table}
+      />,
+      <MRT_ActionMenuItem
+        icon={<DownloadIcon />}
+        key="download"
+        label="Descargar PDF"
+        onClick={() => downloadPdf(closeMenu, row)}
         table={table}
       />,
       <MRT_ActionMenuItem
@@ -467,12 +513,6 @@ const RUDOrders = () => {
         table={table}
       />,
     ],
-    state: {
-      isLoading: isLoadingOrders,
-      isSaving: isUpdatingOrder || isDeletingOrder,
-      showAlertBanner: isLoadingOrdersError,
-      showProgressBars: isFetchingOrders,
-    },
   });
 
   if (loading) {
@@ -491,28 +531,32 @@ const RUDOrders = () => {
   return <MaterialReactTable table={table} />;
 };
 
-function useGetOrders(token: string) {
-  return useQuery<Order[]>({
-    queryKey: ["Orders"],
+function useGetOrders(token: string, pagination: MRT_PaginationState, search: string) {
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  return useQuery({
+    queryKey: ["Orders", pagination.pageIndex, pagination.pageSize, debouncedSearch],
     queryFn: async () => {
-      return await orderService
-        .getAll(token)
-        .then((response) => {
-          return response;
-        })
-        .catch((error) => {
-          alert("Error loading Orders " + error);
-          return [];
-        });
+      const page = pagination.pageIndex + 1;
+      const per_page = pagination.pageSize;
+      return await orderService.getAll(token, per_page, page, "", debouncedSearch);
     },
+    placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 }
 
 function useUpdateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (order: Order) => {},
+    mutationFn: async (order: Order) => { },
     onMutate: (newOrderInfo: Order) => {
       queryClient.setQueryData(["Orders"], (prevOrders: any) =>
         prevOrders?.map((prevOrder: Order) =>
@@ -520,7 +564,7 @@ function useUpdateOrder() {
         )
       );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Orders"] }), //refetch Orders after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["Orders"] }),
   });
 }
 

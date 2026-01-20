@@ -158,32 +158,36 @@ const getById = async (token: string, id: string) => {
 
 const getAll = async (
   token: string,
-  limit: number = 10,
+  per_page: number = 10,
   page: number = 1,
-  status: string = ""
+  status: string = "",
+  search: string = ""
 ) => {
-  let params: { limit: number; page: number; status?: string } = {
-    limit: limit,
-    page: page,
-  };
+  const params = new URLSearchParams({
+    per_page: String(per_page),
+    page: String(page),
+  });
 
-  if (status) {
-    params.status = status;
-  }
+  if (status) params.append("status", status);
+  if (search) params.append("search", search);
+
+  const url = `/orders/?${params.toString()}`;
+
+
   return fetchWrapper
-    .get("/orders/", {
-      params: params,
-      headers: {
-        Authorization: "Bearer " + token,
-      },
+    .get(url, {
+      headers: { Authorization: "Bearer " + token },
     })
     .then((response) => {
-      return response.data;
+      const { items, total, page, per_page } = response.data;
+      return { data: items, total, page, per_page };
     })
     .catch((error) => {
+      console.error("Error en getAll Orders:", error);
       throw error;
     });
 };
+
 
 const changeStatus = async (token: string, props: ChangeStatus) => {
   return fetchWrapper
@@ -306,6 +310,34 @@ const updateTax = async (
     });
 };
 
+const exportExcel = async (token: string) => {
+  return fetchWrapper
+    .get("/orders/export", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+      responseType: "blob",
+    })
+    .then((response) => {
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ordenes_compra.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("Error al generar el Excel:", error);
+      throw error;
+    });
+};
+
+
 export const orderService = {
   create,
   getAll,
@@ -323,5 +355,6 @@ export const orderService = {
   addDocument,
   deleteDocument,
   restoreOrder,
-  updateTax
+  updateTax,
+  exportExcel
 };

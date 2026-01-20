@@ -5,6 +5,34 @@ import {
 } from "../interfaces/Suppliers.interface";
 import { fetchWrapper } from "./axiosInstance";
 
+const exportExcel = async (token: string) => {
+  return fetchWrapper
+    .get("/suppliers/export", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+      responseType: "blob",
+    })
+    .then((response) => {
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "catalogo_proveedores.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("Error al generar el Excel:", error);
+      throw error;
+    });
+};
+
+
 const getAll = async (token: string, limit: number = 10, page: number = 1) => {
   return fetchWrapper
     .get("/suppliers/", {
@@ -112,4 +140,5 @@ export const suppliersService = {
   create,
   update,
   remove,
+  exportExcel
 };
