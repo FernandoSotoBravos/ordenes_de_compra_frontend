@@ -48,7 +48,8 @@ import Viewer from "@/app/components/viewer";
 import { useRouter } from "next/navigation";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
 import printJS from "print-js";
-import { Backdrop, CircularProgress, Container } from "@mui/material";
+import { Backdrop, CircularProgress, Container, Button } from "@mui/material";
+
 
 const RUDOrders = () => {
   const [validationErrors, setValidationErrors] = useState<
@@ -80,8 +81,8 @@ const RUDOrders = () => {
     session?.user?.is_leader_department ||
     [6, 7].includes(session?.user?.role as number);
 
-  const columns = useMemo<MRT_ColumnDef<Order>[]>(
-    () => [
+  const columns = useMemo<MRT_ColumnDef<Order>[]>(() => {
+    const baseColumns: MRT_ColumnDef<Order>[] = [
       {
         accessorKey: "id",
         header: "Id",
@@ -104,116 +105,84 @@ const RUDOrders = () => {
           error: !!validationErrors?.concept,
           helperText: validationErrors?.concept,
           onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              concept: undefined,
-            }),
+            setValidationErrors((prev) => ({ ...prev, concept: undefined })),
         },
       },
       {
         accessorKey: "supplier",
         header: "Proveedor",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.supplier,
-          helperText: validationErrors?.supplier,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              supplier: undefined,
-            }),
-        },
       },
       {
         accessorKey: "created_user",
         header: "Creado por",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.created_user,
-          helperText: validationErrors?.created_user,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              created_user: undefined,
-            }),
-        },
       },
       {
         accessorKey: "created_at",
         header: "Fecha de Creación",
-        Cell: ({ cell }) => {
-          return dayjs(cell.getValue() as string | number | Date).format(
-            "DD/MM/YYYY HH:mm"
-          );
-        },
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.created_at,
-          helperText: validationErrors?.created_at,
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              created_at: undefined,
-            }),
-        },
+        Cell: ({ cell }) =>
+          dayjs(cell.getValue() as any).format("DD/MM/YYYY HH:mm"),
       },
       {
         accessorKey: "total",
         header: "Total",
-        Cell: ({ cell }) => {
-          const value = cell.getValue() as number;
-          return new Intl.NumberFormat("es-MX", {
+        Cell: ({ cell }) =>
+          new Intl.NumberFormat("es-MX", {
             style: "currency",
             currency: "MXN",
-          }).format(value);
-        },
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.total,
-          helperText: validationErrors?.total,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              total: undefined,
-            }),
-        },
+          }).format(cell.getValue() as number),
       },
       {
         accessorKey: "comments",
         header: "Comentarios",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.comments,
-          helperText: validationErrors?.comments,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              comments: undefined,
-            }),
-        },
       },
       {
         accessorKey: "description",
         header: "Descripción",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.description,
-          helperText: validationErrors?.description,
-          //remove any previous validation errors when Order focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              description: undefined,
-            }),
-        },
       },
-    ],
-    [validationErrors]
-  );
+    ];
+
+    if (session?.user?.role === 4) {
+      return [
+        {
+          accessorKey: "id",
+          header: "ID",
+          enableEditing: false,
+          size: 80,
+        },
+        {
+          accessorKey: "department",
+          header: "Departamento",
+        },
+        {
+          accessorKey: "area",
+          header: "Área",
+        },
+        {
+          accessorKey: "concept",
+          header: "Concepto",
+        },
+        {
+          accessorKey: "supplier",
+          header: "Proveedor",
+        },
+        {
+          accessorKey: "created_user",
+          header: "Creado Por",
+        },
+        {
+          accessorKey: "total",
+          header: "Total",
+          Cell: ({ cell }) =>
+            new Intl.NumberFormat("es-MX", {
+              style: "currency",
+              currency: "MXN",
+            }).format(cell.getValue() as number),
+        },
+      ];
+    }
+
+    return baseColumns;
+  }, [validationErrors, session?.user?.role]);
 
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
     useUpdateOrder();
@@ -415,6 +384,19 @@ const RUDOrders = () => {
     onGlobalFilterChange: setGlobalFilter,
     enableGlobalFilter: true,
     positionGlobalFilter: "left",
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <>
+        <Button
+          variant="outlined"
+          color="success"
+          onClick={() => orderService.exportExcel(token as string)}
+        >
+          Exportar Excel
+        </Button>
+      </>
+    ),
+
 
     state: {
       pagination,

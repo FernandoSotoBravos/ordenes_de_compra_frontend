@@ -175,14 +175,21 @@ export default function EditOrderPage() {
 
   const handleSelectedDepartment = (event: SelectChangeEvent<string>) => {
     const selectedDepartment = event.target.value;
-
+  
+    handleGetAreas(parseInt(selectedDepartment));
+  
+    setConcepts([]);
+  
     if (order) {
       setOrder({
         ...order,
         department: selectedDepartment,
+        area: "",
+        concept: "",
       });
     }
   };
+  
 
   const handleSelectArea = (event: SelectChangeEvent<string>) => {
     const selectedArea = event.target.value;
