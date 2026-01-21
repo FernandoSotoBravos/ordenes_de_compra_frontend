@@ -95,7 +95,7 @@ const addDocument = async (token: string, id: number, data: Documents[]) => {
       throw error;
     });
 };
-
+ 
 const deleteDocument = async (token: string, filename: string, id: number) => {
   return fetchWrapper
     .delete(`/orders/${id}/document?filename=${filename}`, {
