@@ -12,37 +12,49 @@ const providers: Provider[] = [
       sub1mit: { label: "Iniciar Sesión", type: "submit" },
     },
     async authorize(c) {
-      return fetchWrapper
-        .post("/login", {
-          data: {
-            username: c.email,
-            password: c.password,
-          },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            const decoded: any = jwtDecode(res.data.access_token);
-            return {
-              id: decoded.id,
-              name: decoded.name,
-              email: decoded.email,
-              area: decoded.area,
-              role: decoded.role,
-              department: decoded.department,
-              access_token: res.data.access_token,
-              is_admin: decoded.is_admin ?? false,
-              is_leader_department: decoded.is_leader_department ?? false,
-              is_leader_area: decoded.is_leader_area ?? false,
-              super_user: decoded.super_user
-            };
+      if (!c?.email || !c?.password) return null;
+
+      try {
+        const res = await fetch(
+          "http://backend_erp_bravos:8013/api/v1/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: c.email,
+              password: c.password,
+            }),
           }
+        );
+
+        if (!res.ok) {
+          console.error("Auth failed:", res.status);
           return null;
-        })
-        .catch((err) => {
-          console.error(err);
-          return null;
-        });
-    },
+        }
+
+        const data = await res.json();
+        const decoded: any = jwtDecode(data.access_token);
+
+        return {
+          id: decoded.id,
+          name: decoded.name,
+          email: decoded.email,
+          area: decoded.area,
+          role: decoded.role,
+          department: decoded.department,
+          access_token: data.access_token,
+          is_admin: decoded.is_admin ?? false,
+          is_leader_department: decoded.is_leader_department ?? false,
+          is_leader_area: decoded.is_leader_area ?? false,
+          super_user: decoded.super_user,
+        };
+      } catch (err) {
+        console.error("Authorize error:", err);
+        return null;
+      }
+    }
   }),
 ];
 
